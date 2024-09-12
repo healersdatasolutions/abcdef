@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "healers-healthcare-backend": {
+      "main": "src/healers-healthcare-backend/main.mo",
+      "type": "motoko"
+    },
+    "healers-healthcare-frontend": {
+      "dependencies": [
+        "healers-healthcare-backend"
+      ],
+      "source": [
+        "src/healers-healthcare-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "healers-healthcare-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
