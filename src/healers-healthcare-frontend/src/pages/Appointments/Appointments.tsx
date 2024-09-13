@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, Clock, Search, CalendarIcon, Menu, Phone, Mail, CreditCard, CalendarCheck, UserCheck2, UserCircle2, UserX, Users2 } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, Clock, Search, CalendarIcon, Menu, Phone, Mail } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Link } from 'react-router-dom'
@@ -15,6 +15,13 @@ import { Textarea } from "../../components/ui/textarea"
 import { Checkbox } from "../../components/ui/checkbox"
 
 const statuses = ['Pending', 'Done']
+const doctors = [
+  'Dr. Jane Smith',
+  'Dr. John Doe',
+  'Dr. Emily Johnson',
+  'Dr. Michael Brown',
+  'Dr. Sarah Lee'
+]
 
 export default function Appointment() {
   const [appointments, setAppointments] = useState([
@@ -125,10 +132,12 @@ export default function Appointment() {
     </>
   )
 
-  interface AppointmentFormProps {
-    onSubmit: (formData: FormData) => void;  // Accepts FormData instead of FormEvent
-    onCancel: () => void;
-  }
+ interface AppointmentFormProps {
+  onSubmit: (formData: FormData) => void;  
+  onCancel: () => void;
+}
+
+  
   const EnhancedAppointmentForm: React.FC<AppointmentFormProps> = ({ onSubmit, onCancel }) => {
     const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   
@@ -144,11 +153,12 @@ export default function Appointment() {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
       formData.append('existingConditions', selectedConditions.join(', '));
-      onSubmit(formData);  // Now, onSubmit expects a FormData object
+      onSubmit(formData);
     };
-  
+
+
     return (
-      <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh]  overflow-y-auto px-4">
+      <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -158,13 +168,8 @@ export default function Appointment() {
               <Input name="patientName" placeholder="Patient Name" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
             </div>
             <div className="flex items-center space-x-2">
-            
-            <CalendarCheck className='text-[#7047eb]'/>
               <Input name="patientAge" type="number" placeholder="Patient Age" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
             </div>
-
-            <div className="flex items-center space-x-2">
-            <Users2 className='text-[#7047eb]'/>
             <Select name="patientGender">
               <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
                 <SelectValue placeholder="Patient Gender" />
@@ -176,9 +181,6 @@ export default function Appointment() {
                 <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
-            </div>
-
-
             <div className="flex items-center space-x-2">
               <Phone className="text-[#7047eb]" />
               <Input name="contactNumber" type="tel" placeholder="Contact Number" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
@@ -192,10 +194,16 @@ export default function Appointment() {
           {/* Appointment Details */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-[#7047eb]">Appointment Details</h3>
-            <div className="flex items-center space-x-2">
-              <UserCog className="text-[#7047eb]" />
-              <Input name="doctorName" placeholder="Doctor Name" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
-            </div>
+            <Select name="doctorName">
+              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+                <SelectValue placeholder="Select Doctor" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border-gray-700">
+                {doctors.map((doctor) => (
+                  <SelectItem key={doctor} value={doctor}>{doctor}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex items-center space-x-2">
               <Calendar className="text-[#7047eb]" />
               <Input name="appointmentDate" type="date" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
@@ -217,17 +225,6 @@ export default function Appointment() {
               <SelectContent className="bg-black border-gray-700">
                 <SelectItem value="in-person">In-person</SelectItem>
                 <SelectItem value="teleconsultation">Teleconsultation</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select name="paymentMode">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
-                <SelectValue placeholder="Preferred Mode of Payment" />
-              </SelectTrigger>
-              <SelectContent className="bg-black border-gray-700">
-                <SelectItem value="credit-debit">Credit/Debit Card</SelectItem>
-                <SelectItem value="cash">Cash</SelectItem>
-                <SelectItem value="insurance">Insurance</SelectItem>
-                <SelectItem value="upi">UPI</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -278,7 +275,7 @@ export default function Appointment() {
           <div className="space-y-4 md:col-span-2">
             <h3 className="text-lg font-semibold text-[#7047eb]">Insurance and Emergency</h3>
             <Select name="insuranceProvider">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover: border-[#7047eb] transition duration-200">
                 <SelectValue placeholder="Insurance Provider" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -373,7 +370,7 @@ export default function Appointment() {
                 New Appointment
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-black text-white border-gray-700 max-w-7xl max-h-[90vh] ">
+            <DialogContent className="bg-black text-white border-gray-700 max-w-6xl max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-[#7047eb] mb-4">Add New Appointment</DialogTitle>
               </DialogHeader>
