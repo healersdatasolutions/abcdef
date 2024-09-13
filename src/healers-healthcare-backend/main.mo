@@ -5,6 +5,7 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 
 
+
 actor Hospital {
 
   type MedicalHistory = {
@@ -32,7 +33,7 @@ actor Hospital {
     weight: Nat;
     medicalHistories: [MedicalHistory];
     testReports: [TestReport];
-    //visitDate: Int; // Timestamp of the last visit
+    date: Int; // Timestamp of the last visit
   };
 
  type Appointment={
@@ -52,6 +53,7 @@ actor Hospital {
     insuranceProvider : Text;
     emergencyContactName : Text;
     emergencyContactPhone : Nat;   
+    appDate : Int;
 
   };
   
@@ -82,7 +84,7 @@ var appointments: [Appointment] = [];
       weight = weight;
       medicalHistories = medicalHistories;
       testReports = testReports;
-      //visitDate = Time.now();
+      date = Time.now();
     };
 
  
@@ -140,6 +142,7 @@ var appointments: [Appointment] = [];
     insuranceProvider = insuranceProvider;
     emergencyContactName = emergencyContactName;
     emergencyContactPhone = emergencyContactPhone;
+    appDate = Time.now();
     };
 
     appointments := Array.append<Appointment>(appointments, [newAppointment]);
