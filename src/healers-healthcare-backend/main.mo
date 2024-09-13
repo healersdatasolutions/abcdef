@@ -35,11 +35,31 @@ actor Hospital {
     //visitDate: Int; // Timestamp of the last visit
   };
 
+ type Appointment={
+    patientName : Text;
+    patientAge : Text;
+    gender : Text;
+    contact : Nat;
+    email : Text;
+    doctor : Text;
+    date : Int;
+    appTime : Text;
+    consultation : Text;
+    existingConditions: [Text];
+    currentMedications : Text;
+    allergies : Text;
+    nOfVisits : Nat;
+    insuranceProvider : Text;
+    emergencyContactName : Text;
+    emergencyContactPhone : Nat;   
+
+  };
   
 
    var patients: [Patient] = [];
    var nextPatientId: Nat = 0;
 
+var appointments: [Appointment] = [];
 
   public shared({caller}) func addPatient(
     name: Text,
@@ -85,5 +105,48 @@ actor Hospital {
     return patients;
   };
 
+  public shared ({caller}) func addAppointment (
+    patientName : Text,
+    patientAge : Text,
+    gender : Text,
+    contact : Nat,
+    email : Text,
+    doctor : Text,
+    date : Int,
+    appTime : Text,
+    consultation : Text,
+    existingConditions: [Text],
+    currentMedications : Text,
+    allergies : Text,
+    nOfVisits : Nat,
+    insuranceProvider : Text,
+    emergencyContactName : Text,
+    emergencyContactPhone : Nat
+  ) : async Nat {
+    let newAppointment : Appointment = {
+    patientName = patientName;
+    patientAge = patientAge;
+    gender = gender;
+    contact = contact;
+    email = email;
+    doctor = doctor;
+    date = date;
+    appTime = appTime;
+    consultation = consultation;
+    existingConditions = existingConditions;
+    currentMedications = currentMedications;
+    allergies = allergies;
+    nOfVisits = nOfVisits;
+    insuranceProvider = insuranceProvider;
+    emergencyContactName = emergencyContactName;
+    emergencyContactPhone = emergencyContactPhone;
+    };
+
+    appointments := Array.append<Appointment>(appointments, [newAppointment]);
+    return appointments.size();
+  };
   
+   public query func listAppointments() : async [Appointment] {
+    return appointments;
+  };
 };
