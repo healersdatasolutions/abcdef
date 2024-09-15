@@ -13,6 +13,9 @@ import { Skeleton } from "../../components/ui/skeleton"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { Textarea } from "../../components/ui/textarea"
 import { Checkbox } from "../../components/ui/checkbox"
+import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
+import { Actor, HttpAgent } from '@dfinity/agent';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+import App from 'next/app'
 
 const statuses = ['Pending', 'Done']
 const doctors = [
@@ -20,26 +23,40 @@ const doctors = [
   'Dr. John Doe',
   'Dr. Emily Johnson',
   'Dr. Michael Brown',
-  'Dr. Sarah Lee'
+   'Dr. Sarah Lee'
 ]
+type Appointment = {
+ 
+    patientName : string;
+    patientAge : string;
+    gender : string;
+    contact : bigint;
+    email : string;
+    doctor : string;
+    date : string;
+    appTime : string;
+    consultation : string;
+    existingConditions: [string];
+    currentMedications : string;
+    allergies : string;
+    nOfVisits : bigint;
+    insuranceProvider : string;
+    emergencyContactName : string;
+    emergencyContactPhone : bigint; 
+}
+
+type Filters = {
+  status: string;
+  search: string;
+  date: string;
+};
+
 
 export default function Appointment() {
-  const [appointments, setAppointments] = useState([
-    { id: 'APT001', patientName: 'John Doe', doctorName: 'Dr. Jane Smith', time: '2023-07-01 10:00', status: 'Pending' },
-    { id: 'APT002', patientName: 'Alice Johnson', doctorName: 'Dr. Bob Brown', time: '2023-07-01 11:30', status: 'Done' },
-    { id: 'APT003', patientName: 'John Doe', doctorName: 'Dr. Jane Smith', time: '2023-07-01 10:00', status: 'Pending' },
-    { id: 'APT004', patientName: 'Alice Johnson', doctorName: 'Dr. Bob Brown', time: '2023-07-01 11:30', status: 'Done' },
-    { id: 'APT005', patientName: 'John Doe', doctorName: 'Dr. Jane Smith', time: '2023-07-01 10:00', status: 'Done' },
-    { id: 'APT006', patientName: 'Alice Johnson', doctorName: 'Dr. Bob Brown', time: '2023-07-01 11:30', status: 'Done' },
-    { id: 'APT007', patientName: 'John Doe', doctorName: 'Dr. Jane Smith', time: '2023-07-01 10:00', status: 'Done' },
-    { id: 'APT008', patientName: 'Alice Johnson', doctorName: 'Dr. Bob Brown', time: '2023-07-01 11:30', status: 'Done' },
-    { id: 'APT009', patientName: 'John Doe', doctorName: 'Dr. Jane Smith', time: '2023-07-01 10:00', status: 'Pending' },
-    { id: 'APT010', patientName: 'Alice Johnson', doctorName: 'Dr. Bob Brown', time: '2023-07-01 11:30', status: 'Pending' },
-  ])
-
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [currentPage, setCurrentPage] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
-  const [filters, setFilters] = useState({ status: '', time: '', search: '' })
+  const [filters, setFilters] = useState<Filters>({status: '', date: '', search: ''})
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [isLoading, setIsLoading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -48,17 +65,70 @@ export default function Appointment() {
     return 'APT' + Math.floor(1000 + Math.random() * 9000).toString()
   }
 
-  const handleAddAppointment = useCallback((formData: FormData) => {
-    const newAppointment = {
-      id: generateUniqueId(),
-      patientName: formData.get('patientName') as string,
-      doctorName: formData.get('doctorName') as string,
-      time: `${formData.get('appointmentDate')} ${formData.get('appointmentTime')}`,
-      status: 'Pending',
+  
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const result = await healers_healthcare_backend.listAppointments();
+      setAppointments(result as Appointment[]);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
     }
-    setAppointments(prevAppointments => [...prevAppointments, newAppointment])
-    setIsOpen(false)
-  }, [])
+  };
+
+  const handleAddAppointment = async (formData: FormData) => {
+    try {
+      const existingConditionsString = formData.get('existingConditions') as string;
+    const existingConditionsArray = existingConditionsString.split(', ');
+
+      const newAppointment: Appointment = {
+        patientName: formData.get('patientName') as string,
+        patientAge: formData.get('patientAge') as string,
+        gender: formData.get('patientGender') as string,
+        contact: BigInt(formData.get('contactNumber') as string),
+        email: formData.get('emailAddress') as string,
+        doctor: formData.get('doctorName') as string,
+        date: formData.get('appointmentDate') as string,
+        appTime: formData.get('appointmentTime') as string,
+        consultation: formData.get('consultationType') as string,
+        existingConditions: [existingConditionsArray[0] || ''],
+        currentMedications: formData.get('currentMedications') as string,
+        allergies: formData.get('allergies') as string,
+        nOfVisits: BigInt(formData.get('previousVisits') as string),
+        insuranceProvider: formData.get('insuranceProvider') as string,
+        emergencyContactName: formData.get('emergencyContact') as string,
+        emergencyContactPhone: BigInt(formData.get('emergencyPhone') as string),
+      };
+
+      await healers_healthcare_backend.addAppointment(
+        newAppointment.patientName,
+        newAppointment.patientAge,
+        newAppointment.gender,
+        newAppointment.contact,
+        newAppointment.email,
+        newAppointment.doctor,
+        newAppointment.date,
+        newAppointment.appTime,
+        newAppointment.consultation,
+        newAppointment.existingConditions,
+        newAppointment.currentMedications,
+        newAppointment.allergies,
+        newAppointment.nOfVisits,
+        newAppointment.insuranceProvider,
+        newAppointment.emergencyContactName,
+        newAppointment.emergencyContactPhone
+      );
+
+      console.log("Appointment added successfully");
+      setIsOpen(false);
+      fetchAppointments(); // Refresh the appointments list
+    } catch (error) {
+      console.error('Error adding appointment:', error);
+    }
+  };
 
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value === 'all' ? '' : value }))
@@ -68,15 +138,15 @@ export default function Appointment() {
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter(appointment => {
-      const statusMatch = filters.status === '' || appointment.status === filters.status
-      const timeMatch = filters.time === '' || appointment.time.includes(filters.time)
-      const searchMatch = filters.search === '' || 
+      const statusMatch = filters.status === '' || appointment.consultation === filters.status;
+      const searchMatch = filters.search === '' ||
         appointment.patientName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        appointment.doctorName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        appointment.id.includes(filters.search)
-      return statusMatch && timeMatch && searchMatch
-    })
-  }, [appointments, filters])
+        appointment.doctor.toLowerCase().includes(filters.search.toLowerCase());
+      const dateMatch = filters.date === '' || appointment.date === filters.date;
+
+      return statusMatch && searchMatch && dateMatch;
+    });
+  }, [appointments, filters]);
 
   const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage)
 
@@ -98,8 +168,6 @@ export default function Appointment() {
       setCurrentPage(prev => prev - 1)
     }
   }, [paginatedAppointments, currentPage])
-
-  const parallaxRef = useRef(null)
 
   const simulateLoading = useCallback(() => {
     setIsLoading(true)
@@ -138,7 +206,7 @@ export default function Appointment() {
 }
 
   
-  const EnhancedAppointmentForm: React.FC<AppointmentFormProps> = ({ onSubmit, onCancel }) => {
+  const EnhancedAppointmentForm: React.FC<{ onSubmit: (formData: FormData) => void; onCancel: () => void }> = ({ onSubmit, onCancel }) => {
     const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   
     const handleConditionChange = (condition: string) => {
@@ -156,7 +224,7 @@ export default function Appointment() {
       onSubmit(formData);
     };
 
-
+  
     return (
       <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -406,18 +474,18 @@ export default function Appointment() {
                     </TableRow>
                   ))
                 ) : (
-                  paginatedAppointments.map((appointment) => (
+                  paginatedAppointments.map((appointment, index) => (
                     <TableRow 
-                      key={appointment.id} 
+                      key={index} 
                       className="border-b border-transparent hover:bg-[#7047eb20] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell>{appointment.id}</TableCell>
+                      <TableCell>{generateUniqueId()}</TableCell>
                       <TableCell>{appointment.patientName}</TableCell>
-                      <TableCell>{appointment.doctorName}</TableCell>
-                      <TableCell>{appointment.time}</TableCell>
+                      <TableCell>{appointment.doctor}</TableCell>
+                      <TableCell>{appointment.date}</TableCell>
                       <TableCell className='border-transparent'>
-                        <span className={`px-2 py-1 rounded-lg ${appointment.status === 'Done' ? 'bg-green-500' : 'bg-yellow-500'}`}>
-                          {appointment.status}
+                      <span className={`px-2 py-1 rounded-lg ${appointment.consultation === 'in-person' ? 'bg-green-500' : 'bg-yellow-500'}`}>
+                          {appointment.consultation}
                         </span>
                       </TableCell>
                     </TableRow>

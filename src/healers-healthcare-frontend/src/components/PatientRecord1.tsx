@@ -25,6 +25,9 @@ import Ripple from './magicui/ripple'
 import animationData from '../components/lotties/medical4.json'
 import animationData2 from '../components/lotties/medical3.json'
 import { AiFillHeart } from 'react-icons/ai'
+import EhrPage from '../pages/EhrPage/EhrPage' ;
+import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
+import { Actor, HttpAgent } from '@dfinity/agent';
 
 
 
@@ -47,6 +50,10 @@ const recoveryData = [
   { name: 'Week 6', progress: 95 },
 ]
 
+interface PatientInfoProps {
+  patientId: string; // Define the type of patientId
+}
+
 const defaultOptions = {
   loop: true,
   autoplay: true,
@@ -63,22 +70,54 @@ const defaultOptions2 = {
     preserveAspectRatio: 'xMidYMid slice'
   }
 };
+interface MedicalHistory  {
+  pharmacy: string;
+  physician: string;
+  event: string;
+  prescription: string;
+  remedies: string;
+};
 
+interface TestReport  {
+  doctor: string;
+  referedto: string;
+  testtype: string;
+  comments: string;
+  file: number[] | Uint8Array
+};
+
+interface Patient  {
+  id : string;
+  name: string;
+  age: bigint;
+  gender: string;
+  location: string;
+  blood: string;
+  height: bigint;
+  weight: bigint;
+  medicalHistories: MedicalHistory[];
+  testReports: TestReport[];
+  pdate: bigint;
+  
+}; 
+
+/*interface  Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  blood: string;
+  height: number;
+  weight: number;
+  location: string;
+  medicalHistories: []; // Adjust type as necessary
+  testReports: []; // Adjust type as necessary
+  pdate: number; // You can use `Date` if you want to format it later
+}
+*/
 
 // Dummy patient data
-const patientData = {
-  id: '12345678',
-  name: 'John Doe',
-  age: 35,
-  gender: 'Male',
-  bloodGroup: 'O+',
-  height: 175,
-  weight: 70,
-  location: 'Delhi, India',
-  occupation: 'Engineer',
-  allergies: 'Peanuts',
-  emergencyContact: '+9100068686',
-}
+
 
 // Dummy AI responses
 const aiResponses = [
@@ -92,13 +131,53 @@ const aiResponses = [
 export default function PatientDetails() {
   const { id } = useParams<{ id: string }>()
   const [isLoading, setIsLoading] = useState(true)
-  const [editedData, setEditedData] = useState(patientData)
+ 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [aiQuery, setAiQuery] = useState('')
   const [aiConversation, setAiConversation] = useState<string[]>(['AI: Hello! How can I assist you today?'])
   const chatRef = useRef<HTMLDivElement>(null)
   const ref = useRef(null)
 
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [editedData, setEditedData] = useState<Patient | null>(null);
+  
+
+  const PatientInfo: React.FC<PatientInfoProps> = ({ patientId }) => {
+
+    const [patientData, setPatientData] = useState <Patient | null>(null) 
+
+
+
+    const fetchPatients = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedPatients = await healers_healthcare_backend.listPatients();
+        const mappedPatients: Patient[] = fetchedPatients.map(patient => ({
+          id: patient.id,
+          name: patient.name,
+          age: BigInt(patient.age),
+          gender: patient.gender,
+          location: patient.location,
+          blood: patient.blood,
+          height: BigInt(patient.height),
+          weight: BigInt(patient.weight),
+          medicalHistories: patient.medicalHistories,
+          testReports: patient.testReports,
+          pdate: BigInt(patient.pdate)
+        }));
+        setPatients(mappedPatients);
+        setEditedData(mappedPatients.length > 0 ? mappedPatients[0] : null); // Initialize editedData with the first patient's data
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      fetchPatients();
+    }, []);
+    
   useEffect(() => {
     // Simulate loading delay
     const timer = setTimeout(() => {
@@ -120,7 +199,7 @@ export default function PatientDetails() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setEditedData(prev => ({ ...prev, [name]: value }))
+    setEditedData((prev: any) => ({ ...prev, [name]: value }))
   }
 
   const handleAiQuery = (e: React.FormEvent) => {
@@ -221,46 +300,46 @@ export default function PatientDetails() {
             <img src={`/defaultProfilePhoto.jpg`} alt="Patient" className="sm:col-span-4 w-[30vh] sm:w-[40vh] h-[30vh] sm:h-[40vh] rounded-lg hover:scale-95 transition duration-100 mx-auto lg:mx-0 sm:my-auto" />
 
             <div className='flex flex-col justify-between w-full sm:col-span-8'>
-            <h1 className="text-5xl font-bold mb-8 text-white">Name: {editedData.name}</h1>
+            <h1 className="text-5xl font-bold mb-8 text-white">Name: {editedData?.name}</h1>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData.gender}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData?.gender}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Cake className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData.age}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData?.age.toString()}</p></span>
                 </div>
                 
                 <div className="flex items-top gap-2 items-center">
                   <MapPin className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData.location}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData?.location}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Droplet className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData.bloodGroup}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData?.blood}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Ruler className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData.height}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData?.height.toString()}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Weight className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData.weight} kg</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData?.weight.toString()}  kg</p></span>
                 </div>
+                {/*
                 <div className="flex items-top gap-2 items-center">
                   <BackpackIcon className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{editedData.occupation}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{editedData?.occupation}</p></span>
                 </div>
-                <div className="flex items-top gap-2 items-center">
-                  <Droplet className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Allergies:</h4> <p className='text-white/55'>{editedData.allergies}</p></span>
-                </div>
+                
+                
                 <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4> <p className='text-white/55'>{editedData.emergencyContact}</p></span>
                 </div>
+                */}
               </div>
               <div className="flex flex-wrap gap-2 ">
             <Badge variant="outline" className="bg-[#fff] text-black">Heart Rate: Normal</Badge>
@@ -304,7 +383,7 @@ export default function PatientDetails() {
                 <DrawerDescription>Make changes to patient information here.</DrawerDescription>
               </DrawerHeader>
               <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(editedData).map(([key, value]) => (
+              {editedData && Object.entries(editedData).map(([key, value]) => (
                   <div key={key} className="space-y-2">
                     <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
                     <Input
@@ -493,4 +572,5 @@ export default function PatientDetails() {
       </div>
     </div>
   )
+}
 }

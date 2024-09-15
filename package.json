@@ -17,5 +17,8 @@
   ],
   "dependencies": {
     "types": "github:metamask/logo"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5"
   }
 }
