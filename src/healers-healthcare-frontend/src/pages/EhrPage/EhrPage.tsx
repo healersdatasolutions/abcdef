@@ -1,171 +1,352 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, MapPin, Droplet, Ruler, Weight, Pill, Stethoscope, FileSymlink, FileText as FileTextIcon, Upload, Trash2, Search, CalendarIcon, Menu } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Link } from 'react-router-dom'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
 import { Calendar1 } from "../../components/ui/calendar"
-import { Label } from "../../components/ui/label"
-// import { gradient } from '../assets'
-import { MouseParallax, ScrollParallax } from "react-just-parallax"
-import { addDays, format, isWithinInterval } from "date-fns"
-import { DateRange } from "react-day-picker"
+import { format, isWithinInterval } from "date-fns"
 import { cn } from "../../lib/utils"
+import { Link } from 'react-router-dom';
+import { DateRange } from 'react-day-picker';
 import { Skeleton } from "../../components/ui/skeleton"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { Transition, Dialog as HeadlessDialog } from '@headlessui/react'
 import GridPattern from "../../components/magicui/grid-pattern";
+import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend";
+import { Actor, HttpAgent } from '@dfinity/agent';
+
+
+  type MedicalHistory = {
+    pharmacy: string;
+    physician: string;
+    event: string;
+    prescription: string;
+    remedies: string;
+  };
+
+  type TestReport = {
+    doctor: string;
+    referedto: string;
+    testtype: string;
+    comments: string;
+    file: number[] | Uint8Array
+  };
+
+type Patient = {
+  id : string;
+  name: string;
+  age: bigint;
+  gender: string;
+  location: string;
+  blood: string;
+  height: bigint;
+  weight: bigint;
+  medicalHistories: MedicalHistory[];
+  testReports: TestReport[];
+  pdate: bigint;
+  
+};
+
+type Filters = {
+  gender: string;
+  search: string;
+  date: DateRange | undefined;
+};
 
 export default function PatientHealthRecord() {
-  const [patients, setPatients] = useState([
-    { id: '45678901', name: 'Alice Brown', age: 31, gender: 'Female', date: '2024-06-04' },
-    { id: '56789012', name: 'Charlie Davis', age: 45, gender: 'Male', date: '2024-06-05' },
-    { id: '67890123', name: 'Eva Wilson', age: 39, gender: 'Female', date: '2024-07-06' },
-    { id: '78901234', name: 'John Doe 2', age: 35, gender: 'Female', date: '2024-06-07' },
-    { id: '89012345', name: 'Jane Smith', age: 28, gender: 'Female', date: '2024-07-08' },
-    { id: '90123456', name: 'Bob Johnson 2', age: 42, gender: 'Male', date: '2024-06-09' },
-    { id: '01234567', name: 'Alice Brown', age: 31, gender: 'Female', date: '2024-07-10' },
-    { id: '12345678', name: 'Charlie' , age: 45, gender: 'Male', date: '2024-07-11' },
-    { id: '23456789', name: 'Eva Wilson 2', age: 39, gender: 'Female', date: '2024-07-12' },
-    { id: '34567890', name: 'Bob Johnson 3', age: 42, gender:'Male', date: '2024-06-13' },
-    { id: '01234577', name: 'Alice Brown', age: 31, gender: 'Female', date: '2024-07-10' },
-    { id: '12345608', name: 'Charlie' , age: 45, gender: 'Male', date: '2024-07-11' },
-    { id: '23455789', name: 'Eva Wilson 2', age: 39, gender: 'Female', date: '2024-07-12' },
-    { id: '34560890', name: 'Bob Johnson 3', age: 42, gender:'Male', date: '2024-06-13' },
-  ])
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [filters, setFilters] = useState<Filters>({
+    gender: '',
+    search: '',
+    date: undefined
+  });
+
+  const [newPatient, setNewPatient] = useState<Omit<Patient, 'id' | 'pdate'>> ({
+    name: '',
+    age: BigInt(0),
+    gender: '',
+    location: '',
+    blood: '',
+    height: BigInt(0),
+    weight: BigInt(0),
+    medicalHistories: [],
+    testReports: []
+  });
+    
+
+  
 
   const [currentPage, setCurrentPage] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
-  const [filters, setFilters] = useState({ gender: '', date: undefined as DateRange | undefined, search: '' })
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [medicalHistories, setMedicalHistories] = useState([{}])
-  const [testReports, setTestReports] = useState([{}])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isAddingPatient, setIsAddingPatient] = useState(false);
 
-  const generateUniqueId = () => {
-    return Math.floor(10000000 + Math.random() * 90000000).toString()
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (e.target instanceof HTMLInputElement && e.target.type === 'file') {
+      // Handle file input
+      const file = e.target.files ? e.target.files[0] : null;
+
+      setNewPatient(prev => ({
+          ...prev,
+          [name]: file  // Store the file directly or process it as needed
+      }));
+    } else {
+    setNewPatient(prev => ({
+      ...prev,
+      [name]: ['age', 'height', 'weight'].includes(name) ? BigInt(value || 0) : value
+    }));
   }
+  }; 
 
-  const handleAddPatient = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const newPatient = {
-      id: generateUniqueId(),
-      name: formData.get('name') as string,
-      age: parseInt(formData.get('age') as string) || 0,
-      gender: formData.get('gender') as string,
-      date: new Date().toISOString().split('T')[0],
-      location: formData.get('location') as string,
-      bloodGroup: formData.get('bloodGroup') as string,
-      height: formData.get('height') as string,
-      weight: formData.get('weight') as string,
-      medicalHistories: medicalHistories.map((_, index) => ({
-        pharmacy: formData.get(`pharmacy${index}`) as string,
-        physician: formData.get(`physician${index}`) as string,
-        event: formData.get(`event${index}`) as string,
-        prescription: formData.get(`prescription${index}`) as string,
-        remedies: formData.get(`remedies${index}`) as string,
-      })),
-      testReports: testReports.map((_, index) => ({
-        doctor: formData.get(`doctor${index}`) as string,
-        referredTo: formData.get(`referredTo${index}`) as string,
-        type: formData.get(`type${index}`) as string,
-        comments: formData.get(`comments${index}`) as string,
-      })),
+  const handleAddPatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log(newPatient);
+      const id = await healers_healthcare_backend.addPatient(
+        newPatient.name,
+        newPatient.age,
+        newPatient.gender,
+        newPatient.location,
+        newPatient.blood,
+        newPatient.height,
+        newPatient.weight,
+        newPatient.medicalHistories,
+        newPatient.testReports
+      );
+  
+      console.log("Patient added successfully",id);
+      setIsAddingPatient(false);
+      fetchPatients();
+      setNewPatient({
+        name: '',
+        age: BigInt(0),
+        gender: '',
+        location: '',
+        blood: '',
+        height: BigInt(0),
+        weight: BigInt(0),
+        medicalHistories: [],
+        testReports: []
+      });
+    } catch (error) {
+      console.error('Error adding patient:', error);
     }
-    setPatients(prevPatients => [...prevPatients, newPatient])
-    setIsOpen(false)
-    setMedicalHistories([{}])
-    setTestReports([{}])
-  }, [medicalHistories, testReports])
+  };
+  
+
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedPatients = await healers_healthcare_backend.listPatients();
+      const mappedPatients: Patient[] = fetchedPatients.map(patient => ({
+        id: patient.id,
+        name: patient.name,
+        age: BigInt(patient.age),
+        gender: patient.gender,
+        location: patient.location,
+        blood: patient.blood,
+        height: BigInt(patient.height),
+        weight: BigInt(patient.weight),
+        medicalHistories: patient.medicalHistories,
+        testReports: patient.testReports,
+        pdate: BigInt(patient.pdate)
+      }));
+      setPatients(mappedPatients);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+ /* const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedPatients = await healers_healthcare_backend.listPatients();
+      const mappedPatients = fetchedPatients.map((patient) => ({
+      
+        name: patient.name,
+        age: patient.age,
+        gender: patient.gender,
+        location: patient.location,
+        blood: patient.blood,
+        height: patient.height,
+        weight: patient.weight,
+        // Format the date here
+        /*date: new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+        }).format(new Date(Number(patient.date))),
+        medicalHistories: patient.medicalHistories,
+        testReports: patient.testReports.map((report) => ({
+          doctor: report.doctor,
+          file: Array.from(report.file), // Handle file correctly
+          referedto: report.referedto,
+          testtype: report.testtype,
+          comments: report.comments,
+        })),
+      }));
+      setPatients(mappedPatients);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  */
+
 
   const handleFilter = useCallback((key: string, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value === 'all' ? '' : value }))
+    setFilters(prev => ({
+      ...prev,
+      [key]: key === 'date' ? (value as DateRange | undefined) : (value === 'all' ? '' : value)
+    }))
     setCurrentPage(1)
-    simulateLoading()
   }, [])
 
-  const filteredPatients = useMemo(() => {
+ /* const filteredPatients = React.useMemo(() => {
     return patients.filter(patient => {
-      const genderMatch = filters.gender === '' || patient.gender === filters.gender
-      const searchMatch = filters.search === '' || 
+      const genderMatch = filters.gender === '' || patient.gender === filters.gender;
+      const searchMatch = filters.search === '' ||
         patient.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        patient.id.includes(filters.search)
-      let dateMatch = true
-      if (filters.date?.from || filters.date?.to) {
-        const patientDate = new Date(patient.date)
+        patient.id.includes(filters.search);
+  
+      let dateMatch = true;
+      if (filters.date) {
+        const patientDate = new Date(Number(patient.date));
         if (filters.date.from && filters.date.to) {
-          dateMatch = isWithinInterval(patientDate, { start: filters.date.from, end: filters.date.to })
+          dateMatch = isWithinInterval(patientDate, { start: filters.date.from, end: filters.date.to });
         } else if (filters.date.from) {
-          dateMatch = patientDate >= filters.date.from
+          dateMatch = patientDate >= filters.date.from;
         } else if (filters.date.to) {
-          dateMatch = patientDate <= filters.date.to
+          dateMatch = patientDate <= filters.date.to;
         }
       }
-      return genderMatch && dateMatch && searchMatch
-    })
-  }, [patients, filters])
+  
+      return genderMatch && dateMatch && searchMatch;
+    });
+  }, [patients, filters]);
+
+  */
+
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
+  const filteredPatients = React.useMemo(() => {
+    return patients.filter(patient => {
+      const genderMatch = filters.gender === '' || patient.gender === filters.gender;
+      const searchMatch = filters.search === '' ||
+        patient.name.toLowerCase().includes(filters.search.toLowerCase());
+        patient.id.includes(filters.search);
+
+        let dateMatch = true;
+let formattedDate = '';
+
+if (filters.date) {
+    const patientDate = new Date(Number(patient.pdate) / 1000000);
+    formattedDate = formatDate(patientDate);
+
+    if (filters.date.from && filters.date.to) {
+        dateMatch = patientDate >= filters.date.from && patientDate <= filters.date.to;
+    } else if (filters.date.from) {
+        dateMatch = patientDate >= filters.date.from;
+    } else if (filters.date.to) {
+        dateMatch = patientDate <= filters.date.to;
+    }
+}
+  
+      return genderMatch && searchMatch;
+    });
+  }, [patients, filters]);
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
+
+  const addMedicalHistory = useCallback(() => {
+    setNewPatient(prev => ({
+      ...prev,
+      medicalHistories: [...prev.medicalHistories, {
+        pharmacy: '',
+        physician: '',
+        event: '',
+        prescription: '',
+        remedies: ''
+      }]
+    }));
+  }, []);
+
+  const addTestReport = useCallback(() => {
+    setNewPatient(prev => ({
+      ...prev,
+      testReports: [...prev.testReports, {
+        doctor: '',
+        referedto: '',
+        testtype: '',
+        comments: '',
+        file: []
+      }]
+    }));
+  }, []);
 
   const handleItemsPerPageChange = useCallback((value: string) => {
     setItemsPerPage(value === 'all' ? filteredPatients.length : parseInt(value))
     setCurrentPage(1)
-    simulateLoading()
   }, [filteredPatients.length])
 
-  const paginatedPatients = useMemo(() => {
+  const paginatedPatients = React.useMemo(() => {
     return filteredPatients.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     )
   }, [filteredPatients, currentPage, itemsPerPage])
-
-  useEffect(() => {
-    if (paginatedPatients.length === 0 && currentPage > 1) {
-      setCurrentPage(prev => prev - 1)
-    }
-  }, [paginatedPatients, currentPage])
-
-  const parallaxRef = useRef(null)
-
-  const addMedicalHistory = useCallback(() => {
-    if (medicalHistories.length < 5) {
-      setMedicalHistories(prev => [...prev, {}])
-    }
-  }, [medicalHistories])
+ 
+  const handleMedicalHistoryChange = (index: number, field: keyof MedicalHistory, value: string) => {
+    setNewPatient(prev => ({
+      ...prev,
+      medicalHistories: prev.medicalHistories.map((history, i) => 
+        i === index ? { ...history, [field]: value } : history
+      )
+    }));
+  };
 
   const removeMedicalHistory = useCallback((index: number) => {
-    setMedicalHistories(prev => {
-      const newHistories = [...prev]
-      newHistories.splice(index, 1)
-      return newHistories
-    })
-  }, [])
+    setNewPatient(prev => ({
+      ...prev,
+      medicalHistories: prev.medicalHistories.filter((_, i) => i !== index)
+    }));
+  }, []);
 
-  const addTestReport = useCallback(() => {
-    if (testReports.length < 5) {
-      setTestReports(prev => [...prev, {}])
-    }
-  }, [testReports])
-
+  const handleTestReportChange = (index: number, field: keyof TestReport, value: any) => {
+    setNewPatient(prev => ({
+      ...prev,
+      testReports: prev.testReports.map((report, i) => 
+        i === index ? { ...report, [field]: value } : report
+      )
+    }));
+  };
   const removeTestReport = useCallback((index: number) => {
-    setTestReports(prev => {
-      const newReports = [...prev]
-      newReports.splice(index, 1)
-      return newReports
-    })
-  }, [])
-
+    setNewPatient(prev => ({
+      ...prev,
+      testReports: prev.testReports.filter((_, i) => i !== index)
+    }));
+  }, []);
+  
   const simulateLoading = useCallback(() => {
     setIsLoading(true)
-    setTimeout(() => setIsLoading(false), 1500)
+    setInterval(() => setIsLoading(false), 1500)
   }, [])
 
   const SidebarContent = () => (
@@ -267,14 +448,14 @@ export default function PatientHealthRecord() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar1
-                initialFocus
-                mode="range"
-                defaultMonth={filters.date?.from}
-                selected={filters.date}
-                onSelect={(newDate) => handleFilter('date', newDate)}
-                numberOfMonths={2}
-              />
+            <Calendar1
+  initialFocus
+  mode="range"
+  defaultMonth={filters.date?.from}
+  selected={filters.date}
+  onSelect={(newDate) => handleFilter('date', newDate)}
+  numberOfMonths={2}
+/>
             </PopoverContent>
           </Popover>
 
@@ -339,19 +520,19 @@ export default function PatientHealthRecord() {
                             <div className="space-y-4 m-0 sm:m-10">
                               <div className="flex items-center space-x-2">
                                 <User className="text-[#fff]" />
-                                <Input name="name" placeholder="Name" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                <Input name="name" placeholder="Name" value={newPatient.name} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                               <div className="flex items-center space-x-2">
                                 <Calendar className="text-[#fff]" />
-                                <Input name="age" type="number" placeholder="Age" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                <Input name="age" type="number" placeholder="Age" value={newPatient.age.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                               </div>
 
 
                               <div className="flex items-center space-x-2">
                                 <UserCog className="text-[#fff]" />
-                                <Select name="gender">
+                                <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } } as any)}>
                                   <SelectTrigger className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
                                     <SelectValue placeholder="Select Gender" />
                                   </SelectTrigger>
@@ -366,11 +547,11 @@ export default function PatientHealthRecord() {
 
                               <div className="flex items-center space-x-2">
                                 <MapPin className="text-[#fff]" />
-                                <Input name="location" placeholder="Location" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                <Input name="location" placeholder="Location" value={newPatient.location} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Droplet className="text-[#fff]" />
-                                <Select name="bloodGroup">
+                                <Select name="bloodGroup" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } } as any)}>
                                   <SelectTrigger className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
                                     <SelectValue placeholder="Blood Group" />
                                   </SelectTrigger>
@@ -386,11 +567,11 @@ export default function PatientHealthRecord() {
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Ruler className="text-[#fff]" />
-                                <Input name="height" type="number" placeholder="Height (in cms.)" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                <Input name="height" type="number" placeholder="Height (in cms.)" value={newPatient.height.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Weight className="text-[#fff]" />
-                                <Input name="weight" type="number" placeholder="Weight (in kg.)" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                <Input name="weight" type="number" placeholder="Weight (in kg.)" value={newPatient.weight.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                               </div>
                             </div>
                           </div>
@@ -409,14 +590,14 @@ export default function PatientHealthRecord() {
                               Medical History Section
                         </h1>
                         
-                            {medicalHistories.map((_, index) => (
+                        {newPatient.medicalHistories.map((history, index) => (
                               <div key={index} className="mb-6">
                                 <h3 className="text-2xl font-semibold mb-3 text-[#fff]">Medical History {index + 1}</h3>
                                 
                                 <div className="space-y-4 m-0 sm:m-10">
                                   <div className="flex items-center space-x-2">
                                     <Pill className="text-[#fff]" />
-                                    <Input name={`pharmacy${index}`} placeholder="Pharmacy" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`pharmacy${index}`} placeholder="Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -424,19 +605,19 @@ export default function PatientHealthRecord() {
 
                                   <div className="flex items-center space-x-2">
                                     <Stethoscope className="text-[#fff]" />
-                                    <Input name={`physician${index}`} placeholder="Physician" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`physician${index}`} placeholder="Physician" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Calendar className="text-[#fff]" />
-                                    <Input name={`event${index}`} placeholder="Event" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`event${index}`} placeholder="Event"  value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileSymlink className="text-[#fff]" />
-                                    <Input name={`prescription${index}`} placeholder="Prescription" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`prescription${index}`} placeholder="Prescription" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Pill className="text-[#fff]" />
-                                    <Input name={`remedies${index}`} placeholder="Remedies" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`remedies${index}`} placeholder="Remedies" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   </div>
                                 </div>
@@ -448,7 +629,7 @@ export default function PatientHealthRecord() {
                                 )}
                               </div>
                             ))}
-                            {medicalHistories.length < 5 && (
+                            {newPatient.medicalHistories.length < 5 && (
                               <Button type="button" onClick={addMedicalHistory} className="mt-4 bg-black text-white border  hover:border-green-500 hover:bg-transparent">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Add Medical History
@@ -470,7 +651,7 @@ export default function PatientHealthRecord() {
                           <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">
                               Test Report Section
                         </h1>
-                          {testReports.map((_, index) => (
+                        {newPatient.testReports.map((report, index) => (
                               <div key={index} className="mt-6">
                                 <h3 className="text-lg font-semibold mb-3 text-[#fff]">Test Report {index + 1}</h3>
                                 <div className="space-y-4 m-0 sm:m-10">
@@ -478,23 +659,34 @@ export default function PatientHealthRecord() {
 
                                   <div className="flex items-center space-x-2">
                                     <UserCog className="text-[#fff]" />
-                                    <Input name={`doctor${index}`} placeholder="Doctor" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`doctor${index}`} placeholder="Doctor" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileSymlink className="text-[#fff]" />
-                                    <Input name={`referredTo${index}`} placeholder="Referred to" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`referredTo${index}`} placeholder="Referred to" value={report.referedto} onChange={(e) => handleTestReportChange(index, 'referedto', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileTextIcon className="text-[#fff]" />
-                                    <Input name={`type${index}`} placeholder="Type" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`type${index}`} placeholder="Type" value={report.testtype} onChange={(e) => handleTestReportChange(index, 'testtype', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileText className="text-[#fff]" />
-                                    <Input name={`comments${index}`} placeholder="Comments" className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`comments${index}`} placeholder="Comments" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Upload className="text-[#fff]" />
-                                    <Input name={`files${index}`} type="file" multiple className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`files${index}`} type="file"  onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            if (event.target?.result) {
+                              const arrayBuffer = event.target.result as ArrayBuffer;
+                              const uint8Array = new Uint8Array(arrayBuffer); handleTestReportChange(index, 'file', Array.from(uint8Array)); }
+                            };
+                            reader.readAsArrayBuffer(file);
+                          }
+                        }} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                 </div>
                                 </div>
@@ -506,7 +698,7 @@ export default function PatientHealthRecord() {
                                 )}
                               </div>
                             ))}
-                            {testReports.length < 5 && (
+                            {newPatient.testReports.length < 5 && (
                               <Button type="button" onClick={addTestReport} className="mt-4 bg-black text-white border  hover:border-green-500 hover:bg-transparent">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Add Test Report
@@ -577,9 +769,9 @@ export default function PatientHealthRecord() {
                     >
                       <TableCell>{patient.id}</TableCell>
                       <TableCell>{patient.name}</TableCell>
-                      <TableCell>{patient.age}</TableCell>
+                      <TableCell>{String(patient.age)}</TableCell>
                       <TableCell>{patient.gender}</TableCell>
-                      <TableCell>{patient.date}</TableCell>
+                      <TableCell>{String(patient.pdate)}</TableCell>
                       <TableCell className='border-transparent'>
                         <Link to={`/patient/${patient.id}`} className="text-[#7047eb] hover:underline">
                           View Details
@@ -639,4 +831,4 @@ export default function PatientHealthRecord() {
       </div>
     </div>
   )
-}
+};

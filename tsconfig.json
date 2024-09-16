@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "types": ["vite/client"],
+        "types": ["vite/client" ,"node"],
         "strict": true,
         "target": "ES2020",
         "experimentalDecorators": true,

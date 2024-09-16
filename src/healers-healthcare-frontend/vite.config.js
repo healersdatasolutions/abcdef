@@ -5,11 +5,13 @@ import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
 import path from "path"
 
+
 dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
   build: {
     emptyOutDir: true,
+    sourcemap: true,
   },
   optimizeDeps: {
     esbuildOptions: {
