@@ -58,6 +58,17 @@ type Filters = {
 };
 
 export default function PatientHealthRecord() {
+  const formatDate = (dateInNanoseconds: bigint): string => {
+    const milliseconds = Number(dateInNanoseconds) / 1000000
+    const date = new Date(milliseconds)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filters, setFilters] = useState<Filters>({
     gender: '',
@@ -239,39 +250,30 @@ export default function PatientHealthRecord() {
 
   */
 
-  const formatDate = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-};
+  
 
   const filteredPatients = React.useMemo(() => {
     return patients.filter(patient => {
       const genderMatch = filters.gender === '' || patient.gender === filters.gender;
       const searchMatch = filters.search === '' ||
-        patient.name.toLowerCase().includes(filters.search.toLowerCase());
+        patient.name.toLowerCase().includes(filters.search.toLowerCase())||
         patient.id.includes(filters.search);
 
-        let dateMatch = true;
-let formattedDate = '';
-
-if (filters.date) {
-    const patientDate = new Date(Number(patient.pdate) / 1000000);
-    formattedDate = formatDate(patientDate);
-
-    if (filters.date.from && filters.date.to) {
-        dateMatch = patientDate >= filters.date.from && patientDate <= filters.date.to;
-    } else if (filters.date.from) {
-        dateMatch = patientDate >= filters.date.from;
-    } else if (filters.date.to) {
-        dateMatch = patientDate <= filters.date.to;
-    }
-}
+        let dateMatch = true
+        if (filters.date) {
+          const patientDate = new Date(Number(patient.pdate) / 1000000)
+          if (filters.date.from && filters.date.to) {
+            dateMatch = patientDate >= filters.date.from && patientDate <= filters.date.to
+          } else if (filters.date.from) {
+            dateMatch = patientDate >= filters.date.from
+          } else if (filters.date.to) {
+            dateMatch = patientDate <= filters.date.to
+          }
+        }
   
-      return genderMatch && searchMatch;
-    });
-  }, [patients, filters]);
+        return genderMatch && dateMatch && searchMatch
+      })
+    }, [patients, filters])
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
 
@@ -771,7 +773,7 @@ if (filters.date) {
                       <TableCell>{patient.name}</TableCell>
                       <TableCell>{String(patient.age)}</TableCell>
                       <TableCell>{patient.gender}</TableCell>
-                      <TableCell>{String(patient.pdate)}</TableCell>
+                      <TableCell>{formatDate(patient.pdate)}</TableCell>
                       <TableCell className='border-transparent'>
                         <Link to={`/patient/${patient.id}`} className="text-[#7047eb] hover:underline">
                           View Details

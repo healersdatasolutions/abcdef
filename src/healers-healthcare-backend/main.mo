@@ -43,7 +43,7 @@ actor Hospital {
   };
 
  type Appointment={
-  id : Text;
+    
     patientName : Text;
     patientAge : Text;
     gender : Text;

@@ -148,35 +148,47 @@ export default function PatientDetails() {
 
 
 
-    const fetchPatients = async () => {
-      try {
-        setIsLoading(true);
-        const fetchedPatients = await healers_healthcare_backend.listPatients();
-        const mappedPatients: Patient[] = fetchedPatients.map(patient => ({
-          id: patient.id,
-          name: patient.name,
-          age: BigInt(patient.age),
-          gender: patient.gender,
-          location: patient.location,
-          blood: patient.blood,
-          height: BigInt(patient.height),
-          weight: BigInt(patient.weight),
-          medicalHistories: patient.medicalHistories,
-          testReports: patient.testReports,
-          pdate: BigInt(patient.pdate)
-        }));
-        setPatients(mappedPatients);
-        setEditedData(mappedPatients.length > 0 ? mappedPatients[0] : null); // Initialize editedData with the first patient's data
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     useEffect(() => {
-      fetchPatients();
-    }, []);
+      const fetchPatientData = async () => {
+        if (!id) {
+          console.error('No patient ID provided')
+          setIsLoading(false)
+          return
+        }
+  
+        try {
+          setIsLoading(true)
+          console.log("Fetching patient with ID:", id) // Debug log
+          const patient = await healers_healthcare_backend.getPatientById(id)
+          console.log("Fetched patient data:", patient)
+          
+          if (Array.isArray(patient)) {
+            setPatientData(patient[0] || null)
+          } else if (patient) {
+            setPatientData(patient)
+          } else {
+            console.error('No patient found with the given ID')
+            setPatientData(null)
+          }
+        } catch (error) {
+          console.error('Error fetching patient data:', error)
+          setPatientData(null)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+  
+      fetchPatientData()
+    }, [id])
+  
+    if (isLoading) {
+      return <div>Loading...</div>
+    }
+  
+    if (!patientData) {
+      return <div>No patient data found</div>
+    }
+
     
   useEffect(() => {
     // Simulate loading delay
@@ -260,6 +272,7 @@ export default function PatientDetails() {
   }
 
   return (
+    
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -286,7 +299,7 @@ export default function PatientDetails() {
           <span className="text-[#7047eb]">Patient Details</span>
         </div>
 
-            <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {id}</p>
+            <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {patientData.id}</p>
         <div className='relative bg-[#131313a2]  mb-12 flex-col items-center justify-center overflow-hidden rounded-lg border border-black md:shadow-xl'>
 
           <Card className="bg-[#131313a2]">
@@ -300,33 +313,33 @@ export default function PatientDetails() {
             <img src={`/defaultProfilePhoto.jpg`} alt="Patient" className="sm:col-span-4 w-[30vh] sm:w-[40vh] h-[30vh] sm:h-[40vh] rounded-lg hover:scale-95 transition duration-100 mx-auto lg:mx-0 sm:my-auto" />
 
             <div className='flex flex-col justify-between w-full sm:col-span-8'>
-            <h1 className="text-5xl font-bold mb-8 text-white">Name: {editedData?.name}</h1>
+            <h1 className="text-5xl font-bold mb-8 text-white">Name: {patientData.name}</h1>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData?.gender}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{patientData.gender}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Cake className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData?.age.toString()}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{patientData.age.toString()}</p></span>
                 </div>
                 
                 <div className="flex items-top gap-2 items-center">
                   <MapPin className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData?.location}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{patientData.location}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Droplet className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData?.blood}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{patientData.blood}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Ruler className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData?.height.toString()}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{patientData.height.toString()}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Weight className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData?.weight.toString()}  kg</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{patientData.weight.toString()} kg</p></span>
                 </div>
                 {/*
                 <div className="flex items-top gap-2 items-center">

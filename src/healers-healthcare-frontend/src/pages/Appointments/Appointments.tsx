@@ -78,7 +78,7 @@ export default function Appointment() {
       console.error('Error fetching appointments:', error);
     }
   };
-
+  
   const handleAddAppointment = async (formData: FormData) => {
     try {
       const existingConditionsString = formData.get('existingConditions') as string;
