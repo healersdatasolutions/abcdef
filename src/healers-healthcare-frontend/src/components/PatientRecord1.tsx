@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Button } from "./ui/button"
@@ -25,7 +25,7 @@ import Ripple from './magicui/ripple'
 import animationData from '../components/lotties/medical4.json'
 import animationData2 from '../components/lotties/medical3.json'
 import { AiFillHeart } from 'react-icons/ai'
-import EhrPage from '../pages/EhrPage/EhrPage' ;
+
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
 import { Actor, HttpAgent } from '@dfinity/agent';
 
@@ -101,6 +101,27 @@ interface Patient  {
   
 }; 
 
+type Appointment = {
+ 
+  patientName : string;
+  patientAge : string;
+  gender : string;
+  contact : bigint;
+  email : string;
+  doctor : string;
+  date : string;
+  appTime : string;
+  consultation : string;
+  existingConditions: [string];
+  currentMedications : string;
+  allergies : string;
+  nOfVisits : bigint;
+  insuranceProvider : string;
+  emergencyContactName : string;
+  emergencyContactPhone : bigint; 
+}
+
+
 /*interface  Patient {
   id: string;
   name: string;
@@ -129,102 +150,98 @@ const aiResponses = [
 ]
 
 export default function PatientDetails() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true)
  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [aiQuery, setAiQuery] = useState('')
   const [aiConversation, setAiConversation] = useState<string[]>(['AI: Hello! How can I assist you today?'])
   const chatRef = useRef<HTMLDivElement>(null)
-  const ref = useRef(null)
+  
 
-  const [patients, setPatients] = useState<Patient[]>([]);
   const [editedData, setEditedData] = useState<Patient | null>(null);
+  const [editedData2, setEditedData2] = useState<Appointment | null>(null);
   
 
-  const PatientInfo: React.FC<PatientInfoProps> = ({ patientId }) => {
-
-    const [patientData, setPatientData] = useState <Patient | null>(null) 
 
 
+    const [patientData, setPatientData] = useState<Patient | null>(null); 
+    const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([]);
 
-    useEffect(() => {
-      const fetchPatientData = async () => {
-        if (!id) {
-          console.error('No patient ID provided')
-          setIsLoading(false)
-          return
-        }
-  
-        try {
-          setIsLoading(true)
-          console.log("Fetching patient with ID:", id) // Debug log
-          const patient = await healers_healthcare_backend.getPatientById(id)
-          console.log("Fetched patient data:", patient)
-          
-          if (Array.isArray(patient)) {
-            setPatientData(patient[0] || null)
-          } else if (patient) {
-            setPatientData(patient)
-          } else {
-            console.error('No patient found with the given ID')
-            setPatientData(null)
-          }
-        } catch (error) {
-          console.error('Error fetching patient data:', error)
-          setPatientData(null)
-        } finally {
-          setIsLoading(false)
-        }
+
+
+    const fetchPatientData = useCallback(async () => {
+      if (!id) {
+        console.error('No patient ID provided')
+        setIsLoading(false)
+        return
       }
   
-      fetchPatientData()
+      try {
+        setIsLoading(true)
+        console.log("Fetching patient with ID:", id)
+        const patient = await healers_healthcare_backend.getPatientById(id)
+        const appointment = await healers_healthcare_backend.listAppointments()
+        console.log("Fetched patient data:", patient)
+        console.log("Fetched appointment data:", appointment)
+        
+        
+        if (Array.isArray(patient))  {
+          setPatientData(patient[0] || null)
+          setEditedData(patient[0] || null)
+        } else if (patient) {
+          setPatientData(patient)
+          setEditedData(patient)
+        } else {
+          console.error('No patient found with the given ID')
+          setPatientData(null)
+          setEditedData(null)
+        }
+
+    const appointments = await healers_healthcare_backend.listAppointments();
+    console.log("Fetched appointment data:", appointments);
+
+    if (Array.isArray(appointments)) {
+      setAppointmentsData(appointments as Appointment[]);
+    } 
+      } catch (error) {
+        console.error('Error fetching patient data:', error)
+        setPatientData(null)
+        setEditedData(null)
+      } finally {
+        setIsLoading(false)
+      }
     }, [id])
   
-    if (isLoading) {
-      return <div>Loading...</div>
-    }
+    useEffect(() => {
+      fetchPatientData()
+    }, [fetchPatientData])
   
-    if (!patientData) {
-      return <div>No patient data found</div>
-    }
-
-    
-  useEffect(() => {
-    // Simulate loading delay
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight
-    }
-  }, [aiConversation])
-
-  const handleSave = () => {
-    toast.success('Patient details updated successfully')
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setEditedData((prev: any) => ({ ...prev, [name]: value }))
-  }
-
-  const handleAiQuery = (e: React.FormEvent) => {
-    e.preventDefault()
-    setAiConversation(prev => [...prev, `You: ${aiQuery}`])
-    const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)]
-    setTimeout(() => {
-      setAiConversation(prev => [...prev, `AI: ${randomResponse}`])
-    }, 1000)
-    setAiQuery('')
-  }
-
-  const parallaxRef = useRef(null)
+    useEffect(() => {
+      if (chatRef.current) {
+        chatRef.current.scrollTop = chatRef.current.scrollHeight
+      }
+    }, [aiConversation])
+  
+    const handleSave = useCallback(() => {
+      // Implement the logic to save the edited data
+      toast.success('Patient details updated successfully')
+    }, [])
+  
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target
+      setEditedData((prev: any) => ({ ...prev, [name]: value }))
+    }, [])
+  
+    const handleAiQuery = useCallback((e: React.FormEvent) => {
+      e.preventDefault()
+      setAiConversation(prev => [...prev, `You: ${aiQuery}`])
+      const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)]
+      setTimeout(() => {
+        setAiConversation(prev => [...prev, `AI: ${randomResponse}`])
+      }, 1000)
+      setAiQuery('')
+    }, [aiQuery])
 
   const SidebarContent = () => (
     <>
@@ -270,7 +287,10 @@ export default function PatientDetails() {
       </div>
     )
   }
-
+  if (!editedData) {
+    return <div className="text-white">No patient data found</div>
+}
+const firstAppointment = appointmentsData[0] || {};
   return (
     
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
@@ -292,6 +312,7 @@ export default function PatientDetails() {
       <div className="relative flex-1 min-h-screen bg-black text-white p-8 sm:p-10">
         
         <Toaster />
+        
         <div className="mb-6 flex items-center text-sm text-gray-500">
           
           <a href="/health-records" className="hover:text-[#7047eb]">Health Records</a>
@@ -299,7 +320,7 @@ export default function PatientDetails() {
           <span className="text-[#7047eb]">Patient Details</span>
         </div>
 
-            <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {patientData.id}</p>
+            <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {editedData.id}</p>
         <div className='relative bg-[#131313a2]  mb-12 flex-col items-center justify-center overflow-hidden rounded-lg border border-black md:shadow-xl'>
 
           <Card className="bg-[#131313a2]">
@@ -313,46 +334,46 @@ export default function PatientDetails() {
             <img src={`/defaultProfilePhoto.jpg`} alt="Patient" className="sm:col-span-4 w-[30vh] sm:w-[40vh] h-[30vh] sm:h-[40vh] rounded-lg hover:scale-95 transition duration-100 mx-auto lg:mx-0 sm:my-auto" />
 
             <div className='flex flex-col justify-between w-full sm:col-span-8'>
-            <h1 className="text-5xl font-bold mb-8 text-white">Name: {patientData.name}</h1>
+            <h1 className="text-5xl font-bold mb-8 text-white">Name: {editedData.name}</h1>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{patientData.gender}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData.gender}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Cake className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{patientData.age.toString()}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData.age.toString()}</p></span>
                 </div>
                 
                 <div className="flex items-top gap-2 items-center">
                   <MapPin className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{patientData.location}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData.location}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Droplet className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{patientData.blood}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData.blood}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Ruler className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{patientData.height.toString()}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData.height.toString()}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
                   <Weight className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{patientData.weight.toString()} kg</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData.weight.toString()} kg</p></span>
                 </div>
                 {/*
                 <div className="flex items-top gap-2 items-center">
                   <BackpackIcon className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{editedData?.occupation}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{firstAppointment?.occupation || 'N/A'}</p></span>
                 </div>
-                
+                */}
                 
                 <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4> <p className='text-white/55'>{editedData.emergencyContact}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4> <p className='text-white/55'>{firstAppointment?.contact || 'N/A'}</p></span>
                 </div>
-                */}
+                
               </div>
               <div className="flex flex-wrap gap-2 ">
             <Badge variant="outline" className="bg-[#fff] text-black">Heart Rate: Normal</Badge>
@@ -585,5 +606,4 @@ export default function PatientDetails() {
       </div>
     </div>
   )
-}
 }
