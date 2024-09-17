@@ -749,6 +749,7 @@ export default function PatientHealthRecord() {
                   <TableHead className="text-[#7047eb] border-r">Gender</TableHead>
                   <TableHead className="text-[#7047eb] border-r">Date</TableHead>
                   <TableHead className="text-[#7047eb]">Actions</TableHead>
+                  <TableHead className="text-[#7047eb]">Delete</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -761,6 +762,7 @@ export default function PatientHealthRecord() {
                       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -774,11 +776,16 @@ export default function PatientHealthRecord() {
                       <TableCell>{String(patient.age)}</TableCell>
                       <TableCell>{patient.gender}</TableCell>
                       <TableCell>{formatDate(patient.pdate)}</TableCell>
-                      <TableCell className='border-transparent'>
+                      <TableCell>
                         <Link to={`/patient/${patient.id}`} className="text-[#7047eb] hover:underline">
                           View Details
                         </Link>
                       </TableCell>
+                      <TableCell className='border-transparent'>
+              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TableCell>
                     </TableRow>
                   ))
                 )}

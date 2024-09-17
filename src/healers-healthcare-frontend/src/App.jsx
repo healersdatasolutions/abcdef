@@ -15,14 +15,28 @@ import PatientDetails from "./components/PatientRecord1";
 import MedicalHistory from "./components/MedicalHistory";
 import TestReport from "./components/TestReport";
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
+import LoginSignup from "./pages/Login-Signup/Login-Signup";
+import Dashboard from "./pages/DashboardPage/Dashboard";
 
 
 function App() {
 
   const router = createBrowserRouter([
+    
+    // other pages....
     {
       path: "/",
-      element: <Ehr/>,
+      element: <LoginSignup />,
+
+    },
+    {
+      path: "/login",
+      element: <LoginSignup />,
+
+    },
+    {
+      path: "/dashboard",
+      element: <Dashboard />,
     },
     // other pages....
     {
