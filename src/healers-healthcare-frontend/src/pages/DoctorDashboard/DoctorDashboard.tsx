@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Checkbox } from "../../components/ui/checkbox"
 import { Label } from "../../components/ui/label"
-import { MouseParallax } from "react-just-parallax"
+
 import { Skeleton } from "../../components/ui/skeleton"
+import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
+import { Actor, HttpAgent } from '@dfinity/agent'; 
 // import { gradient } from '../assets'
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 
@@ -22,23 +24,22 @@ const specialties = [
 
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function DoctorRecord() {
-  const [doctors, setDoctors] = useState([
-    { id: '12345678', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '23456789', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
-    //add 10 more distinct doctors data
-    { id: '34567890', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '45678901', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
-    { id: '56789012', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '67890123', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
-    { id: '78901234', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '89012345', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
-    { id: '90123456', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '01234567', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
-    { id: '12345678', name: 'Dr. John Doe', experience: 10, specialty: 'NEUROSURGEON', mobile: '1234567890', daysAvailable: ['Mon', 'Wed', 'Fri'], dutyStart: '09:00', dutyEnd: '17:00' },
-    { id: '23456789', name: 'Dr. Jane Smith', experience: 8, specialty: 'PEDIATRICIAN', mobile: '2345678901', daysAvailable: ['Tue', 'Thu', 'Sat'], dutyStart: '10:00', dutyEnd: '18:00' },
 
-  ])
+type Doctor = {
+  name : string;
+  experience : string;
+  speciality : string;
+  mobile : bigint;
+  days : string[];
+  dutyStart : string;
+  dutyEnd : string;
+  qualification : string;
+  op : bigint;
+
+};
+
+export default function DoctorRecord() {
+  const [doctors, setDoctors] = useState<Doctor[]>([])
 
   const [currentPage, setCurrentPage] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
@@ -49,24 +50,61 @@ export default function DoctorRecord() {
 
   const generateUniqueId = () => {
     return Math.floor(10000000 + Math.random() * 90000000).toString()
+
   }
 
-  const handleAddDoctor = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
+ 
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const result = await healers_healthcare_backend.listDoctors();
+      setDoctors(result);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    }
+  };
+
+
+  const handleAddDoctor = async (formData: FormData) => {
+    try {
+     
     const newDoctor = {
-      id: generateUniqueId(),
       name: formData.get('name') as string,
-      experience: parseInt(formData.get('experience') as string) || 0,
-      specialty: formData.get('specialty') as string,
-      mobile: formData.get('mobile') as string,
-      daysAvailable: days.filter(day => formData.get(day) === 'on'),
+      experience: formData.get('experience') as string,
+      speciality: formData.get('specialty') as string,
+      mobile: BigInt(formData.get('mobile') as string),
+      days: days.filter(day => formData.get(day) === 'on'),
       dutyStart: formData.get('dutyStart') as string,
       dutyEnd: formData.get('dutyEnd') as string,
+      qualification: formData.get('qualification') as string,
+      op: BigInt(formData.get('opdFees') as string),
     }
-    setDoctors(prevDoctors => [...prevDoctors, newDoctor])
-    setIsOpen(false)
-  }, [])
+  
+   
+      await healers_healthcare_backend.AddDoctor(
+        newDoctor.name,
+        newDoctor.experience,
+        newDoctor.speciality,
+        newDoctor.mobile,
+        newDoctor.days,
+        newDoctor.dutyStart,
+        newDoctor.dutyEnd,
+        newDoctor.qualification,
+        newDoctor.op
+      )
+      
+      console.log("doctor added successfully");
+       // Refresh the doctors list
+      setIsOpen(false);
+      fetchDoctors()
+    } catch (error) {
+      console.error("Error adding doctor:", error)
+    }
+  }; 
 
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => {
@@ -79,16 +117,15 @@ export default function DoctorRecord() {
       return { ...prev, [key]: value === 'all' ? '' : value }
     })
     setCurrentPage(1)
-    simulateLoading()
+    
   }, [])
 
   const filteredDoctors = useMemo(() => {
     return doctors.filter(doctor => {
-      const specialtyMatch = filters.specialty === '' || doctor.specialty === filters.specialty
-      const daysMatch = filters.days.length === 0 || filters.days.some(day => doctor.daysAvailable.includes(day))
+      const specialtyMatch = filters.specialty === '' || doctor.speciality === filters.specialty
+      const daysMatch = filters.days.length === 0 || filters.days.some(day => doctor.days.includes(day))
       const searchMatch = filters.search === '' || 
-        doctor.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        doctor.id.includes(filters.search)
+        doctor.name.toLowerCase().includes(filters.search.toLowerCase())
       return specialtyMatch && daysMatch && searchMatch
     })
   }, [doctors, filters])
@@ -114,7 +151,6 @@ export default function DoctorRecord() {
     }
   }, [paginatedDoctors, currentPage])
 
-  const parallaxRef = useRef(null)
 
   const simulateLoading = useCallback(() => {
     setIsLoading(true)
@@ -147,7 +183,25 @@ export default function DoctorRecord() {
       </nav>
     </>
   )
-
+  /*
+  const EnhancedDoctorForm: React.FC<{ onSubmit: (formData: FormData) => void; onCancel: () => void }> = ({ onSubmit, onCancel }) => {
+    const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  
+    const handleConditionChange = (condition: string) => {
+      setSelectedDays(prev =>
+        prev.includes(condition)
+          ? prev.filter(c => c !== condition)
+          : [...prev, condition]
+      );
+    };
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.append('days', selectedDays.join(', '));
+    onSubmit(formData);
+  };
+  
+*/  
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
       {/* Mobile Sidebar */}
@@ -219,7 +273,10 @@ export default function DoctorRecord() {
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-[#7047eb] mb-4">Add New Doctor</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAddDoctor} className="space-y-6">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleAddDoctor(new FormData(e.currentTarget));
+              }} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -368,15 +425,15 @@ export default function DoctorRecord() {
                     </TableRow>
                   ))
                 ) : (
-                  paginatedDoctors.map((doctor) => (
+                  paginatedDoctors.map((doctor, index ) => (
                     <TableRow 
-                      key={doctor.id} 
+                      key={index} 
                       className="border-b border-transparent hover:bg-[#7047eb20] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell>{doctor.id}</TableCell>
+                      <TableCell>{generateUniqueId()}</TableCell>
                       <TableCell>{doctor.name}</TableCell>
-                      <TableCell>{doctor.specialty}</TableCell>
-                      <TableCell>{doctor.daysAvailable.join(', ')}</TableCell>
+                      <TableCell>{doctor.speciality}</TableCell>
+                      <TableCell>{doctor.days.join(', ')}</TableCell>
                       <TableCell className='border-transparent'>{`${doctor.dutyStart} - ${doctor.dutyEnd}`}</TableCell>
                     </TableRow>
                   ))

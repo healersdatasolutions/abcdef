@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect,useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
@@ -8,19 +8,61 @@ import { ScrollArea } from "./ui/scroll-area"
 import { Separator } from "./ui/separator"
 import { Pill, Stethoscope, Calendar, FileSymlink, FileText, Package, UserCog, Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
+import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend"; 
 
-// Dummy medical history data
-const medicalHistoryData = [
-  { id: 1, pharmacy: 'City Pharmacy', physician: 'Dr. Smith', event: 'Annual Checkup', prescription: 'Vitamins', remedies: 'Exercise', date: '2023-05-15' },
-  { id: 2, pharmacy: 'Central Drugs', physician: 'Dr. Johnson', event: 'Flu Treatment', prescription: 'Antibiotics', remedies: 'Rest', date: '2023-07-22' },
-  { id: 3, pharmacy: 'Health Plus', physician: 'Dr. Williams', event: 'Allergy Consultation', prescription: 'Antihistamines', remedies: 'Avoid Allergens', date: '2023-09-10' },
-  { id: 4, pharmacy: 'MediCare', physician: 'Dr. Brown', event: 'Blood Pressure Check', prescription: 'BP Medication', remedies: 'Low-sodium Diet', date: '2023-11-05' },
-  { id: 5, pharmacy: 'QuickCare', physician: 'Dr. Davis', event: 'Sprain Treatment', prescription: 'Pain Relievers', remedies: 'Ice and Rest', date: '2024-01-18' },
-]
+type MedicalHistory = {
+  pharmacy: string;
+  physician: string;
+  event: string;
+  prescription: string;
+  remedies: string;
+}
+
+type Patient = {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  location: string;
+  blood: string;
+  height: number;
+  weight: number;
+  medicalHistories: MedicalHistory[];
+}
 
 export default function MedicalHistory() {
   const { id } = useParams<{ id: string }>()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+ 
+  const [patientData, setPatientData] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchMedicalHistory = async () => {
+      if (!id) {
+        setError('Patient ID is undefined')
+        setIsLoading(false)
+        return
+      }
+      try {
+        const response = await healers_healthcare_backend.getPatientById(id)
+
+        if (response && Array.isArray(response) && response.length > 0) {
+          setPatientData(response[0] as unknown as Patient) 
+        } else {
+          setError("Patient not found")
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error)
+        setError("Failed to fetch patient data")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMedicalHistory()
+  }, [id])
 
   const SidebarContent = () => (
     <>
@@ -48,7 +90,15 @@ export default function MedicalHistory() {
       </nav>
     </>
   )
-
+  if (isLoading) {
+    return <div className="text-white">Loading...</div>
+  }
+  if (error) {
+    return <div className="text-white">Error: {error}</div>
+  }
+  if (!patientData) {
+    return <div className="text-white">No patient data found</div>
+  }
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
       {/* Mobile Sidebar */}
@@ -80,8 +130,8 @@ export default function MedicalHistory() {
         <h1 className="text-4xl font-bold mb-8">Medical History</h1>
 
         <ScrollArea className="h-[calc(100vh-200px)] pr-4">
-          {medicalHistoryData.map((history, index) => (
-            <Card key={history.id} className="mb-6 text-white bg-[#131313a2] border hover:border-[#7047eb] transition duration-100">
+          {patientData.medicalHistories && patientData.medicalHistories.length > 0 ?(patientData.medicalHistories.map((history, index) => (
+            <Card key={index} className="mb-6 text-white bg-[#131313a2] border hover:border-[#7047eb] transition duration-100">
               <CardHeader>
                 <CardTitle className="text-[#fff]">Medical Report {index + 1}</CardTitle>
               </CardHeader>
@@ -107,16 +157,22 @@ export default function MedicalHistory() {
                     <Pill className="text-[#7047eb]" />
                     <span>Remedies: {history.remedies}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/*<div className="flex items-center gap-2">
                     <Calendar className="text-[#7047eb]" />
                     <span>Date: {history.date}</span>
-                  </div>
+                  </div> */}
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ))
+        ):(
+          <div className="text-white">No medical history available</div>
+        )}
         </ScrollArea>
       </div>
     </div>
   )
 }
+
+
+  

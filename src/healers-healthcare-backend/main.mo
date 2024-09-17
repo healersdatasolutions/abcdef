@@ -1,4 +1,4 @@
-//import Blob "mo:base/Blob";
+import Blob "mo:base/Blob";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
@@ -20,13 +20,13 @@ actor Hospital {
     remedies: Text;
   };
 
-  type TestReport = {
-    doctor: Text;
-    referedto: Text;
-    testtype: Text;
-    comments: Text;
-    file: [Nat8];
-  };
+    type TestReport = {
+      doctor: Text;
+      referedto: Text;
+      testtype: Text;
+      comments: Text;
+      file: [Nat8];
+    };
 
   type Patient = {
     id : Text;
@@ -43,7 +43,7 @@ actor Hospital {
   };
 
  type Appointment={
-  id : Text;
+    
     patientName : Text;
     patientAge : Text;
     gender : Text;
@@ -59,9 +59,20 @@ actor Hospital {
     nOfVisits : Nat64;
     insuranceProvider : Text;
     emergencyContactName : Text;
-    emergencyContactPhone : Nat64;   
-    
-    
+    emergencyContactPhone : Nat64;    
+
+  };
+
+  type Doctor = {
+    name : Text;
+    experience : Text;
+    speciality : Text;
+    mobile : Nat64;
+    days : [Text];
+    dutyStart : Text;
+    dutyEnd : Text;
+    qualification : Text;
+    op : Nat64;
 
   };
   
@@ -69,6 +80,7 @@ var patients: [Patient] = [];
   var nextPatientId: Nat = 0;
 
 var appointments: [Appointment] = [];
+var doctors : [Doctor] = [];
 
   public shared func addPatient(
     
@@ -166,5 +178,36 @@ var appointments: [Appointment] = [];
   
    public query func listAppointments() : async [Appointment] {
     return appointments;
+  };
+
+  public shared func AddDoctor (
+    name : Text,
+    experience : Text,
+    speciality : Text,
+    mobile : Nat64,
+    days : [Text],
+    dutyStart : Text,
+    dutyEnd : Text,
+    qualification : Text,
+    op : Nat64
+  ) : async Nat {
+    let newDoctor : Doctor = {
+      name = name;
+      experience = experience;
+      speciality = speciality;
+      mobile = mobile;
+      days = days;
+      dutyStart =dutyStart;
+      dutyEnd = dutyEnd;
+      qualification = qualification;
+      op = op;
+    };
+
+    doctors := Array.append(doctors, [newDoctor]);
+    return doctors.size();
+  };
+
+  public query func listDoctors() : async [Doctor] {
+    return doctors;
   };
 };
