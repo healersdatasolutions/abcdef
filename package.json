@@ -16,6 +16,7 @@
     "src/healers-healthcare-frontend"
   ],
   "dependencies": {
+    "@radix-ui/react-toggle": "^1.1.0",
     "types": "github:metamask/logo"
   },
   "devDependencies": {
