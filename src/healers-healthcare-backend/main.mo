@@ -79,13 +79,13 @@ actor Hospital {
 
   };
 
-  /*type Inventory = {
+  type MutableInventory = {
     masks : Nat64;
     gloves : Nat64;
     gowns : Nat64;
     paracetamol : Nat64;
     painkiller : Nat64;
-    cogh : Nat64;
+    cough : Nat64;
     oxygen : Nat64;
     ehr : Nat64;
     defi : Nat64;
@@ -96,57 +96,24 @@ actor Hospital {
     forceps : Nat64;
     surgicalScissors : Nat64;
   };
-  */
-  type MutableInventory = {
-    var masks : Nat64;
-    var gloves : Nat64;
-    var gowns : Nat64;
-    var paracetamol : Nat64;
-    var painkiller : Nat64;
-    var coughSyrup : Nat64;
-    var oxygenCylinder : Nat64;
-    var ehrMachine : Nat64;
-    var defibrillator : Nat64;
-    var testTubes : Nat64;
-    var microscopeSlides : Nat64;
-    var petriDishes : Nat64;
-    var scalpels : Nat64;
-    var forceps : Nat64;
-    var surgicalScissors : Nat64;
-  };
-  type Inventory = {
-  var masks : Nat64;
-  var gloves : Nat64;
-  var gowns : Nat64;
-  var paracetamol : Nat64;
-  var painkiller : Nat64;
-  var coughSyrup : Nat64;
-  var oxygenCylinder : Nat64;
-  var ehrMachine : Nat64;
-  var defibrillator : Nat64;
-  var testTubes : Nat64;
-  var microscopeSlides : Nat64;
-  var petriDishes : Nat64;
-  var scalpels : Nat64;
-  var forceps : Nat64;
-  var surgicalScissors : Nat64;
-};
+
+ 
 var inventory : MutableInventory = {
-  var masks = 150;
-  var gloves = 150;
-  var gowns = 150;
-  var paracetamol = 150;
-  var painkiller = 150;
-  var coughSyrup = 150;
-  var oxygenCylinder = 150;
-  var ehrMachine = 150;
-  var defibrillator = 150;
-  var testTubes = 500;
-  var microscopeSlides = 1000;
-  var petriDishes = 200;
-  var scalpels = 100;
-  var forceps = 75;
-  var surgicalScissors = 50;
+    masks = 150;
+    gloves = 150;
+    gowns = 150;
+    paracetamol = 150;
+    painkiller = 150;
+    cough = 150;
+    oxygen = 150;
+    ehr = 150;
+    defi = 150;
+    test = 150 ;
+    microscope = 150 ;
+    petri = 150 ;
+    scalpels = 150 ;
+    forceps = 150;
+    surgicalScissors = 150;
 };
 
 var patients: [Patient] = [];
@@ -292,64 +259,36 @@ public func deletePatient(id: Text) : async Bool {
     return doctors;
   };
 
- /* public func increment () : async Nat {
-    count +=1;
-    return count;
-
-  };
-
-  public func decrement() : async Nat {
-    count -=1;
-    return count;
-  };
-  public func getCount() : async Nat {
-        return count;
-    };
-*/
+ 
   public func updateInventory(item: Text, change: Int) : async Nat64 {
-  func updateField(field: Nat64) : Nat64 {
+  func updateField(field: Nat64, change: Int) : Nat64 {
     let currentValue = Nat64.toNat(field);
     let newValue = Nat.max(0, Int.abs(currentValue + change));
     Nat64.fromNat(newValue)
   };
 
-  switch (item) {
-    case "masks" { inventory.masks := updateField(inventory.masks); inventory.masks };
-    case "gloves" { inventory.gloves := updateField(inventory.gloves); inventory.gloves };
-    case "gowns" { inventory.gowns := updateField(inventory.gowns); inventory.gowns };
-    case "paracetamol" { inventory.paracetamol := updateField(inventory.paracetamol); inventory.paracetamol };
-    case "painkiller" { inventory.painkiller := updateField(inventory.painkiller); inventory.painkiller };
-    case "coughsyrup" { inventory.coughSyrup := updateField(inventory.coughSyrup); inventory.coughSyrup };
-    case "oxygencylinder" { inventory.oxygenCylinder := updateField(inventory.oxygenCylinder); inventory.oxygenCylinder };
-    case "ehrmachine" { inventory.ehrMachine := updateField(inventory.ehrMachine); inventory.ehrMachine };
-    case "defibrillator" { inventory.defibrillator := updateField(inventory.defibrillator); inventory.defibrillator };
-    case "testtubes" { inventory.testTubes := updateField(inventory.testTubes); inventory.testTubes };
-    case "microscopeslides" { inventory.microscopeSlides := updateField(inventory.microscopeSlides); inventory.microscopeSlides };
-    case "petridishes" { inventory.petriDishes := updateField(inventory.petriDishes); inventory.petriDishes };
-    case "scalpels" { inventory.scalpels := updateField(inventory.scalpels); inventory.scalpels };
-    case "forceps" { inventory.forceps := updateField(inventory.forceps); inventory.forceps };
-    case "surgicalscissors" { inventory.surgicalScissors := updateField(inventory.surgicalScissors); inventory.surgicalScissors };
-    case _ { 0 };
-  }
+  let updatedValue = switch (item) {
+    case "masks" { updateField(inventory.masks, change) };
+    case "gloves" { updateField(inventory.gloves, change) };
+    case "gowns" { updateField(inventory.gowns, change) };
+    case "paracetamol" { updateField(inventory.paracetamol, change) };
+    case "painkiller" { updateField(inventory.painkiller, change) };
+    case "cough" { updateField(inventory.cough, change) };
+    case "oxygen" { updateField(inventory.oxygen, change) };
+    case "ehr" { updateField(inventory.ehr, change) };
+    case "defi" { updateField(inventory.defi, change) };
+    case "test" { updateField(inventory.test, change) };
+    case "microscope" { updateField(inventory.microscope, change) };
+    case "petri" { updateField(inventory.petri, change) };
+    case "scalpels" { updateField(inventory.scalpels, change) };
+    case "forceps" { updateField(inventory.forceps, change) };
+    case "surgicalscissors" { updateField(inventory.surgicalScissors, change) };
+    case _ { Nat64.fromNat(0) };
+  };
+  updatedValue;
 };
 
-/*public query func getInventory() : async Inventory {
-    {
-      masks = inventory.masks;
-      gloves = inventory.gloves;
-      gowns = inventory.gowns;
-      paracetamol = inventory.paracetamol;
-      painkiller = inventory.painkiller;
-      coughSyrup = inventory.coughSyrup;
-      oxygenCylinder = inventory.oxygenCylinder;
-      ehrMachine = inventory.ehrMachine;
-      defibrillator = inventory.defibrillator;
-      testTubes = inventory.testTubes;
-      microscopeSlides = inventory.microscopeSlides;
-      petriDishes = inventory.petriDishes;
-      scalpels = inventory.scalpels;
-      forceps = inventory.forceps;
-      surgicalScissors = inventory.surgicalScissors;
-    }
-  };*/
+  public query func getInventory  () : async MutableInventory {
+  inventory
+};
 };
