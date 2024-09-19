@@ -224,9 +224,12 @@ export default function PatientDetails() {
     }, [aiConversation])
   
     const handleSave = useCallback(() => {
-      // Implement the logic to save the edited data
-      toast.success('Patient details updated successfully')
-    }, [])
+      // Implement the logic to save the edited data, including medical histories and test reports
+      // You might need to call an API or update your backend here
+      toast.success('Patient details updated successfully');
+    }, [editedData]);
+
+
   
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target
@@ -242,6 +245,110 @@ export default function PatientDetails() {
       }, 1000)
       setAiQuery('')
     }, [aiQuery])
+
+
+    const handleMedicalHistoryChange = (index: number, field: keyof MedicalHistory, value: string) => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          medicalHistories: prev.medicalHistories.map((history, i) => 
+            i === index ? { ...history, [field]: value } : history
+          ),
+          // Ensure required fields are not undefined, e.g., use default values for fields like id
+          id: prev.id || '', // or handle this appropriately based on your logic
+        };
+      });
+    };
+    
+    const handleTestReportChange = (index: number, field: keyof TestReport, value: any) => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          testReports: prev.testReports.map((report, i) => 
+            i === index ? { ...report, [field]: value } : report
+          ),
+          id: prev.id || '', // Same approach here to avoid undefined
+        };
+      });
+    };
+    
+
+
+
+    const addMedicalHistory = () => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          medicalHistories: [
+            ...prev.medicalHistories,
+            {
+              pharmacy: '',
+              physician: '',
+              event: '',
+              prescription: '',
+              remedies: ''
+            }
+          ],
+          id: prev.id || '', // Ensure id is not undefined
+        };
+      });
+    };
+    
+    const removeMedicalHistory = (index: number) => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          medicalHistories: prev.medicalHistories.filter((_, i) => i !== index),
+          id: prev.id || '', // Ensure id is not undefined
+        };
+      });
+    };
+    
+    const addTestReport = () => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          testReports: [
+            ...prev.testReports,
+            {
+              doctor: '',
+              referedto: '',
+              testtype: '',
+              comments: '',
+              file: []
+            }
+          ],
+          id: prev.id || '', // Ensure id is not undefined
+        };
+      });
+    };
+    
+    const removeTestReport = (index: number) => {
+      setEditedData(prev => {
+        if (!prev) return null;
+    
+        return {
+          ...prev,
+          testReports: prev.testReports.filter((_, i) => i !== index),
+          id: prev.id || '', // Ensure id is not undefined
+        };
+      });
+    };
+    
+
+    
+
+
 
   const SidebarContent = () => (
     <>
@@ -408,35 +515,213 @@ const firstAppointment = appointmentsData[0] || {};
         
           <h2 className="text-4xl font-bold">Patient Records</h2>
           <Drawer>
-            <DrawerTrigger asChild>
-              <Button className="border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] text-white">Edit Patient Details</Button>
-            </DrawerTrigger>
-            <DrawerContent className="bg-black text-white">
-              <DrawerHeader>
-                <DrawerTitle>Edit Patient Details</DrawerTitle>
-                <DrawerDescription>Make changes to patient information here.</DrawerDescription>
-              </DrawerHeader>
-              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {editedData && Object.entries(editedData).map(([key, value]) => (
-                  <div key={key} className="space-y-2">
-                    <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
-                    <Input
-                      id={key}
-                      name={key}
-                      value={value}
-                      onChange={handleInputChange}
-                      className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="p-4">
-                <div className='w-full flex justify-center items-center'>
-                  <Button onClick={handleSave} className="w-[30vh] border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] hover:text-white ">Save Changes</Button>
-                </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
+  <DrawerTrigger asChild>
+    <Button className="border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] text-white">Edit Patient Details</Button>
+  </DrawerTrigger>
+  <DrawerContent className="bg-black text-white">
+    <DrawerHeader>
+      <DrawerTitle>Edit Patient Details</DrawerTitle>
+      <DrawerDescription>Make changes to patient information here.</DrawerDescription>
+    </DrawerHeader>
+    <ScrollArea className="h-[calc(100vh-10rem)] px-4">
+    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {editedData && Object.entries(editedData).map(([key, value]) => (
+        key !== 'medicalHistories' && key !== 'testReports' && (
+          <div key={key} className="space-y-2">
+            <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
+            <Input
+              id={key}
+              name={key}
+              value={value}
+              onChange={handleInputChange}
+              className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+            />
+          </div>
+        )
+      ))}
+    </div>
+
+    {/* Medical History Section */}
+    <div className="p-4">
+      <h3 className="text-xl font-semibold mb-4">Medical History</h3>
+      {editedData.medicalHistories.map((history, index) => (
+        <div key={index} className="mb-4 p-4 border border-gray-700 rounded-lg">
+          <h4 className="text-lg font-medium mb-2">Medical History {index + 1}</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor={`pharmacy${index}`}>Pharmacy</Label>
+              <Input
+                id={`pharmacy${index}`}
+                name={`pharmacy${index}`}
+                value={history.pharmacy}
+                onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`physician${index}`}>Physician</Label>
+              <Input
+                id={`physician${index}`}
+                name={`physician${index}`}
+                value={history.physician}
+                onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`event${index}`}>Event</Label>
+              <Input
+                id={`event${index}`}
+                name={`event${index}`}
+                value={history.event}
+                onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`prescription${index}`}>Prescription</Label>
+              <Input
+                id={`prescription${index}`}
+                name={`prescription${index}`}
+                value={history.prescription}
+                onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`remedies${index}`}>Remedies</Label>
+              <Input
+                id={`remedies${index}`}
+                name={`remedies${index}`}
+                value={history.remedies}
+                onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+          </div>
+          {index > 0 && (
+            <Button
+              type="button"
+              onClick={() => removeMedicalHistory(index)}
+              className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent"
+            >
+              Remove Medical History
+            </Button>
+          )}
+        </div>
+      ))}
+      {editedData.medicalHistories.length < 5 && (
+        <Button
+          type="button"
+          onClick={addMedicalHistory}
+          className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent"
+        >
+          Add Medical History
+        </Button>
+      )}
+    </div>
+
+    {/* Test Report Section */}
+    <div className="p-4">
+      <h3 className="text-xl font-semibold mb-4">Test Reports</h3>
+      {editedData.testReports.map((report, index) => (
+        <div key={index} className="mb-4 p-4 border border-gray-700 rounded-lg">
+          <h4 className="text-lg font-medium mb-2">Test Report {index + 1}</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor={`doctor${index}`}>Doctor</Label>
+              <Input
+                id={`doctor${index}`}
+                name={`doctor${index}`}
+                value={report.doctor}
+                onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`referedto${index}`}>Referred to</Label>
+              <Input
+                id={`referedto${index}`}
+                name={`referedto${index}`}
+                value={report.referedto}
+                onChange={(e) => handleTestReportChange(index, 'referedto', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`testtype${index}`}>Test Type</Label>
+              <Input
+                id={`testtype${index}`}
+                name={`testtype${index}`}
+                value={report.testtype}
+                onChange={(e) => handleTestReportChange(index, 'testtype', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`comments${index}`}>Comments</Label>
+              <Input
+                id={`comments${index}`}
+                name={`comments${index}`}
+                value={report.comments}
+                onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`file${index}`}>File</Label>
+              <Input
+                id={`file${index}`}
+                name={`file${index}`}
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      if (event.target?.result) {
+                        const arrayBuffer = event.target.result as ArrayBuffer;
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        handleTestReportChange(index, 'file', Array.from(uint8Array));
+                      }
+                    };
+                    reader.readAsArrayBuffer(file);
+                  }
+                }}
+                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+              />
+            </div>
+          </div>
+          {index > 0 && (
+            <Button
+              type="button"
+              onClick={() => removeTestReport(index)}
+              className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent"
+            >
+              Remove Test Report
+            </Button>
+          )}
+        </div>
+      ))}
+      {editedData.testReports.length < 5 && (
+        <Button
+          type="button"
+          onClick={addTestReport}
+          className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent"
+        >
+          Add Test Report
+        </Button>
+      )}
+    </div>
+
+    <div className="p-4">
+      <div className='w-full flex justify-center items-center'>
+        <Button onClick={handleSave} className="w-[30vh] border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] hover:text-white ">Save Changes</Button>
+      </div>
+    </div>
+    </ScrollArea>
+  </DrawerContent>
+</Drawer>
         </div>
         </div>
 
