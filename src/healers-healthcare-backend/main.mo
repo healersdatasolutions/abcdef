@@ -5,10 +5,8 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
-
-
-
-
+import Debug "mo:base/Debug";
+import Int "mo:base/Int";
 
 actor Hospital {
 
@@ -75,12 +73,50 @@ actor Hospital {
     op : Nat64;
 
   };
-  
-var patients: [Patient] = [];
+
+  type MutableInventory = {
+    masks : Nat64;
+    gloves : Nat64;
+    gowns : Nat64;
+    paracetamol : Nat64;
+    painkiller : Nat64;
+    cough : Nat64;
+    oxygen : Nat64;
+    ehr : Nat64;
+    defi : Nat64;
+    test : Nat64;
+    microscope : Nat64;
+    petri : Nat64;
+    scalpels : Nat64;
+    forceps : Nat64;
+    surgicalScissors : Nat64;
+  };
+
+ 
+var inventory : MutableInventory = {
+    masks = 150;
+    gloves = 150;
+    gowns = 150;
+    paracetamol = 150;
+    painkiller = 150;
+    cough = 150;
+    oxygen = 150;
+    ehr = 150;
+    defi = 150;
+    test = 150 ;
+    microscope = 150 ;
+    petri = 150 ;
+    scalpels = 150 ;
+    forceps = 150;
+    surgicalScissors = 150;
+};
+
+stable var patients: [Patient] = [];
   var nextPatientId: Nat = 0;
 
 var appointments: [Appointment] = [];
 var doctors : [Doctor] = [];
+
 
   public shared func addPatient(
     
@@ -128,6 +164,13 @@ var doctors : [Doctor] = [];
   };
   return null;
 };
+
+public func deletePatient(id: Text) : async Bool {
+  let initialSize = patients.size();
+  patients := Array.filter(patients, func(p: Patient) : Bool { p.id != id });
+  return patients.size() < initialSize;
+};
+
 
 
 
@@ -210,4 +253,37 @@ var doctors : [Doctor] = [];
   public query func listDoctors() : async [Doctor] {
     return doctors;
   };
+
+ 
+  public func updateInventory(item: Text, change: Int) : async Nat64 {
+  func updateField(field: Nat64, change: Int) : Nat64 {
+    let currentValue = Nat64.toNat(field);
+    let newValue = Nat.max(0, Int.abs(currentValue + change));
+    Nat64.fromNat(newValue)
+  };
+
+  let updatedValue = switch (item) {
+    case "masks" { updateField(inventory.masks, change) };
+    case "gloves" { updateField(inventory.gloves, change) };
+    case "gowns" { updateField(inventory.gowns, change) };
+    case "paracetamol" { updateField(inventory.paracetamol, change) };
+    case "painkiller" { updateField(inventory.painkiller, change) };
+    case "cough" { updateField(inventory.cough, change) };
+    case "oxygen" { updateField(inventory.oxygen, change) };
+    case "ehr" { updateField(inventory.ehr, change) };
+    case "defi" { updateField(inventory.defi, change) };
+    case "test" { updateField(inventory.test, change) };
+    case "microscope" { updateField(inventory.microscope, change) };
+    case "petri" { updateField(inventory.petri, change) };
+    case "scalpels" { updateField(inventory.scalpels, change) };
+    case "forceps" { updateField(inventory.forceps, change) };
+    case "surgicalscissors" { updateField(inventory.surgicalScissors, change) };
+    case _ { Nat64.fromNat(0) };
+  };
+  updatedValue;
+};
+
+  public query func getInventory  () : async MutableInventory {
+  inventory
+};
 };

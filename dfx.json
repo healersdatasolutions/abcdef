@@ -4,6 +4,7 @@
       "main": "src/healers-healthcare-backend/main.mo",
       "type": "motoko"
     },
+    
     "healers-healthcare-frontend": {
       "dependencies": [
         "healers-healthcare-backend"

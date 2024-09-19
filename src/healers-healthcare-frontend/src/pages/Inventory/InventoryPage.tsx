@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useCallback, useRef } from 'react'
+import React, { useState, useEffect,useMemo, useCallback, useRef } from 'react'
 import { FileText, UserCog, Calendar, Package, Minus, Plus, Syringe, Pill, Droplet, Menu, Search } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -11,6 +11,7 @@ import { MouseParallax } from "react-just-parallax"
 import { Sheet, SheetContent, SheetTrigger } from '../../components/ui/sheet'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Label } from "../../components/ui/label"
+import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend";
 
 type InventoryItem = {
   name: string
@@ -26,53 +27,71 @@ type InventorySection = {
 
 export default function Inventory() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const parallaxRef = useRef(null)
-  const [inventory, setInventory] = useState<InventorySection[]>([
-    {
-      name: "Medical Supplies and Consumables",
-      items: [
-        { name: "Masks", count: 150, icon: Package, category: "PPE" },
-        { name: "Gloves", count: 150, icon: Package, category: "PPE" },
-        { name: "Gowns", count: 150, icon: Package, category: "PPE" },
-        { name: "Paracetamol", count: 150, icon: Pill, category: "Medication" },
-        { name: "Painkiller", count: 150, icon: Pill, category: "Medication" },
-        { name: "Cough Syrup", count: 150, icon: Droplet, category: "Medication" },
-      ]
-    },
-    {
-      name: "Stock For Emergency",
-      items: [
-        { name: "Oxygen Cylinder", count: 150, icon: Package, category: "Equipment" },
-        { name: "EHR Machine", count: 150, icon: Package, category: "Equipment" },
-        { name: "Defibrillator", count: 150, icon: Package, category: "Equipment" },
-      ]
-    },
-    {
-      name: "Laboratory Supplies",
-      items: [
-        { name: "Test Tubes", count: 500, icon: Package, category: "Lab" },
-        { name: "Microscope Slides", count: 1000, icon: Package, category: "Lab" },
-        { name: "Petri Dishes", count: 200, icon: Package, category: "Lab" },
-      ]
-    },
-    {
-      name: "Surgical Instruments",
-      items: [
-        { name: "Scalpels", count: 100, icon: Package, category: "Surgical" },
-        { name: "Forceps", count: 75, icon: Package, category: "Surgical" },
-        { name: "Surgical Scissors", count: 50, icon: Package, category: "Surgical" },
-      ]
-    }
-  ])
-
+  const [inventory, setInventory] = useState<InventorySection[]>([])
   const [filters, setFilters] = useState({ category: '', search: '' })
 
-  const handleCountChange = (sectionIndex: number, itemIndex: number, change: number) => {
-    setInventory(prevInventory => {
-      const newInventory = [...prevInventory]
-      newInventory[sectionIndex].items[itemIndex].count += change
-      return newInventory
-    })
+  useEffect(() => {
+    fetchInventory()
+  }, [])
+
+  const fetchInventory = async () => {
+    try {
+      const result = await healers_healthcare_backend.getInventory()
+      const newInventory: InventorySection[] = [
+        {
+          name: "Medical Supplies and Consumables",
+          items: [
+            { name: "Masks", count: Number(result.masks), icon: Package, category: "PPE" },
+            { name: "Gloves", count: Number(result.gloves), icon: Package, category: "PPE" },
+            { name: "Gowns", count: Number(result.gowns), icon: Package, category: "PPE" },
+            { name: "Paracetamol", count: Number(result.paracetamol), icon: Pill, category: "Medication" },
+            { name: "Painkiller", count: Number(result.painkiller), icon: Pill, category: "Medication" },
+            { name: "Cough Syrup", count: Number(result.cough), icon: Droplet, category: "Medication" },
+          ]
+        },
+        {
+          name: "Stock For Emergency",
+          items: [
+            { name: "Oxygen Cylinder", count: Number(result.oxygen), icon: Package, category: "Equipment" },
+            { name: "EHR Machine", count: Number(result.ehr), icon: Package, category: "Equipment" },
+            { name: "Defibrillator", count: Number(result.defi), icon: Package, category: "Equipment" },
+          ]
+        },
+        {
+          name: "Laboratory Supplies",
+          items: [
+            { name: "Test Tubes", count: Number(result.test), icon: Package, category: "Lab" },
+            { name: "Microscope Slides", count: Number(result.microscope), icon: Package, category: "Lab" },
+            { name: "Petri Dishes", count: Number(result.petri), icon: Package, category: "Lab" },
+          ]
+        },
+        {
+          name: "Surgical Instruments",
+          items: [
+            { name: "Scalpels", count: Number(result.scalpels), icon: Package, category: "Surgical" },
+            { name: "Forceps", count: Number(result.forceps), icon: Package, category: "Surgical" },
+            { name: "Surgical Scissors", count: Number(result.surgicalScissors), icon: Package, category: "Surgical" },
+          ]
+        }
+      ]
+      setInventory(newInventory)
+    } catch (error) {
+      console.error("Failed to fetch inventory:", error)
+    }
+  }
+
+  const handleCountChange = async (sectionIndex: number, itemIndex: number, change: number) => {
+    const item = inventory[sectionIndex].items[itemIndex];
+    try {
+      const newCount = await healers_healthcare_backend.updateInventory(item.name.toLowerCase().replace(' ', ''), BigInt(change))
+      setInventory(prevInventory => {
+        const newInventory = [...prevInventory]
+        newInventory[sectionIndex].items[itemIndex].count = Number(newCount)
+        return newInventory
+      })
+    } catch (error) {
+      console.error("Failed to update inventory:", error)
+    }
   }
 
   const handleFilter = useCallback((key: string, value: string) => {

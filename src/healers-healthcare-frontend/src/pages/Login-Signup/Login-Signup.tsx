@@ -10,14 +10,26 @@ import { Label } from "../../components/ui/label"
 import { Toggle } from "../../components/ui/toggle"
 import { Mail, Lock, User } from 'lucide-react'
 import React from 'react'
+import { useInternetIdentity } from 'ic-use-internet-identity'
 
-export default function LoginSignup() {
+export default function LoginButton() {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-
+  const { isLoggingIn, login, clear, identity } = useInternetIdentity();
+  
   const navigate = useNavigate();
+
+  function handleClick() {
+    if (identity) {
+      clear();
+    } else {
+      login();
+    }
+  }
+
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,6 +41,7 @@ export default function LoginSignup() {
   }
 
   return (
+    
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
@@ -40,7 +53,10 @@ export default function LoginSignup() {
             <div className="grid grid-cols-2 w-full h-full">
               <div className={`flex items-center justify-center ${isLogin ? 'text-white' : 'text-gray-400'}`}>Login</div>
               <div className={`flex items-center justify-center ${!isLogin ? 'text-white' : 'text-gray-400'}`}>Signup</div>
+              
             </div>
+            
+
           </Toggle>
         </div>
         <motion.div
@@ -134,5 +150,7 @@ export default function LoginSignup() {
         </motion.div>
       </div>
     </div>
+
+    
   )
 }

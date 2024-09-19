@@ -17,6 +17,9 @@ import TestReport from "./components/TestReport";
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
 import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
+import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
+import PlugWallet from "./pages/Login-Signup/PlugWallet"
+import MetaMaskAuth from "./pages/Login-Signup/Metamask"
 
 
 function App() {
@@ -33,6 +36,18 @@ function App() {
       path: "/login",
       element: <LoginSignup />,
 
+    },
+    {
+      path: "/internetidentity",
+      element:<InternetIdentity/>
+    },
+    {
+      path: "/plugwallet",
+      element:<PlugWallet/>
+    },
+    {
+      path: "/metamask",
+      element:<MetaMaskAuth/>
     },
     {
       path: "/dashboard",
@@ -52,6 +67,7 @@ function App() {
       path: "/inventory",
       element: <InventoryPage />,
     },
+    
 
     {
       path: "/appointments",

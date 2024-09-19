@@ -58,6 +58,25 @@ type Filters = {
 };
 
 export default function PatientHealthRecord() {
+  const deletePatient = async (id: string) => {
+    try {
+      const result = await healers_healthcare_backend.deletePatient(id);
+      if (result) {
+        // Patient successfully deleted
+        setPatients(prevPatients => prevPatients.filter(patient => patient.id !== id));
+        // You might want to show a success message here
+        console.log('Patient deleted successfully');
+      } else {
+        // Patient not found or deletion failed
+        console.error('Failed to delete patient');
+        // You might want to show an error message here
+      }
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      // You might want to show an error message here
+    }
+  };
+
   const formatDate = (dateInNanoseconds: bigint): string => {
     const milliseconds = Number(dateInNanoseconds) / 1000000
     const date = new Date(milliseconds)
@@ -782,7 +801,11 @@ export default function PatientHealthRecord() {
                         </Link>
                       </TableCell>
                       <TableCell className='border-transparent'>
-              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this patient?')) {
+                    deletePatient(patient.id);
+                  }
+                }}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TableCell>
