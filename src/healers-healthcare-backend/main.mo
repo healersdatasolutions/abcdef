@@ -8,11 +8,6 @@ import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 
-
-
-
-
-
 actor Hospital {
 
   type MedicalHistory = {
@@ -116,7 +111,7 @@ var inventory : MutableInventory = {
     surgicalScissors = 150;
 };
 
-var patients: [Patient] = [];
+stable var patients: [Patient] = [];
   var nextPatientId: Nat = 0;
 
 var appointments: [Appointment] = [];
