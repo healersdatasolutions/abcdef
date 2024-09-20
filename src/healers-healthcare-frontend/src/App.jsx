@@ -18,7 +18,6 @@ import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppoi
 import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
 import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
-import PlugWallet from "./pages/Login-Signup/PlugWallet"
 import MetaMaskAuth from "./pages/Login-Signup/Metamask"
 
 
@@ -40,10 +39,6 @@ function App() {
     {
       path: "/internetidentity",
       element:<InternetIdentity/>
-    },
-    {
-      path: "/plugwallet",
-      element:<PlugWallet/>
     },
     {
       path: "/metamask",

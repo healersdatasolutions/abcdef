@@ -29,7 +29,7 @@ export default function Inventory() {
   const [inventory, setInventory] = useState<InventorySection[]>([])
   const [filters, setFilters] = useState({ category: '', search: '' })
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false)
-  const [newInventoryItems, setNewInventoryItems] = useState<{ name: string; count: number }[]>([{ name: '', count: 0 }])
+  const [newInventoryItems, setNewInventoryItems] = useState<Array<{ name: string; count: number }>>([{ name: '', count: 0 }])
   const [newSectionName, setNewSectionName] = useState('')
   const [editingSectionIndex, setEditingSectionIndex] = useState<number | null>(null)
 
@@ -125,7 +125,10 @@ export default function Inventory() {
 
   const handleNewInventoryItemChange = (index: number, field: 'name' | 'count', value: string | number) => {
     const updatedItems = [...newInventoryItems]
-    updatedItems[index][field] = field === 'count' ? Number(value) : value
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: field === 'count' ? Number(value) : value
+    }
     setNewInventoryItems(updatedItems)
   }
 

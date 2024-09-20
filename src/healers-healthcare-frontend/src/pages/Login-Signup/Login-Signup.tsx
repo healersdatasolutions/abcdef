@@ -12,7 +12,7 @@ import { Mail, Lock, User, X, Building2, Users, ShieldCheck, AlertCircle, CheckC
 import React from 'react'
 import { useInternetIdentity } from 'ic-use-internet-identity'
 import { ethers } from 'ethers'
-import PlugConnect from '@psychedelic/plug-connect'
+// import PlugConnect from '@psychedelic/plug-connect'
 import { healers_healthcare_backend, canisterId as healthcareCanisterId } from '../../../../declarations/healers-healthcare-backend'
 import Spinner from "../../Spinner"
 import { twMerge } from "tailwind-merge"
@@ -134,20 +134,7 @@ export default function LoginButton() {
   }, [identity])
 
   // Plug Wallet functions
-  const handlePlugConnect = async () => {
-    if (window.ic?.plug) {
-      setIsPlugConnected(true)
-      setPlugPrincipal(window.ic.plug.principalId)
-      setPlugAccountId(window.ic.plug.accountId)
-      setConnectedWallet('Plug')
-      setWalletId(window.ic.plug.principalId)
-      const actorInstance = healers_healthcare_backend
-      // You can use actorInstance here if needed
-    } else {
-      console.error('Plug is not available')
-    }
-    setShowWalletPopup(false)
-  }
+  
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative">
@@ -380,12 +367,7 @@ export default function LoginButton() {
 
 
               
-              <PlugConnect
-                dark={true}
-                title={isPlugConnected ? `Connected as ${plugPrincipal.substr(0, 5)}-xxxxx-${plugPrincipal.substr(plugPrincipal.length - 9, 9)}` : "Connect to Plug"}
-                whitelist={[healthcareCanisterId]}
-                onConnectCallback={handlePlugConnect}
-              />
+              
             </CardContent>
           </Card>
         </div>
