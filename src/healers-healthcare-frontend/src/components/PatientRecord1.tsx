@@ -86,8 +86,8 @@ interface TestReport  {
   file: number[] | Uint8Array
 };
 
-interface Patient  {
-  id : string;
+interface Patient {
+  id: string;
   name: string;
   age: bigint;
   gender: string;
@@ -98,9 +98,7 @@ interface Patient  {
   medicalHistories: MedicalHistory[];
   testReports: TestReport[];
   pdate: bigint;
-  
-}; 
-
+}
 type Appointment = {
  
   patientName : string;
@@ -165,7 +163,7 @@ export default function PatientDetails() {
 
 
 
-    const [patientData, setPatientData] = useState<Patient | null>(null); 
+  const [patientData, setPatientData] = useState<Patient | null>(null);
     const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([]);
 
 
@@ -176,34 +174,48 @@ export default function PatientDetails() {
         setIsLoading(false)
         return
       }
-  
+    
       try {
         setIsLoading(true)
         console.log("Fetching patient with ID:", id)
-        const patient = await healers_healthcare_backend.getPatientById(id)
-        const appointment = await healers_healthcare_backend.listAppointments()
-        console.log("Fetched patient data:", patient)
-        console.log("Fetched appointment data:", appointment)
+        const patientResult = await healers_healthcare_backend.getPatientById(id)
+        console.log("Fetched patient data:", patientResult)
         
-        
-        if (Array.isArray(patient))  {
-          setPatientData(patient[0] || null)
-          setEditedData(patient[0] || null)
-        } else if (patient) {
-          setPatientData(patient)
-          setEditedData(patient)
+        if (patientResult) {
+          const patient = patientResult[0];
+          if (patient) {
+            const formattedPatient: Patient = {
+              id: patient.id,
+              name: patient.name,
+              age: BigInt(patient.age),
+              gender: patient.gender,
+              location: patient.location,
+              blood: patient.blood,
+              height: BigInt(patient.height),
+              weight: BigInt(patient.weight),
+              medicalHistories: patient.medicalHistories,
+              testReports: patient.testReports,
+              pdate: BigInt(patient.pdate)
+            };
+            setPatientData(formattedPatient)
+            setEditedData(formattedPatient)
+          } else {
+            console.error('No patient found with the given ID')
+            setPatientData(null)
+            setEditedData(null)
+          }
         } else {
-          console.error('No patient found with the given ID')
+          console.error('Invalid response from getPatientById')
           setPatientData(null)
           setEditedData(null)
         }
-
-    const appointments = await healers_healthcare_backend.listAppointments();
-    console.log("Fetched appointment data:", appointments);
-
-    if (Array.isArray(appointments)) {
-      setAppointmentsData(appointments as Appointment[]);
-    } 
+    
+        const appointments = await healers_healthcare_backend.listAppointments();
+        console.log("Fetched appointment data:", appointments);
+    
+        if (Array.isArray(appointments)) {
+          setAppointmentsData(appointments as Appointment[]);
+        } 
       } catch (error) {
         console.error('Error fetching patient data:', error)
         setPatientData(null)
@@ -223,18 +235,64 @@ export default function PatientDetails() {
       }
     }, [aiConversation])
   
-    const handleSave = useCallback(() => {
-      // Implement the logic to save the edited data, including medical histories and test reports
-      // You might need to call an API or update your backend here
-      toast.success('Patient details updated successfully');
+    const handleSave = useCallback(async () => {
+      if (!editedData) return;
+    
+      try {
+        const updatedPatient = await healers_healthcare_backend.updatePatient(
+          editedData.id,
+          [editedData.name],
+          [editedData.age],
+          [editedData.gender],
+          [editedData.location],
+          [editedData.blood],
+          [editedData.height],
+          [editedData.weight],
+          [editedData.medicalHistories],
+          [editedData.testReports]
+        );
+    
+        if (updatedPatient && updatedPatient.length > 0) {
+          const patient = updatedPatient[0];
+          if (patient) {
+            const formattedPatient: Patient = {
+              id: patient.id,
+              name: patient.name,
+              age: BigInt(patient.age),
+              gender: patient.gender,
+              location: patient.location,
+              blood: patient.blood,
+              height: BigInt(patient.height),
+              weight: BigInt(patient.weight),
+              medicalHistories: patient.medicalHistories,
+              testReports: patient.testReports,
+              pdate: BigInt(patient.pdate)
+            };
+            setPatientData(formattedPatient);
+            setEditedData(formattedPatient);
+            toast.success('Patient details updated successfully');
+          } else {
+            toast.error('Failed to update patient details');
+          }
+        } else {
+          toast.error('Failed to update patient details');
+        }
+      } catch (error) {
+        console.error('Error updating patient:', error);
+        toast.error('An error occurred while updating patient details');
+      }
     }, [editedData]);
-
-
   
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target
-      setEditedData((prev: any) => ({ ...prev, [name]: value }))
-    }, [])
+      const { name, value } = e.target;
+      setEditedData((prev: Patient | null) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          [name]: name === 'age' || name === 'height' || name === 'weight' ? BigInt(value) : value,
+        };
+      });
+    }, []);
   
     const handleAiQuery = useCallback((e: React.FormEvent) => {
       e.preventDefault()
@@ -250,32 +308,20 @@ export default function PatientDetails() {
     const handleMedicalHistoryChange = (index: number, field: keyof MedicalHistory, value: string) => {
       setEditedData(prev => {
         if (!prev) return null;
-    
-        return {
-          ...prev,
-          medicalHistories: prev.medicalHistories.map((history, i) => 
-            i === index ? { ...history, [field]: value } : history
-          ),
-          // Ensure required fields are not undefined, e.g., use default values for fields like id
-          id: prev.id || '', // or handle this appropriately based on your logic
-        };
+        const updatedHistories = [...prev.medicalHistories];
+        updatedHistories[index] = { ...updatedHistories[index], [field]: value };
+        return { ...prev, medicalHistories: updatedHistories };
       });
     };
     
     const handleTestReportChange = (index: number, field: keyof TestReport, value: any) => {
       setEditedData(prev => {
         if (!prev) return null;
-    
-        return {
-          ...prev,
-          testReports: prev.testReports.map((report, i) => 
-            i === index ? { ...report, [field]: value } : report
-          ),
-          id: prev.id || '', // Same approach here to avoid undefined
-        };
+        const updatedReports = [...prev.testReports];
+        updatedReports[index] = { ...updatedReports[index], [field]: value };
+        return { ...prev, testReports: updatedReports };
       });
     };
-    
 
 
 
@@ -530,12 +576,13 @@ const firstAppointment = appointmentsData[0] || {};
           <div key={key} className="space-y-2">
             <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
             <Input
-              id={key}
-              name={key}
-              value={value}
-              onChange={handleInputChange}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
-            />
+  id={key}
+  name={key}
+  value={typeof value === 'bigint' ? value.toString() : value}
+  onChange={handleInputChange}
+  type={key === 'age' || key === 'height' || key === 'weight' ? 'number' : 'text'}
+  className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+/>
           </div>
         )
       ))}
