@@ -7,6 +7,9 @@ import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
+import Iter "mo:base/Iter";
+import Int64 "mo:base/Int64";
+
 
 actor Hospital {
 
@@ -73,7 +76,7 @@ actor Hospital {
     op : Nat64;
 
   };
-
+/*
   type MutableInventory = {
     masks : Nat64;
     gloves : Nat64;
@@ -91,9 +94,19 @@ actor Hospital {
     forceps : Nat64;
     surgicalScissors : Nat64;
   };
+  */
+  type InventoryItem ={
+    itemName: Text;
+    itemCount : Int;
+  };
 
+type Inventory = {
+  sectionName : Text;
+  items : [InventoryItem]
+
+};
  
-var inventory : MutableInventory = {
+/*var inventory : MutableInventory = {
     masks = 150;
     gloves = 150;
     gowns = 150;
@@ -110,12 +123,13 @@ var inventory : MutableInventory = {
     forceps = 150;
     surgicalScissors = 150;
 };
-
-stable var patients: [Patient] = [];
+*/
+  var  patients: [Patient] = [];
   var nextPatientId: Nat = 0;
 
 var appointments: [Appointment] = [];
 var doctors : [Doctor] = [];
+var inventories : [Inventory] = [];
 
 
   public shared func addPatient(
@@ -169,6 +183,79 @@ public func deletePatient(id: Text) : async Bool {
   let initialSize = patients.size();
   patients := Array.filter(patients, func(p: Patient) : Bool { p.id != id });
   return patients.size() < initialSize;
+};
+
+public shared func updatePatient(
+    id: Text,
+    name: ?Text,
+    age: ?Nat64,
+    gender: ?Text,
+    location: ?Text,
+    blood: ?Text,
+    height: ?Nat64,
+    weight: ?Nat64,
+    medicalHistories: ?[MedicalHistory],
+    testReports: ?[TestReport]
+) : async ?Patient {
+    var updatedPatients: [Patient] = [];
+    var updatedPatient: ?Patient = null;
+
+ 
+    for (patient in patients.vals()) {
+        if (patient.id == id) {
+            // Create a new updated patient record
+            let newPatient: Patient = {
+                id = patient.id;
+                name = switch (name) {
+                    case (?value) value;
+                    case null patient.name;
+                };
+                age = switch (age) {
+                    case (?value) value;
+                    case null patient.age;
+                };
+                gender = switch (gender) {
+                    case (?value) value;
+                    case null patient.gender;
+                };
+                location = switch (location) {
+                    case (?value) value;
+                    case null patient.location;
+                };
+                blood = switch (blood) {
+                    case (?value) value;
+                    case null patient.blood;
+                };
+                height = switch (height) {
+                    case (?value) value;
+                    case null patient.height;
+                };
+                weight = switch (weight) {
+                    case (?value) value;
+                    case null patient.weight;
+                };
+                medicalHistories = switch (medicalHistories) {
+                    case (?value) value;
+                    case null patient.medicalHistories;
+                };
+                testReports = switch (testReports) {
+                    case (?value) value;
+                    case null patient.testReports;
+                };
+                pdate = Time.now();  // Update the last modified time
+            };
+
+            updatedPatient := ?newPatient;
+            updatedPatients := Array.append(updatedPatients, [newPatient]);  // Add the updated patient
+        } else {
+            updatedPatients := Array.append(updatedPatients, [patient]);  // Keep the unchanged patients
+        };
+    };
+
+  
+    patients := updatedPatients;
+
+    return updatedPatient;  // Return the updated patient or null if not found
 };
 
 
@@ -254,7 +341,7 @@ public func deletePatient(id: Text) : async Bool {
     return doctors;
   };
 
- 
+ /*
   public func updateInventory(item: Text, change: Int) : async Nat64 {
   func updateField(field: Nat64, change: Int) : Nat64 {
     let currentValue = Nat64.toNat(field);
@@ -286,4 +373,51 @@ public func deletePatient(id: Text) : async Bool {
   public query func getInventory  () : async MutableInventory {
   inventory
 };
+*/
+
+public shared func AddInventory ( sectionName : Text,
+  items : [InventoryItem]
+) : async () {
+  let newInventory : Inventory ={
+    sectionName = sectionName;
+    items = items;
+  };
+   inventories := Array.append(inventories, [newInventory]);
+
+};
+
+public func updateInventoryItemCount(sectionName: Text, itemName: Text, change: Int) : async () {
+    var updatedInventories : [Inventory] = [];
+    for (section in inventories.vals()) {
+      if (section.sectionName == sectionName) {
+        var updatedItems : [InventoryItem] = [];
+        for (item in section.items.vals()) {
+          if (item.itemName == itemName) {
+            let currentCount = item.itemCount;
+            let newCount = if (change >= 0) {
+              currentCount + Int.abs(change)  // Convert change to Nat using Nat.abs
+            } else {
+              if (currentCount > Int.abs(change)) {
+                currentCount - Int.abs(change)  // Handle negative change by subtracting
+              } else {
+                0
+              }
+            };
+            updatedItems := Array.append(updatedItems, [{itemName = item.itemName; itemCount = newCount}]);
+          } else {
+            updatedItems := Array.append(updatedItems, [item]);
+          }
+        };
+        updatedInventories := Array.append(updatedInventories, [{sectionName = section.sectionName; items = updatedItems}]);
+      } else {
+        updatedInventories := Array.append(updatedInventories, [section]);
+      }
+    };
+    inventories := updatedInventories;
+  };
+
+
+  public query func listInventories() : async [Inventory] {
+    inventories
+  };
 };
