@@ -9,9 +9,22 @@ import path from "path"
 dotenv.config({ path: '../../.env' });
 
 export default defineConfig({
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:4943",
+        changeOrigin: true,
+      },
+    },
+    headers: {
+      'Content-Security-Policy': "default-src 'self'; img-src 'self' data: https://example.com https://pbs.twimg.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' https://*.ic0.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://www.youtube.com; object-src 'none'; worker-src 'self' blob:; font-src 'self' data:;",
+      'Permissions-Policy': "accelerometer=(), autoplay=(), camera=(), gyroscope=(), magnetometer=()"
+    }
+  },
   build: {
+    outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: true,
+    sourcemap: false,
   },
   optimizeDeps: {
     esbuildOptions: {
@@ -20,14 +33,7 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:4943",
-        changeOrigin: true,
-      },
-    },
-  },
+  
   plugins: [
     react(),
     environment("all", { prefix: "CANISTER_" }),

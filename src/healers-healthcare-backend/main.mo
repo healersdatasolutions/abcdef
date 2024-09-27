@@ -1,14 +1,13 @@
-import Blob "mo:base/Blob";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
-import Debug "mo:base/Debug";
+
 import Int "mo:base/Int";
-import Iter "mo:base/Iter";
-import Int64 "mo:base/Int64";
+
+
 
 
 actor Hospital {
