@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 // import Image from "next/image";
-
+//
 export function BentoGridThirdDemo() {
   return (
     <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[20rem]">
