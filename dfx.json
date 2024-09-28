@@ -1,12 +1,17 @@
 {
   "canisters": {
     "healers-healthcare-backend": {
+      "main": "src/healers-healthcare-backend/hospital.mo",
+      "type": "motoko"
+    },
+    "parent_canister": {
       "main": "src/healers-healthcare-backend/main.mo",
       "type": "motoko"
     },
     "healers-healthcare-frontend": {
       "dependencies": [
-        "healers-healthcare-backend"
+        "healers-healthcare-backend",
+        "parent_canister"
       ],
       "source": [
         "src/healers-healthcare-frontend/dist"
