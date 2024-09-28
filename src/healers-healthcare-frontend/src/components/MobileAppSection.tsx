@@ -1,9 +1,9 @@
-import React from "react";
+//import React from "react";
 import Iphone15Pro from "./magicui/iphone-15-pro";
 import DotPattern from "./magicui/dot-pattern";
 import { cn } from "../lib/utils";
-import LetterPullup from "./magicui/letter-pullup";
-import { Apple, LucideApple } from "lucide-react";
+//import LetterPullup from "./magicui/letter-pullup";
+//import { Apple, LucideApple } from "lucide-react";
 import SparklesText from "./magicui/sparkles-text";
 
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 
 import { cn } from "../../lib/utils";
-import React from "react";
+//import React from "react";
 
 interface HyperTextProps {
   text: string;

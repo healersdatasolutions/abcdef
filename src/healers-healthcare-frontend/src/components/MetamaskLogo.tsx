@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import ModelViewer from '@metamask/logo';
-import React from 'react';
+//import React from 'react';
 
 const MetaMaskLogo = () => {
   const logoContainer = useRef<HTMLDivElement | null>(null);
