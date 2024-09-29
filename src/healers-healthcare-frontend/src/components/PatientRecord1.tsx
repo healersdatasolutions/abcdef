@@ -24,10 +24,10 @@ import { BorderBeam } from './magicui/border-beam'
 import Ripple from './magicui/ripple'
 import animationData from '../components/lotties/medical4.json'
 import animationData2 from '../components/lotties/medical3.json'
-import { AiFillHeart } from 'react-icons/ai'
+//import { AiFillHeart } from 'react-icons/ai'
 
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
-import { Actor, HttpAgent } from '@dfinity/agent';
+//import { Actor, HttpAgent } from '@dfinity/agent';
 
 
 
@@ -524,10 +524,10 @@ const firstAppointment = appointmentsData[0] || {};
                 
                 <div className="flex items-top gap-2 items-center">
                   <User className="h-8 w-8 text-[#7047eb]" />
-                  <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4> <p className='text-white/55'>{firstAppointment?.contact || 'N/A'}</p></span>
+                  <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4><p className='text-white/55'>{firstAppointment?.contact ? String(firstAppointment.contact) : 'N/A'}</p></span>
                 </div>
                 
-              </div>
+              </div> 
               <div className="flex flex-wrap gap-2 ">
             <Badge variant="outline" className="bg-[#fff] text-black">Heart Rate: Normal</Badge>
             <Badge variant="outline" className="bg-[#fff] text-black">Blood Pressure: Controlled</Badge>

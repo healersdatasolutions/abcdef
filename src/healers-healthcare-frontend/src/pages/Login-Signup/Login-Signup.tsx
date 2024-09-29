@@ -339,7 +339,7 @@ export default function LoginButton() {
                   disabled={isConnecting}
                   className="w-full flex items-center justify-center space-x-2 hover:scale-95 transition duration-300"
                 >
-                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJZaVpfhv3kgZA46GoqfVNIFhR6pXIdX4_Rg&s" alt="MetaMask" className="w-6 h-6" />
+                  <img src="meta.png" alt="MetaMask" className="w-6 h-6" />
                   <span>{isConnecting ? "Connecting..." : "Connect with MetaMask"}</span>
                 </Button>
               )}
@@ -351,7 +351,7 @@ export default function LoginButton() {
                   isLoggingIn ? "cursor-wait" : "cursor-pointer"
                 )}
               >
-                <img src="https://cryptologos.cc/logos/internet-computer-icp-logo.png" alt="Internet Identity" className="w-6 h-6" />
+                <img src="identity.png" alt="Internet Identity" className="w-6 h-6" />
                 <span>
                   {identity
                     ? "Logout"

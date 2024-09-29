@@ -7,8 +7,8 @@
 
 
     import { useTheme } from '../../components/ThemeProvider/theme-provider';
-import React from 'react';
-import { AnimatedPinDemo } from '../../components/3dPinReal';
+//import React from 'react';
+//import { AnimatedPinDemo } from '../../components/3dPinReal';
 import Section from '../../components/Section/Section';
 import Heading from '../../components/Heading/Heading';
 import { Link } from 'react-router-dom';
@@ -68,7 +68,7 @@ to = "/health-records"
          Customizable Tailwind CSS and Framer Motion Components.
        </span>
      </div>
-     <img src="https://cdn.pixabay.com/photo/2016/06/24/02/35/ehr-1476525_960_720.png" alt="HealthRecord"/>
+     <img src="medicalrecord.jpg" alt="HealthRecord"/>
 
      {/* <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-cyan-500 to-blue-800" /> */}
    </div>
@@ -96,7 +96,7 @@ to = "/doctor-dashboard">
          Customizable Tailwind CSS and Framer Motion Components.
        </span>
      </div>
-     <img src="https://www.price2spy.com/wp-content/uploads/2023/06/Pricing-Dashboard-Hero-Image.png" alt="DoctorDashboard" className="h-88"/>
+     <img src="doctdash.png" alt="DoctorDashboard" className="h-88"/>
 
      {/* <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-cyan-500 to-blue-800" /> */}
    </div>
@@ -125,7 +125,7 @@ to = "/appointments">
          Customizable Tailwind CSS and Framer Motion Components.
        </span>
      </div>
-     <img src="https://png.pngtree.com/png-vector/20220520/ourmid/pngtree-personal-doctor-appointment-2d-vector-isolated-illustration-png-image_4660145.png" alt="Appoiments"/>
+     <img src="app.png" alt="Appoiments"/>
      {/* <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-cyan-500 to-blue-800" /> */}
    </div>
  </PinContainer>
@@ -153,7 +153,7 @@ to = "/inventory">
          Customizable Tailwind CSS and Framer Motion Components.
        </span>
      </div>
-     <img src="https://www.eturns.com/media/drljj503/medical-hero.png" alt="fuck you"/>
+     <img src="inventory.jpg" alt="fuck you"/>
      {/* <div className="flex flex-1 w-full rounded-lg mt-4 bg-gradient-to-br from-green-500 via-cyan-500 to-blue-800" /> */}
    </div>
  </PinContainer>

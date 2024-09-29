@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { ScrollArea } from "./ui/scroll-area"
-import { Separator } from "./ui/separator"
+//import { Separator } from "./ui/separator"
 import { Pill, Stethoscope, Calendar, FileSymlink, FileText, Package, UserCog, Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend"; 

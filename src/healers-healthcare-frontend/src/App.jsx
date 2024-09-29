@@ -20,6 +20,9 @@ import Dashboard from "./pages/DashboardPage/Dashboard";
 import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
 import MetaMaskAuth from "./pages/Login-Signup/Metamask"
 
+import LandingPage from "./pages/LandingPage/LandingPage";
+
+
 
 function App() {
 
@@ -28,7 +31,7 @@ function App() {
     // other pages....
     {
       path: "/",
-      element: <LoginSignup />,
+      element: <LandingPage />,
 
     },
     {

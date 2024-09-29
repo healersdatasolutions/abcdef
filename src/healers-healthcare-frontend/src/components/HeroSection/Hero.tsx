@@ -4,7 +4,7 @@
 import Section from "../Section/Section";
 import { MouseParallax, ScrollParallax} from "react-just-parallax";
 import {useRef} from "react";
-import { cn } from "../../lib/utils";
+//import { cn } from "../../lib/utils";
 // import Notification from "../Notification/Notification";
 // import PlusSvg from "../../assets/svg/PlusSvg";
 // import PropTypes from "prop-types";
@@ -12,7 +12,7 @@ import { cn } from "../../lib/utils";
 // import { gradient} from "../../assets";
 // import Lottie from 'react-lottie';
 // import animationData1 from '../../lotties/medicalIcon1.json';
-import {Tooltip} from "flowbite-react";
+//import {Tooltip} from "flowbite-react";
 
 
 // const defaultOptions = {

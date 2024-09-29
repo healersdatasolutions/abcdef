@@ -6,7 +6,7 @@ import Hero from '../../components/HeroSection/Hero';
 // import DNA from '../../components/3D_Elements/DNA';
 // import { AnimatedPinDemo } from '../../components/3dPinReal';
 // import { BackgroundBoxesDemo } from '../../components/BackgroundBoxes';
-import { CardSpotlightEffect1 } from '../../components/CardSpotlightEffect';
+import  CardSpotlightEffect1  from '../../components/CardSpotlightEffect';
 // import { BackgroundBoxesDemo } from '../../components/BackgroundBoxes';
 // import { HeroScrollDemo } from '../../components/ScrollHero';
 // import { AnimatedPinDemo } from '../../components/3dPinReal';
