@@ -17,7 +17,12 @@ import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { Transition, Dialog as HeadlessDialog } from '@headlessui/react'
 import GridPattern from "../../components/magicui/grid-pattern";
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend";
+import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
 import { Actor, HttpAgent } from '@dfinity/agent';
+import { useLocation } from 'react-router-dom';
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did';
+import { id } from 'ethers'
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 
   type MedicalHistory = {
@@ -30,8 +35,8 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 
   type TestReport = {
     doctor: string;
-    referedto: string;
-    testtype: string;
+    referredTo: string;
+    testType: string;
     comments: string;
     file: number[] | Uint8Array
   };
@@ -58,24 +63,54 @@ type Filters = {
 };
 
 export default function PatientHealthRecord() {
-  const deletePatient = async (id: string) => {
-    try {
-      const result = await healers_healthcare_backend.deletePatient(id);
-      if (result) {
-        // Patient successfully deleted
-        setPatients(prevPatients => prevPatients.filter(patient => patient.id !== id));
-        // You might want to show a success message here
-        console.log('Patient deleted successfully');
-      } else {
-        // Patient not found or deletion failed
-        console.error('Failed to delete patient');
-        // You might want to show an error message here
+  const location = useLocation();
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+      const initializeActor = async () => {
+        try {
+          const canisterId = localStorage.getItem('hospitalCanisterId');
+          if (!canisterId) {
+            throw new Error('Hospital canister ID not found');
+          }
+          console.log('Initializing actor with canister ID:', canisterId);
+          const agent = new HttpAgent({ host: 'http://localhost:3000' });
+          await agent.fetchRootKey(); // This line is needed for local development only
+          const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
+            agent,
+            canisterId,
+          });
+          console.log('Actor initialized successfully');
+          setHospitalActor(actor);
+        } catch (err) {
+          console.error('Failed to initialize hospital actor:', err);
+          setError('Failed to connect to the hospital service. Please try logging in again.');
+        }
+      };
+    
+      initializeActor();
+    }, []);
+
+    const fetchPatients = useCallback(async () => {
+      if (!hospitalActor) {
+        console.error('Hospital actor is not initialized');
+        setError('Unable to fetch patients. Please try logging in again.');
+        return;
       }
-    } catch (error) {
-      console.error('Error deleting patient:', error);
-      // You might want to show an error message here
-    }
-  };
+    
+      try {
+        setIsLoading(true);
+        const result = await hospitalActor.listPatients();
+        setPatients(result);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        setError('Failed to fetch patients. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    }, [hospitalActor]);
 
   const formatDate = (dateInNanoseconds: bigint): string => {
     const milliseconds = Number(dateInNanoseconds) / 1000000
@@ -88,7 +123,7 @@ export default function PatientHealthRecord() {
       minute: '2-digit'
     })
   }
-  const [patients, setPatients] = useState<Patient[]>([]);
+  
   const [filters, setFilters] = useState<Filters>({
     gender: '',
     search: '',
@@ -135,11 +170,26 @@ export default function PatientHealthRecord() {
   }
   }; 
 
-  const handleAddPatient = async (e: React.FormEvent) => {
+  const handleAddPatient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized');
+      setError('Unable to add patient. Please try logging in again.');
+      return;
+    }
+  
+    setIsLoading(true);
+    setError(null);
+  
     try {
-      console.log(newPatient);
-      const id = await healers_healthcare_backend.addPatient(
+      console.log('Attempting to add patient with data:', JSON.stringify(newPatient, (_, v) => typeof v === 'bigint' ? v.toString() : v));
+      
+      // Validate input data
+      if (!newPatient.name || !newPatient.age || !newPatient.gender || !newPatient.location || !newPatient.blood || !newPatient.height || !newPatient.weight) {
+        throw new Error('All required fields must be filled');
+      }
+  
+      const result = await hospitalActor.addPatient(
         newPatient.name,
         newPatient.age,
         newPatient.gender,
@@ -148,12 +198,14 @@ export default function PatientHealthRecord() {
         newPatient.height,
         newPatient.weight,
         newPatient.medicalHistories,
-        newPatient.testReports
+        newPatient.testReports.map(report => ({
+          ...report,
+          testType: report.testType // Ensure this matches the backend property name
+        }))
       );
-  
-      console.log("Patient added successfully",id);
-      setIsAddingPatient(false);
+      console.log('Patient added successfully, result:', result);
       fetchPatients();
+      // Reset form and show success message
       setNewPatient({
         name: '',
         age: BigInt(0),
@@ -165,12 +217,19 @@ export default function PatientHealthRecord() {
         medicalHistories: [],
         testReports: []
       });
+      setError('Patient added successfully');
     } catch (error) {
       console.error('Error adding patient:', error);
+      if (error instanceof Error) {
+        setError(`Failed to add patient: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while adding the patient');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-
+{/*
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
@@ -197,7 +256,7 @@ export default function PatientHealthRecord() {
   };
   useEffect(() => {
     fetchPatients();
-  }, []);
+  }, []);   */}
  /* const fetchPatients = async () => {
     try {
       setIsLoading(true);
@@ -314,8 +373,8 @@ export default function PatientHealthRecord() {
       ...prev,
       testReports: [...prev.testReports, {
         doctor: '',
-        referedto: '',
-        testtype: '',
+        referredTo: '',
+        testType: '',
         comments: '',
         file: []
       }]
@@ -396,6 +455,10 @@ export default function PatientHealthRecord() {
       </nav>
     </>
   )
+
+  function deletePatient(id: string) {
+    throw new Error('Function not implemented.')
+  }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
@@ -684,11 +747,11 @@ export default function PatientHealthRecord() {
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileSymlink className="text-[#fff]" />
-                                    <Input name={`referredTo${index}`} placeholder="Referred to" value={report.referedto} onChange={(e) => handleTestReportChange(index, 'referedto', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`referredTo${index}`} placeholder="Referred to" value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileTextIcon className="text-[#fff]" />
-                                    <Input name={`type${index}`} placeholder="Type" value={report.testtype} onChange={(e) => handleTestReportChange(index, 'testtype', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                                    <Input name={`type${index}`} placeholder="Type" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <FileText className="text-[#fff]" />
