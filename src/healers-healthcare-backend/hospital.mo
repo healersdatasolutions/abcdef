@@ -5,6 +5,9 @@ import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Int "mo:base/Int";
+import Result "mo:base/Result";
+import Debug "mo:base/Debug";
+import Error "mo:base/Error";
 
 actor Hospital {
 
@@ -85,16 +88,23 @@ actor Hospital {
   var inventories: [Inventory] = [];
 
   public shared func addPatient(
-    name: Text,
-    age: Nat64,
-    gender: Text,
-    location: Text,
-    blood: Text,
-    height: Nat64,
-    weight: Nat64,
-    medicalHistories: [MedicalHistory],
-    testReports: [TestReport]
-  ) : async Nat {
+  name: Text,
+  age: Nat64,
+  gender: Text,
+  location: Text,
+  blood: Text,
+  height: Nat64,
+  weight: Nat64,
+  medicalHistories: [MedicalHistory],
+  testReports: [TestReport]
+) : async Result.Result<Nat, Text> {
+  Debug.print("Attempting to add patient: " # name);
+  try {
+    // Validate input
+    if (name == "" or gender == "" or location == "" or blood == "") {
+      return #err("Invalid input: All fields must be non-empty");
+    };
+
     let id = Nat.toText(patients.size());
     let newPatient: Patient = {
       id = id;
@@ -111,9 +121,13 @@ actor Hospital {
     };
 
     patients := Array.append(patients, [newPatient]);
-
-    return patients.size();
-  };
+    Debug.print("Patient added successfully. Total patients: " # Nat.toText(patients.size()));
+    #ok(patients.size())
+  } catch (e) {
+    Debug.print("Error adding patient: " # Error.message(e));
+    #err("Error adding patient: " # Error.message(e))
+  }
+};
 
   public query func listPatients() : async [Patient] {
     return patients;

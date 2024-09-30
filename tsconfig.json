@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "types": ["vite/client" ,"node"],
+        "types": ["vite/client" ,"node","@dfinity/agent", "@dfinity/principal"],
         "strict": true,
         "declaration": true,
         "target": "ES2020",

@@ -7,13 +7,21 @@ import { Input } from "../../components/ui/input"
 import { useNavigate } from 'react-router-dom'
 import { Button } from "../../components/ui/button"
 import { Label } from "../../components/ui/label"
+import { Principal } from '@dfinity/principal';
 import { Toggle } from "../../components/ui/toggle"
 import { Mail, Lock, User, X, Building2, Users, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react'
 import React from 'react'
 import { useInternetIdentity } from 'ic-use-internet-identity'
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { AuthClient } from '@dfinity/auth-client';
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl';
+import { idlFactory } from '../../../../declarations/parent_canister/parent_canister.did.js';
+import { _SERVICE } from '../../../../declarations/parent_canister/parent_canister.did';
+import { ActorSubclass } from '@dfinity/agent';
 import { ethers } from 'ethers'
 // import PlugConnect from '@psychedelic/plug-connect'
-import { healers_healthcare_backend, canisterId as healthcareCanisterId } from '../../../../declarations/healers-healthcare-backend'
+//import { healers_healthcare_backend, canisterId as healthcareCanisterId } from '../../../../declarations/healers-healthcare-backend'
+
 import Spinner from "../../Spinner"
 import { twMerge } from "tailwind-merge"
 
@@ -40,6 +48,8 @@ export default function LoginButton() {
   const [walletId, setWalletId] = useState('')
   const [userType, setUserType] = useState('hospital')
   const [isLoading, setIsLoading] = useState(false)
+  const [authClient, setAuthClient] = useState<AuthClient | null>(null);
+  const [parentActor, setParentActor] = useState<ActorSubclass<_SERVICE> | null>(null);
   
   // MetaMask states
   const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false)
@@ -59,20 +69,81 @@ export default function LoginButton() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (typeof window.ethereum !== 'undefined') {
-      setIsMetaMaskInstalled(true)
+    const initAuthClient = async () => {
+      try {
+        const client = await AuthClient.create()
+        setAuthClient(client)
+  
+        const agent = new HttpAgent({ 
+          host: 'http://localhost:3000',
+          fetch: (url, options) => {
+            return fetch(url, { ...options, credentials: 'include' })
+          }
+        })
+        await agent.fetchRootKey()
+        
+        const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
+          agent,
+          canisterId: 'bd3sg-teaaa-aaaaa-qaaba-cai'
+        });
+        setParentActor(actor)
+      } catch (error) {
+        console.error('Failed to initialize parentActor:', error)
+        setError('Failed to connect to the Internet Computer. Please try again.')
+      }
     }
+  
+    initAuthClient()
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isLogin && email === 'healers@gmail.com' && password === 'healthcare') {
-      navigate('/dashboard')
-    } else {
-      alert(isLogin ? 'Invalid credentials' : 'Signup functionality not implemented')
+    setIsLoading(true)
+    setError("")
+
+    if (!parentActor) {
+      console.error('parentActor is not initialized')
+      setError('The system is still loading. Please try again in a moment.')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      if (isLogin) {
+        const canisterIdOpt = await parentActor.login(email, password)
+        console.log('Login response:', canisterIdOpt)
+        
+        if (canisterIdOpt && canisterIdOpt.length > 0) {
+          const principal = canisterIdOpt[0] as unknown as Principal
+          const canisterId = principal.toString()
+          console.log('Canister ID:', canisterId)
+          localStorage.setItem('hospitalCanisterId', canisterId)
+          navigate('/dashboard')
+        } else {
+          throw new Error('Invalid login credentials')
+        }
+      } else {
+        const result = await parentActor.createHospital(email, password)
+        console.log('Registration result:', result)
+        
+        if ('ok' in result) {
+          const principal = result.ok as unknown as Principal
+          const canisterId = principal.toString()
+          alert(`Hospital registered successfully. Canister ID: ${canisterId}`)
+          setIsLogin(true)
+        } else if ('err' in result) {
+          throw new Error(`Failed to register hospital: ${result.err}`)
+        } else {
+          throw new Error('Invalid registration response')
+        }
+      }
+    } catch (error) {
+      console.error(isLogin ? 'Login error:' : 'Registration error:', error)
+      setError(`An error occurred during ${isLogin ? 'login' : 'registration'}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsLoading(false)
     }
   }
-
   const handleUserTypeChange = (type: string) => {
     setIsLoading(true)
     setUserType(type)
@@ -207,28 +278,28 @@ export default function LoginButton() {
               </div>
             </CardHeader>
             <CardContent>
-              <AnimatePresence mode="wait">
-                {isLoading ? (
-                  <motion.div
-                    key="loading"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex justify-center items-center h-48"
-                  >
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  </motion.div>
-                ) : (
-                  <motion.form
-                    key={userType}
-                    variants={formVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={{ duration: 0.3 }}
-                    onSubmit={handleSubmit}
-                    className="space-y-4"
-                  >
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-center items-center h-48"
+            >
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </motion.div>
+          ) : (
+            <motion.form
+              key={userType}
+              variants={formVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
                     <AnimatePresence mode="wait">
                       {!isLogin && (
                         <motion.div
@@ -284,8 +355,14 @@ export default function LoginButton() {
                       </div>
                     </div>
                     <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200">
-                      {isLogin ? 'Login' : 'Sign Up'}
-                    </Button>
+                {isLogin ? 'Login' : 'Sign Up'}
+              </Button>
+              
+              {error && (
+                <div className="text-red-500 text-sm mt-2">
+                  {error}
+                </div>
+              )}
                   </motion.form>
                 )}
               </AnimatePresence>
