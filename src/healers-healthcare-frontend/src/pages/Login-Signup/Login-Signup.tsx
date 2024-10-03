@@ -84,7 +84,7 @@ export default function LoginButton() {
         
         const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
           agent,
-          canisterId: 'bd3sg-teaaa-aaaaa-qaaba-cai'
+          canisterId: 'be2us-64aaa-aaaaa-qaabq-cai'
         });
         setParentActor(actor)
       } catch (error) {
