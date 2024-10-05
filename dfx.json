@@ -16,11 +16,7 @@
       "source": [
         "src/healers-healthcare-frontend/dist"
       ],
-      "headers": {
-        "Content-Security-Policy": "default-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; script-src 'self' https://www.youtube.com https://s.ytimg.com; img-src 'self' https://i.ytimg.com; connect-src 'self'; style-src 'self' 'unsafe-inline';" ,
-
-        "Permissions-Policy": "accelerometer=(), autoplay=(), camera=(), gyroscope=(), magnetometer=()"
-      },
+      
       "type": "assets",
       "workspace": "healers-healthcare-frontend"
     }
