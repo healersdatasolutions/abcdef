@@ -38,6 +38,12 @@ declare global {
   }
 }
 
+type Result = {
+  ok?: string;
+  err?: string;
+};
+
+
 export default function LoginButton() {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
@@ -110,7 +116,7 @@ export default function LoginButton() {
 
     try {
       if (isLogin) {
-        const canisterIdOpt = await parentActor.login(email, password)
+        const canisterIdOpt = await parentActor.loginUser(email, password)
         console.log('Login response:', canisterIdOpt)
         
         if (canisterIdOpt && canisterIdOpt.length > 0) {
@@ -123,16 +129,17 @@ export default function LoginButton() {
           throw new Error('Invalid login credentials')
         }
       } else {
-        const result = await parentActor.createHospital(email, password)
+
+        const result:string = await parentActor.registerUser(email, password)
         console.log('Registration result:', result)
         
-        if ('ok' in result) {
-          const principal = result.ok as unknown as Principal
+        if (result === "User registered successfully") {
+          const principal = result as unknown as Principal
           const canisterId = principal.toString()
           alert(`Hospital registered successfully. Canister ID: ${canisterId}`)
           setIsLogin(true)
-        } else if ('err' in result) {
-          throw new Error(`Failed to register hospital: ${result.err}`)
+        } else if (result === "Registration failed") {
+          throw new Error(`Failed to register hospital: ${result}`)
         } else {
           throw new Error('Invalid registration response')
         }

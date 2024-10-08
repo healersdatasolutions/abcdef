@@ -11,10 +11,15 @@ To learn more before you start working with `healers-healthcare`, see the follow
 - [Motoko Programming Language Guide](https://internetcomputer.org/docs/current/motoko/main/motoko)
 - [Motoko Language Quick Reference](https://internetcomputer.org/docs/current/motoko/main/language-manual)
 
+To verify that dfx is properly installed, run:
+```bash
+dfx --version
+```
+
 If you want to start working on your project right away, you might want to try the following commands:
 
 ```bash
-cd healers-healthcare/
+cd healers-healthcare-website/
 dfx help
 dfx canister --help
 ```
@@ -25,7 +30,12 @@ If you want to test your project locally, you can use the following commands:
 
 ```bash
 # Starts the replica, running in the background
-dfx start --background
+dfx start --clean --background
+
+# You can stop the local canister execution environment using the  command:
+dfx stop
+# You can upgrade the version of dfx installed on your local computer to the latest version available using the  command:
+dfx upgrade
 
 # Deploys your canisters to the replica and generates your candid interface
 dfx deploy
@@ -48,6 +58,31 @@ npm start
 ```
 
 Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+
+# Deploy the project on Mainnet:
+To deploy your project on the mainnet, you use the dfx deploy command with the --network ic option:
+```bash
+# Check the connection to the mainnet:
+dfx ping ic
+# Verify that the dfx ping ic command returns information about ICP:(example)
+
+{
+  "ic_api_version": "0.18.0"  "impl_hash": "d639545e0f38e075ad240fd4ec45d4eeeb11e1f67a52cdd449cd664d825e7fec"  "impl_version": "8dc1a28b4fb9605558c03121811c9af9701a6142"  "replica_health_status": "healthy"  "root_key": [48, 129, 130, 48, 29, 6, 13, 43, 6, 1, 4, 1, 130, 220, 124, 5, 3, 1, 2, 1, 6, 12, 43, 6, 1, 4, 1, 130, 220, 124, 5, 3, 2, 1, 3, 97, 0, 129, 76, 14, 110, 199, 31, 171, 88, 59, 8, 189, 129, 55, 60, 37, 92, 60, 55, 27, 46, 132, 134, 60, 152, 164, 241, 224, 139, 116, 35, 93, 20, 251, 93, 156, 12, 213, 70, 217, 104, 95, 145, 58, 12, 11, 44, 197, 52, 21, 131, 191, 75, 67, 146, 228, 103, 219, 150, 214, 91, 155, 180, 203, 113, 113, 18, 248, 71, 46, 13, 90, 77, 20, 80, 95, 253, 116, 132, 176, 18, 145, 9, 28, 95, 135, 185, 136, 131, 70, 63, 152, 9, 26, 11, 170, 174]
+}
+# Ensure that node modules are available in your project directory, if needed, by running the following command:
+npm install
+# Register, build, and deploy your  application by running the following command:
+dfx deploy --network ic
+```
+# Deploying the project once again on mainnet after some other changes:
+
+```bash
+# Before deploying on mainnet again,Ugrade deployed canisters by :
+dfx deploy
+# once the dfx deploy successfull, then deploy it on mainnet ..:
+dfx deploy --network ic
+
+```
 
 ### Note on frontend environment variables
 

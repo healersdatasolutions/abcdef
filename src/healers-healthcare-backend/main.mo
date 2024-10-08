@@ -1,116 +1,65 @@
+import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
-import Array "mo:base/Array";
-import Debug "mo:base/Debug";
+import Hash "mo:base/Hash";
 import Error "mo:base/Error";
-import Result "mo:base/Result";
-import Text "mo:base/Text";
-//import Cycles "mo:base/ExperimentalCycles";
-import Blob "mo:base/Blob";
+import Array "mo:base/Array";
+import Hospital "./hospital"; // Refers to the canister you want to create
+import IC "mo:ic";
 
-actor ParentCanister {
-  type HospitalRecord = {
-    email: Text;
-    password: Text;
-    canisterId: Principal;
-  };
 
- stable var hospitals: [HospitalRecord] = [];
 
-  // IC management canister interface
-  type IC = actor {
-    create_canister : ({ settings: ?{ 
-      freezing_threshold: ?Nat;
-      controllers: ?[Principal];
-      memory_allocation: ?Nat;
-      compute_allocation: ?Nat;
-    } }) -> async { canister_id: Principal };
-    install_code : ({ 
-      mode: { #install; #reinstall; #upgrade };
-      canister_id: Principal;
-      wasm_module: Blob;
-      arg: Blob;
-    }) -> async ();
-  };
-
-  public shared func createHospital(email: Text, password: Text) : async Result.Result<Principal, Text> {
-    Debug.print("Attempting to create new canister for hospital: " # email);
-
-    try {
-      let settings = {
-        freezing_threshold = null;
-        controllers = ?[Principal.fromActor(ParentCanister)];
-        memory_allocation = null;
-        compute_allocation = null;
-      };
-
-      let ic : IC = actor("aaaaa-aa");
-      //Cycles.add(1_000_000_000_000); // Add 1T cycles
-      let result = await ic.create_canister({ settings = ?settings });
-      
-      let newCanister = result.canister_id;
-      Debug.print("Created new canister with ID: " # Principal.toText(newCanister));
-
-      // Install the hospital canister code
-      let installResult = await installHospitalCode(ic, newCanister);
-      switch (installResult) {
-        case (#ok(_)) {
-          hospitals := Array.append(hospitals, [{
-            email = email;
-            password = password;
-            canisterId = newCanister;
-          }]);
-          #ok(newCanister)
-        };
-        case (#err(e)) {
-          Debug.print("Error installing hospital code: " # e);
-          #err("Failed to install hospital code: " # e)
-        };
-      };
-    } catch (err) {
-      Debug.print("Error creating canister: " # Error.message(err));
-      #err("Failed to create canister: " # Error.message(err))
-    }
-  };
-
-  public shared query func login(email: Text, password: Text) : async ?Principal {
-    Debug.print("Attempting login for email: " # email);
-    for (hospital in hospitals.vals()) {
-      if (hospital.email == email and hospital.password == password) {
-        Debug.print("Login successful for: " # email);
-        return ?hospital.canisterId;
-      };
+ 
+actor Parent {
+    type User = {
+        username: Text;
+        password: Text;
+        canisterId: ?Principal;
     };
 
-    Debug.print("Login failed for: " # email);
-    null
-  };
+    var users: [(Text, User)] = []; // Store users with username and data
+    var canisters: [(Text, Principal)] = []; 
 
-  public query func listHospitals() : async [{ email: Text; canisterId: Principal }] {
-    Array.map(hospitals, func(hospital: HospitalRecord) : { email: Text; canisterId: Principal } {
-      { email = hospital.email; canisterId = hospital.canisterId }
-    })
-  };
+private let ic : IC.Service = actor "aaaaa-aa";
 
-  // Helper function to install hospital canister code
-  private func installHospitalCode(ic: IC, canisterId: Principal) : async Result.Result<(), Text> {
-    try {
-      // In a production environment, you would need to have your Wasm module
-      // pre-compiled and available. For this example, we'll use a placeholder.
-      let wasmModule : [Nat8] = [
-        0x00, 0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00
-      ];
 
-      let arg = []; // Replace with initialization arguments if needed
 
-      await ic.install_code({
-        mode = #install;
-        canister_id = canisterId;
-        wasm_module = Blob.fromArray(wasmModule);
-        arg = Blob.fromArray(arg);
-      });
-      #ok(())
-    } catch (err) {
-      #err("Failed to install hospital code: " # Error.message(err))
-    }
-  };
-};
+    public shared({caller}) func registerUser(username: Text, password: Text) : async Text {
+       
+       
+
+        // Create a new canister (hospital)
+        Cycles.add(1_000_000_000_000);
+        let newCanister = await Hospital.Hospital("user1");
+
+        let newCanisterId = Principal.fromActor(newCanister);
+
+        let user: User = {
+            username = username;
+            password = password;
+            canisterId = ?newCanisterId;
+        };
+
+        // Add user to the list
+        users := Array.append(users, [(username, user)]);
+        canisters := Array.append(canisters, [(username, newCanisterId)]);
+
+        return "User registered and canister created with ID: " # Principal.toText(newCanisterId);
+    };
+
+    public shared({caller}) func loginUser(username: Text, password: Text) : async ?Principal {
+        for ((storedUsername, user) in users.vals()) {
+            if (storedUsername == username and user.password == password) {
+                return user.canisterId;
+            }
+        };
+        return null;
+    };
+
+    public query func listUsers() : async [(Text, ?Principal)] {
+        var userList: [(Text, ?Principal)] = [];
+        for ((username, user) in users.vals()) {
+            userList := Array.append(userList, [(username, user.canisterId)]);
+        };
+        return userList;
+    };
+}

@@ -122,6 +122,7 @@ export default function PatientHealthRecord() {
       try {
         setIsLoading(true);
         const result = await hospitalActor.listPatients();
+        console.log('Fetched patients:', result);
         const mappedPatients: Patient[] = result.map((patient) => ({
           id: patient.id,
           name: patient.name,
@@ -143,6 +144,12 @@ export default function PatientHealthRecord() {
         setIsLoading(false);
       }
     }, [hospitalActor]);
+
+    useEffect(() => {
+      if (hospitalActor) {
+        fetchPatients();
+      }
+    }, [hospitalActor, fetchPatients]);
 
   const formatDate = (dateInNanoseconds: bigint): string => {
     const milliseconds = Number(dateInNanoseconds) / 1000000
