@@ -4,7 +4,7 @@ import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Cycles "mo:base/ExperimentalCycles";
+//import Cycles "mo:base/ExperimentalCycles";
 import Blob "mo:base/Blob";
 
 actor ParentCanister {
@@ -14,7 +14,7 @@ actor ParentCanister {
     canisterId: Principal;
   };
 
-  var hospitals: [HospitalRecord] = [];
+ stable var hospitals: [HospitalRecord] = [];
 
   // IC management canister interface
   type IC = actor {
@@ -44,7 +44,7 @@ actor ParentCanister {
       };
 
       let ic : IC = actor("aaaaa-aa");
-      Cycles.add(1_000_000_000_000); // Add 1T cycles
+      //Cycles.add(1_000_000_000_000); // Add 1T cycles
       let result = await ic.create_canister({ settings = ?settings });
       
       let newCanister = result.canister_id;

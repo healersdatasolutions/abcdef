@@ -23,7 +23,27 @@ import { useLocation } from 'react-router-dom';
 import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did';
 import { id } from 'ethers'
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
+//import { Result } from '@dfinity/candid/lib/cjs/idl';
+import { Principal } from '@dfinity/principal';
 
+/*interface HospitalService {
+  listPatients(): unknown
+  addPatient: (
+    name: string,
+    age: bigint,
+    gender: string,
+    location: string,
+    blood: string,
+    height: bigint,
+    weight: bigint,
+    medicalHistories: MedicalHistory[],
+    testReports: TestReport[]
+  ) => Promise<Result<bigint, string>>;
+  
+  // ... other methods
+}
+*/
+//type Result = { 'Ok': bigint } | { 'Err': string };
 
   type MedicalHistory = {
     pharmacy: string;
@@ -41,20 +61,19 @@ import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
     file: number[] | Uint8Array
   };
 
-type Patient = {
-  id : string;
-  name: string;
-  age: bigint;
-  gender: string;
-  location: string;
-  blood: string;
-  height: bigint;
-  weight: bigint;
-  medicalHistories: MedicalHistory[];
-  testReports: TestReport[];
-  pdate: bigint;
-  
-};
+  type Patient = {
+    id: string;
+    name: string;
+    age: bigint;
+    gender: string;
+    location: string;
+    blood: string;
+    height: bigint;
+    weight: bigint;
+    medicalHistories: MedicalHistory[];
+    testReports: TestReport[];
+    pdate: bigint;
+  };
 
 type Filters = {
   gender: string;
@@ -77,7 +96,7 @@ export default function PatientHealthRecord() {
           }
           console.log('Initializing actor with canister ID:', canisterId);
           const agent = new HttpAgent({ host: 'http://localhost:3000' });
-          await agent.fetchRootKey(); // This line is needed for local development only
+          await agent.fetchRootKey();
           const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
             agent,
             canisterId,
@@ -103,7 +122,20 @@ export default function PatientHealthRecord() {
       try {
         setIsLoading(true);
         const result = await hospitalActor.listPatients();
-        setPatients(result);
+        const mappedPatients: Patient[] = result.map((patient) => ({
+          id: patient.id,
+          name: patient.name,
+          age: patient.age,
+          gender: patient.gender,
+          location: patient.location,
+          blood: patient.blood,
+          height: patient.height,
+          weight: patient.weight,
+          medicalHistories: patient.medicalHistories,
+          testReports: patient.testReports,
+          pdate: patient.pdate
+        }));
+        setPatients(mappedPatients);
       } catch (error) {
         console.error('Error fetching patients:', error);
         setError('Failed to fetch patients. Please try again.');
@@ -183,11 +215,6 @@ export default function PatientHealthRecord() {
   
     try {
       console.log('Attempting to add patient with data:', JSON.stringify(newPatient, (_, v) => typeof v === 'bigint' ? v.toString() : v));
-      
-      // Validate input data
-      if (!newPatient.name || !newPatient.age || !newPatient.gender || !newPatient.location || !newPatient.blood || !newPatient.height || !newPatient.weight) {
-        throw new Error('All required fields must be filled');
-      }
   
       const result = await hospitalActor.addPatient(
         newPatient.name,
@@ -198,32 +225,18 @@ export default function PatientHealthRecord() {
         newPatient.height,
         newPatient.weight,
         newPatient.medicalHistories,
-        newPatient.testReports.map(report => ({
-          ...report,
-          testType: report.testType // Ensure this matches the backend property name
-        }))
+        newPatient.testReports
       );
+  
       console.log('Patient added successfully, result:', result);
       fetchPatients();
       // Reset form and show success message
-      setNewPatient({
-        name: '',
-        age: BigInt(0),
-        gender: '',
-        location: '',
-        blood: '',
-        height: BigInt(0),
-        weight: BigInt(0),
-        medicalHistories: [],
-        testReports: []
-      });
-      setError('Patient added successfully');
     } catch (error) {
       console.error('Error adding patient:', error);
       if (error instanceof Error) {
         setError(`Failed to add patient: ${error.message}`);
       } else {
-        setError('An unknown error occurred while adding the patient');
+        setError('An unexpected error occurred while adding the patient');
       }
     } finally {
       setIsLoading(false);

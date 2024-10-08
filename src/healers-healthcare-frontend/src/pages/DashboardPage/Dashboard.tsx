@@ -25,44 +25,39 @@ function Dashboard() {
     const [appointmentCount, setAppointmentCount] = useState<number>(0);
     const [doctorCount, setDoctorCount] = useState<number>(0);
     const [inventoryCount, setInventoryCount] = useState<number>(0);
+    const [error, setError] = useState<string | null>(null);
 
     const backgroundImage = theme === 'dark' ? '/webglBG.png' : '/webgl3.jpg';
     
-    useEffect(() => {
-      const initHospitalActor = async () => {
+    const initHospitalActor = async () => {
+        try {
           const hospitalCanisterId = localStorage.getItem('hospitalCanisterId');
           if (!hospitalCanisterId) {
-              console.error('Hospital canister ID not found');
-              return;
+            throw new Error('Hospital canister ID not found');
           }
-
+      
+          console.log('Initializing actor with canister ID:', hospitalCanisterId);
+      
           const agent = new HttpAgent({ host: 'http://localhost:4943' });
           await agent.fetchRootKey();
           
-          const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
-              agent,
-              canisterId: hospitalCanisterId,
+          const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
+            agent,
+            canisterId: hospitalCanisterId,
           });
-
+      
+          console.log('Actor initialized successfully');
           setHospitalActor(actor);
-
-          // Fetch initial data
-          const patients = await actor.listPatients();
-          setPatientCount(patients.length);
-
-          const appointments = await actor.listAppointments();
-          setAppointmentCount(appointments.length);
-
-          const doctors = await actor.listDoctors();
-          setDoctorCount(doctors.length);
-
-          const inventories = await actor.listInventories();
-          setInventoryCount(inventories.length);
+      
+          // Test the connection by calling a simple method
+          const patientCount = await actor.listPatients();
+          console.log('Current patient count:', patientCount.length);
+      
+        } catch (err) {
+          console.error('Error initializing hospital actor:', err);
+          setError('Failed to connect to the hospital service. Please try logging in again.');
+        }
       };
-
-      initHospitalActor();
-  }, []);
-
     return (
       <>
           {/* <NavbarDemo/> */}

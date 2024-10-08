@@ -130,8 +130,23 @@ actor Hospital {
 };
 
   public query func listPatients() : async [Patient] {
-    return patients;
+    patients
   };
+  
+public query func getPatientById(id: Text) : async ?Patient {
+  for (patient in patients.vals()) {
+    if (patient.id == id) {
+      return ?patient;
+    };
+  };
+  return null;
+};
+
+public func deletePatient(id: Text) : async Bool {
+  let initialSize = patients.size();
+  patients := Array.filter(patients, func(p: Patient) : Bool { p.id != id });
+  return patients.size() < initialSize;
+};
 
   public shared func updatePatient(
     id: Text,

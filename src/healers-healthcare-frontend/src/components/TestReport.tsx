@@ -13,8 +13,8 @@ import { healers_healthcare_backend } from "../../../.././src/declarations/heale
 
 type TestReport = {
   doctor: string;
-  referedto: string;
-  testtype: string;
+  referredTo: string;
+  testType: string;
   comments: string;
   file: number[];
 }
@@ -154,11 +154,11 @@ export default function TestReport() {
                       </div>
                       <div className="flex items-center gap-2">
                         <FileSymlink className="text-[#7047eb]" />
-                        <span>Referred To: {history.referedto}</span>
+                        <span>Referred To: {history.referredTo}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <FileText className="text-[#7047eb]" />
-                        <span>Type: {history.testtype}</span>
+                        <span>Type: {history.testType}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="text-[#7047eb]" />

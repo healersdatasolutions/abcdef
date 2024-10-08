@@ -80,8 +80,8 @@ interface MedicalHistory  {
 
 interface TestReport  {
   doctor: string;
-  referedto: string;
-  testtype: string;
+  referredTo: string;
+  testType: string;
   comments: string;
   file: number[] | Uint8Array
 };
@@ -368,8 +368,8 @@ export default function PatientDetails() {
             ...prev.testReports,
             {
               doctor: '',
-              referedto: '',
-              testtype: '',
+              referredTo: '',
+              testType: '',
               comments: '',
               file: []
             }
@@ -686,22 +686,22 @@ const firstAppointment = appointmentsData[0] || {};
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`referedto${index}`}>Referred to</Label>
+              <Label htmlFor={`referredTo${index}`}>Referred to</Label>
               <Input
-                id={`referedto${index}`}
-                name={`referedto${index}`}
-                value={report.referedto}
-                onChange={(e) => handleTestReportChange(index, 'referedto', e.target.value)}
+                id={`referredTo${index}`}
+                name={`referredTo${index}`}
+                value={report.referredTo}
+                onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)}
                 className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`testtype${index}`}>Test Type</Label>
+              <Label htmlFor={`testType${index}`}>Test Type</Label>
               <Input
-                id={`testtype${index}`}
-                name={`testtype${index}`}
-                value={report.testtype}
-                onChange={(e) => handleTestReportChange(index, 'testtype', e.target.value)}
+                id={`testType${index}`}
+                name={`testType${index}`}
+                value={report.testType}
+                onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)}
                 className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
               />
             </div>
