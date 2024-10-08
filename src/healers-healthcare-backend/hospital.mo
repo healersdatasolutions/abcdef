@@ -9,8 +9,8 @@ import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 
-actor Hospital {
-
+actor class Hospital(user : Text) = this {
+  
   type MedicalHistory = {
     pharmacy: Text;
     physician: Text;
@@ -82,7 +82,7 @@ actor Hospital {
     items: [InventoryItem];
   };
 
-  var patients: [Patient] = [];
+ stable var patients: [Patient] = [];
   var appointments: [Appointment] = [];
   var doctors: [Doctor] = [];
   var inventories: [Inventory] = [];
@@ -272,39 +272,7 @@ public func deletePatient(id: Text) : async Bool {
     return doctors;
   };
 
- /*
-  public func updateInventory(item: Text, change: Int) : async Nat64 {
-  func updateField(field: Nat64, change: Int) : Nat64 {
-    let currentValue = Nat64.toNat(field);
-    let newValue = Nat.max(0, Int.abs(currentValue + change));
-    Nat64.fromNat(newValue)
-  };
-
-  let updatedValue = switch (item) {
-    case "masks" { updateField(inventory.masks, change) };
-    case "gloves" { updateField(inventory.gloves, change) };
-    case "gowns" { updateField(inventory.gowns, change) };
-    case "paracetamol" { updateField(inventory.paracetamol, change) };
-    case "painkiller" { updateField(inventory.painkiller, change) };
-    case "cough" { updateField(inventory.cough, change) };
-    case "oxygen" { updateField(inventory.oxygen, change) };
-    case "ehr" { updateField(inventory.ehr, change) };
-    case "defi" { updateField(inventory.defi, change) };
-    case "test" { updateField(inventory.test, change) };
-    case "microscope" { updateField(inventory.microscope, change) };
-    case "petri" { updateField(inventory.petri, change) };
-    case "scalpels" { updateField(inventory.scalpels, change) };
-    case "forceps" { updateField(inventory.forceps, change) };
-    case "surgicalscissors" { updateField(inventory.surgicalScissors, change) };
-    case _ { Nat64.fromNat(0) };
-  };
-  updatedValue;
-};
-
-  public query func getInventory  () : async MutableInventory {
-  inventory
-};
-*/
+ 
 
 public shared func AddInventory ( sectionName : Text,
   items : [InventoryItem]

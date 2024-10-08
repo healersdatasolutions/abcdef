@@ -38,7 +38,7 @@ function Dashboard() {
       
           console.log('Initializing actor with canister ID:', hospitalCanisterId);
       
-          const agent = new HttpAgent({ host: 'http://localhost:4943' });
+          const agent = new HttpAgent({ host: 'http://localhost:3000' });
           await agent.fetchRootKey();
           
           const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
