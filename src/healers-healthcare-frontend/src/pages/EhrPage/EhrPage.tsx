@@ -25,6 +25,7 @@ import { id } from 'ethers'
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 //import { Result } from '@dfinity/candid/lib/cjs/idl';
 import { Principal } from '@dfinity/principal';
+import { toast } from "sonner" 
 
 /*interface HospitalService {
   listPatients(): unknown
@@ -476,9 +477,30 @@ export default function PatientHealthRecord() {
     </>
   )
 
-  function deletePatient(id: string) {
+  const deletePatient = useCallback(async (id: string) => {
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized');
+      toast.error('Unable to delete patient. Please try logging in again.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await hospitalActor.deletePatient(id);
+      toast.success('Patient deleted successfully');
+      // Refresh the patient list
+      fetchPatients();
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      toast.error('Failed to delete patient. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hospitalActor, fetchPatients]);
+
+  /* function deletePatient(id: string) {
     throw new Error('Function not implemented.')
-  }
+  } */
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">

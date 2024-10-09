@@ -36,7 +36,8 @@ dfx start --clean --background
 dfx stop
 # You can upgrade the version of dfx installed on your local computer to the latest version available using the  command:
 dfx upgrade
-
+# install all the necessary dependencies and packages
+npm i
 # Deploys your canisters to the replica and generates your candid interface
 dfx deploy
 ```
@@ -57,7 +58,7 @@ If you are making frontend changes, you can start a development server with
 npm start
 ```
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+Which will start a server at `http://localhost:3000`, proxying API requests to the replica at port 4943.
 
 # Deploy the project on Mainnet:
 To deploy your project on the mainnet, you use the dfx deploy command with the --network ic option:
@@ -77,6 +78,8 @@ dfx deploy --network ic
 # Deploying the project once again on mainnet after some other changes:
 
 ```bash
+# install all the necessary dependencies and packages
+npm i
 # Before deploying on mainnet again,Ugrade deployed canisters by :
 dfx deploy
 # once the dfx deploy successfull, then deploy it on mainnet ..:

@@ -25,9 +25,12 @@ import Ripple from './magicui/ripple'
 import animationData from '../components/lotties/medical4.json'
 import animationData2 from '../components/lotties/medical3.json'
 //import { AiFillHeart } from 'react-icons/ai'
-
+import { Principal } from '@dfinity/principal'
+import { idlFactory } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
-//import { Actor, HttpAgent } from '@dfinity/agent';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 
 
@@ -162,27 +165,50 @@ export default function PatientDetails() {
   
 
 
-
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
   const [patientData, setPatientData] = useState<Patient | null>(null);
     const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([]);
 
-
+    const initializeActor = useCallback(async () => {
+      try {
+        const canisterId = localStorage.getItem('hospitalCanisterId')
+        if (!canisterId) {
+          throw new Error('Hospital canister ID not found')
+        }
+        console.log('Initializing actor with canister ID:', canisterId)
+        const agent = new HttpAgent({ host: 'http://localhost:3000' })
+        await agent.fetchRootKey()
+        const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
+          agent,
+          canisterId,
+        })
+        console.log('Actor initialized successfully')
+        setHospitalActor(actor)
+      } catch (err) {
+        console.error('Failed to initialize hospital actor:', err)
+        toast.error('Failed to connect to the hospital service. Please try logging in again.')
+      }
+    }, [])
+  
+    useEffect(() => {
+      initializeActor()
+    }, [initializeActor])
 
     const fetchPatientData = useCallback(async () => {
-      if (!id) {
-        console.error('No patient ID provided')
+      if (!id || !hospitalActor) {
+        console.error('No patient ID provided or hospital actor not initialized')
         setIsLoading(false)
         return
       }
-    
+  
       try {
         setIsLoading(true)
         console.log("Fetching patient with ID:", id)
-        const patientResult = await healers_healthcare_backend.getPatientById(id)
+        const patientResult = await hospitalActor.getPatientById(id)
         console.log("Fetched patient data:", patientResult)
-        
-        if (patientResult) {
-          const patient = patientResult[0];
+  
+        if (patientResult && patientResult.length > 0) {
+          const patient = patientResult[0]
           if (patient) {
             const formattedPatient: Patient = {
               id: patient.id,
@@ -196,50 +222,56 @@ export default function PatientDetails() {
               medicalHistories: patient.medicalHistories,
               testReports: patient.testReports,
               pdate: BigInt(patient.pdate)
-            };
+            }
             setPatientData(formattedPatient)
             setEditedData(formattedPatient)
           } else {
-            console.error('No patient found with the given ID')
+            console.error('Patient data is undefined')
             setPatientData(null)
             setEditedData(null)
+            toast.error('Patient data is undefined')
           }
         } else {
-          console.error('Invalid response from getPatientById')
+          console.error('No patient found with the given ID')
           setPatientData(null)
           setEditedData(null)
+          toast.error('Patient not found')
         }
-    
-        const appointments = await healers_healthcare_backend.listAppointments();
-        console.log("Fetched appointment data:", appointments);
-    
+  
+        const appointments = await hospitalActor.listAppointments()
+        console.log("Fetched appointment data:", appointments)
+  
         if (Array.isArray(appointments)) {
-          setAppointmentsData(appointments as Appointment[]);
-        } 
+          setAppointmentsData(appointments as Appointment[])
+        }
       } catch (error) {
         console.error('Error fetching patient data:', error)
         setPatientData(null)
         setEditedData(null)
+        toast.error('Failed to fetch patient data')
       } finally {
         setIsLoading(false)
       }
-    }, [id])
+    }, [id, hospitalActor])
   
     useEffect(() => {
-      fetchPatientData()
-    }, [fetchPatientData])
+      if (hospitalActor) {
+        fetchPatientData()
+      }
+    }, [hospitalActor, fetchPatientData])
+
   
-    useEffect(() => {
+   /* useEffect(() => {
       if (chatRef.current) {
         chatRef.current.scrollTop = chatRef.current.scrollHeight
       }
-    }, [aiConversation])
+    }, [aiConversation]) */
   
     const handleSave = useCallback(async () => {
-      if (!editedData) return;
-    
+      if (!editedData || !hospitalActor) return;
+  
       try {
-        const updatedPatient = await healers_healthcare_backend.updatePatient(
+        const updatedPatient = await hospitalActor.updatePatient(
           editedData.id,
           [editedData.name],
           [editedData.age],
@@ -251,7 +283,7 @@ export default function PatientDetails() {
           [editedData.medicalHistories],
           [editedData.testReports]
         );
-    
+  
         if (updatedPatient && updatedPatient.length > 0) {
           const patient = updatedPatient[0];
           if (patient) {
@@ -281,11 +313,11 @@ export default function PatientDetails() {
         console.error('Error updating patient:', error);
         toast.error('An error occurred while updating patient details');
       }
-    }, [editedData]);
+    }, [editedData, hospitalActor]);
   
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
-      setEditedData((prev: Patient | null) => {
+      setEditedData((prev) => {
         if (!prev) return null;
         return {
           ...prev,
@@ -294,9 +326,18 @@ export default function PatientDetails() {
       });
     }, []);
   
+  
     const handleAiQuery = useCallback((e: React.FormEvent) => {
       e.preventDefault()
       setAiConversation(prev => [...prev, `You: ${aiQuery}`])
+      // Simulated AI response
+      const aiResponses = [
+        "The patient's blood pressure has been stable over the last 6 months.",
+        "Based on the recent test results, the patient's cholesterol levels have improved.",
+        "I recommend scheduling a follow-up appointment in 3 months to monitor progress.",
+        "The patient's BMI is within the normal range, but regular exercise is advised.",
+        "No significant drug interactions were found with the current medication regimen.",
+      ]
       const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)]
       setTimeout(() => {
         setAiConversation(prev => [...prev, `AI: ${randomResponse}`])
