@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect,useState } from 'react'
+import React, { useEffect,useState, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
@@ -8,7 +8,13 @@ import { ScrollArea } from "./ui/scroll-area"
 //import { Separator } from "./ui/separator"
 import { Pill, Stethoscope, Calendar, FileSymlink, FileText, Package, UserCog, Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
-import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend"; 
+import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
+import { idlFactory } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
+import { toast } from "sonner" 
+import { Actor, HttpAgent } from '@dfinity/agent'
+import { Toaster } from "./ui/sonner"
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 type MedicalHistory = {
   pharmacy: string;
@@ -21,12 +27,12 @@ type MedicalHistory = {
 type Patient = {
   id: string;
   name: string;
-  age: number;
+  age: bigint;
   gender: string;
   location: string;
   blood: string;
-  height: number;
-  weight: number;
+  height: bigint;
+  weight: bigint;
   medicalHistories: MedicalHistory[];
 }
 
@@ -37,19 +43,61 @@ export default function MedicalHistory() {
   const [patientData, setPatientData] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null)
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
+
+  const initializeActor = useCallback(async () => {
+    try {
+      const canisterId = localStorage.getItem('hospitalCanisterId')
+      if (!canisterId) {
+        throw new Error('Hospital canister ID not found')
+      }
+      console.log('Initializing actor with canister ID:', canisterId)
+      const agent = new HttpAgent({ host: 'http://localhost:3000' })
+      await agent.fetchRootKey()
+      const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
+        agent,
+        canisterId,
+      })
+      console.log('Actor initialized successfully')
+      setHospitalActor(actor)
+    } catch (err) {
+      console.error('Failed to initialize hospital actor:', err)
+      setError('Failed to connect to the hospital service')
+    }
+  }, [])
+
+  useEffect(() => {
+    initializeActor()
+  }, [initializeActor])
 
   useEffect(() => {
     const fetchMedicalHistory = async () => {
-      if (!id) {
-        setError('Patient ID is undefined')
+      if (!id || !hospitalActor) {
+        setError('Patient ID is undefined or hospital actor not initialized')
         setIsLoading(false)
         return
       }
       try {
-        const response = await healers_healthcare_backend.getPatientById(id)
+        const response = await hospitalActor.getPatientById(id)
 
         if (response && Array.isArray(response) && response.length > 0) {
-          setPatientData(response[0] as unknown as Patient) 
+          const patient = response[0]
+          if (patient) {
+            const formattedPatient: Patient = {
+              id: patient.id,
+              name: patient.name,
+              age: BigInt(patient.age),
+              gender: patient.gender,
+              location: patient.location,
+              blood: patient.blood,
+              height: BigInt(patient.height),
+              weight: BigInt(patient.weight),
+              medicalHistories: patient.medicalHistories,
+            }
+            setPatientData(formattedPatient)
+          } else {
+            setError("Patient data is undefined")
+          }
         } else {
           setError("Patient not found")
         }
@@ -61,8 +109,10 @@ export default function MedicalHistory() {
       }
     }
 
-    fetchMedicalHistory()
-  }, [id])
+    if (hospitalActor) {
+      fetchMedicalHistory()
+    }
+  }, [id, hospitalActor])
 
   const SidebarContent = () => (
     <>

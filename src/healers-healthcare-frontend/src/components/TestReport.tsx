@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
@@ -8,26 +8,30 @@ import { ScrollArea } from "./ui/scroll-area"
 import { Stethoscope, FileSymlink, FileText, Calendar, Package, UserCog, Menu, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
-
+import { idlFactory } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
+import { Actor, HttpAgent } from '@dfinity/agent'
+import { toast } from "sonner" 
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 type TestReport = {
   doctor: string;
   referredTo: string;
   testType: string;
   comments: string;
-  file: number[];
+  file: number[] | Uint8Array;
 }
 
 type Patient = {
   id: string;
   name: string;
-  age: number;
+  age: bigint;
   gender: string;
   location: string;
   blood: string;
-  height: number;
-  weight: number;
+  height: bigint;
+  weight: bigint;
   pdate: bigint;
   testReports: TestReport[];
 }
@@ -39,36 +43,88 @@ export default function TestReport() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
+
+  const initializeActor = useCallback(async () => {
+    try {
+      const canisterId = localStorage.getItem('hospitalCanisterId')
+      if (!canisterId) {
+        throw new Error('Hospital canister ID not found')
+      }
+      console.log('Initializing actor with canister ID:', canisterId)
+      const agent = new HttpAgent({ host: 'http://localhost:3000' })
+      await agent.fetchRootKey()
+      const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
+        agent,
+        canisterId,
+      })
+      console.log('Actor initialized successfully')
+      setHospitalActor(actor)
+    } catch (err) {
+      console.error('Failed to initialize hospital actor:', err)
+      setError('Failed to connect to the hospital service')
+      toast.error('Failed to connect to the hospital service. Please try logging in again.')
+    }
+  }, [])
+
+  useEffect(() => {
+    initializeActor()
+  }, [initializeActor])
 
   useEffect(() => {
     const fetchTestReports = async () => {
-      if (!id) {
-        setError('Patient ID is undefined')
+      if (!id || !hospitalActor) {
+        setError('Patient ID is undefined or hospital actor not initialized')
         setIsLoading(false)
         return
       }
       try {
-        const response = await healers_healthcare_backend.getPatientById(id)
+        const response = await hospitalActor.getPatientById(id)
 
         if (response && Array.isArray(response) && response.length > 0) {
-          setPatientData(response[0] as unknown as Patient)
+          const patient = response[0]
+          if (patient) {
+            const formattedPatient: Patient = {
+              id: patient.id,
+              name: patient.name,
+              age: BigInt(patient.age),
+              gender: patient.gender,
+              location: patient.location,
+              blood: patient.blood,
+              height: BigInt(patient.height),
+              weight: BigInt(patient.weight),
+              pdate: BigInt(patient.pdate),
+              testReports: patient.testReports,
+            }
+            setPatientData(formattedPatient)
+          } else {
+            setError("Patient data is undefined")
+          }
         } else {
           setError("Patient not found")
         }
       } catch (error) {
         console.error('Error fetching patient data:', error)
         setError("Failed to fetch patient data")
+        toast.error('Failed to fetch patient data. Please try again.')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchTestReports()
-  }, [id])
+    if (hospitalActor) {
+      fetchTestReports()
+    }
+  }, [id, hospitalActor])
 
-  const byteArrayToBase64 = (byteArray: number[]) => {
-    const binaryString = byteArray.reduce((data, byte) => data + String.fromCharCode(byte), '');
-    return btoa(binaryString);
+  const byteArrayToBase64 = (byteArray: number[] | Uint8Array): string => {
+    const uint8Array = byteArray instanceof Uint8Array ? byteArray : new Uint8Array(byteArray);
+    let binary = '';
+    const len = uint8Array.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(uint8Array[i]);
+    }
+    return window.btoa(binary);
   };
 
   const SidebarContent = () => (
@@ -139,8 +195,8 @@ export default function TestReport() {
 
         <ScrollArea className="h-[calc(100vh-200px)] pr-4">
           {patientData.testReports && patientData.testReports.length > 0 ? (
-            patientData.testReports.map((history, index) => {
-              const imageData = byteArrayToBase64(history.file);
+            patientData.testReports.map((report, index) => {
+              const imageData = byteArrayToBase64(report.file);
               return (
                 <Card key={index} className="mb-6 bg-[#131313a2] border-[#7047eb]">
                   <CardHeader>
@@ -150,15 +206,15 @@ export default function TestReport() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="flex items-center gap-2">
                         <Stethoscope className="text-[#7047eb]" />
-                        <span>Doctor: {history.doctor}</span>
+                        <span>Doctor: {report.doctor}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <FileSymlink className="text-[#7047eb]" />
-                        <span>Referred To: {history.referredTo}</span>
+                        <span>Referred To: {report.referredTo}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <FileText className="text-[#7047eb]" />
-                        <span>Type: {history.testType}</span>
+                        <span>Type: {report.testType}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="text-[#7047eb]" />
@@ -190,7 +246,7 @@ export default function TestReport() {
                         </div>
                       </DialogContent>
                     </Dialog>
-                    <p className="text-gray-300">Comments: {history.comments}</p>
+                    <p className="text-gray-300">Comments: {report.comments}</p>
                   </CardContent>
                 </Card>
               );
