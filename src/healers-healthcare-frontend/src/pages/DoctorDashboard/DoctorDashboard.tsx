@@ -10,12 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Checkbox } from "../../components/ui/checkbox"
 import { Label } from "../../components/ui/label"
-
+import { idlFactory } from '../../../../declarations/parent_canister/parent_canister.did.js';
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did';
 import { Skeleton } from "../../components/ui/skeleton"
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
 import { Actor, HttpAgent } from '@dfinity/agent'; 
+import { toast } from "sonner"
 // import { gradient } from '../assets'
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 const specialties = [
   'NEUROSURGEON', 'UROLOGIST', 'ENT', 'GYNECOLOGIST', 'ORTHOPEDIC',
@@ -40,7 +43,8 @@ type Doctor = {
 
 export default function DoctorRecord() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
-
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
   const [filters, setFilters] = useState<{ specialty: string; days: string[]; search: string }>({ specialty: '', days: [], search: '' })
@@ -53,39 +57,78 @@ export default function DoctorRecord() {
 
   }
 
- 
-
   useEffect(() => {
-    fetchDoctors();
+    const initializeActor = async () => {
+      try {
+        const canisterId = localStorage.getItem('hospitalCanisterId');
+        if (!canisterId) {
+          throw new Error('Hospital canister ID not found');
+        }
+        console.log('Initializing actor with canister ID:', canisterId);
+        const agent = new HttpAgent({ host: 'http://localhost:3000' }); // Update this URL if your local network is different
+        await agent.fetchRootKey();
+        const actor = Actor.createActor<HospitalService>(idlFactory, {
+          agent,
+          canisterId,
+        });
+        console.log('Actor initialized successfully');
+        setHospitalActor(actor);
+      } catch (err) {
+        console.error('Failed to initialize hospital actor:', err);
+        setError('Failed to connect to the hospital service. Please try logging in again.');
+      }
+    };
+  
+    initializeActor();
   }, []);
 
-  const fetchDoctors = async () => {
+  const fetchDoctors = useCallback(async () => {
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized');
+      setError('Unable to fetch doctors. Please try logging in again.');
+      return;
+    }
+  
     try {
-      const result = await healers_healthcare_backend.listDoctors();
+      setIsLoading(true);
+      const result = await hospitalActor.listDoctors();
+      console.log('Fetched doctors:', result);
       setDoctors(result);
     } catch (error) {
       console.error('Error fetching doctors:', error);
+      setError('Failed to fetch doctors. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [hospitalActor]);
 
+  useEffect(() => {
+    if (hospitalActor) {
+      fetchDoctors();
+    }
+  }, [hospitalActor, fetchDoctors]);
 
   const handleAddDoctor = async (formData: FormData) => {
-    try {
-     
-    const newDoctor = {
-      name: formData.get('name') as string,
-      experience: formData.get('experience') as string,
-      speciality: formData.get('specialty') as string,
-      mobile: BigInt(formData.get('mobile') as string),
-      days: days.filter(day => formData.get(day) === 'on'),
-      dutyStart: formData.get('dutyStart') as string,
-      dutyEnd: formData.get('dutyEnd') as string,
-      qualification: formData.get('qualification') as string,
-      op: BigInt(formData.get('opdFees') as string),
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized');
+      setError('Unable to add doctor. Please try logging in again.');
+      return;
     }
-  
-   
-      await healers_healthcare_backend.AddDoctor(
+
+    try {
+      const newDoctor = {
+        name: formData.get('name') as string,
+        experience: formData.get('experience') as string,
+        speciality: formData.get('specialty') as string,
+        mobile: BigInt(formData.get('mobile') as string),
+        days: days.filter(day => formData.get(day) === 'on'),
+        dutyStart: formData.get('dutyStart') as string,
+        dutyEnd: formData.get('dutyEnd') as string,
+        qualification: formData.get('qualification') as string,
+        op: BigInt(formData.get('opdFees') as string),
+      }
+
+      const result = await hospitalActor.AddDoctor(
         newDoctor.name,
         newDoctor.experience,
         newDoctor.speciality,
@@ -95,16 +138,18 @@ export default function DoctorRecord() {
         newDoctor.dutyEnd,
         newDoctor.qualification,
         newDoctor.op
-      )
+      );
       
-      console.log("doctor added successfully");
-       // Refresh the doctors list
+      console.log("Doctor added successfully, result:", result);
+      toast.success("Doctor added successfully");
       setIsOpen(false);
-      fetchDoctors()
+      fetchDoctors();
     } catch (error) {
-      console.error("Error adding doctor:", error)
+      console.error("Error adding doctor:", error);
+      toast.error("Failed to add doctor. Please try again.");
     }
   }; 
+
 
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => {

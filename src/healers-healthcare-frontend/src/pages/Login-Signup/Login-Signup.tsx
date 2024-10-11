@@ -130,7 +130,7 @@ export default function LoginButton() {
         }
       } else {
 
-        const result:string = await parentActor.registerUser(email, password)
+        const result:string = await parentActor.registerUser(name, email, password)
         console.log('Registration result:', result)
         
         if (result === "User registered successfully") {
