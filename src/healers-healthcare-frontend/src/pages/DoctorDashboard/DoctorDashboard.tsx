@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Checkbox } from "../../components/ui/checkbox"
 import { Label } from "../../components/ui/label"
-import { idlFactory } from '../../../../declarations/parent_canister/parent_canister.did.js';
-import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did';
+import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { Skeleton } from "../../components/ui/skeleton"
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
 import { Actor, HttpAgent } from '@dfinity/agent'; 
@@ -67,7 +67,7 @@ export default function DoctorRecord() {
         console.log('Initializing actor with canister ID:', canisterId);
         const agent = new HttpAgent({ host: 'http://localhost:3000' }); // Update this URL if your local network is different
         await agent.fetchRootKey();
-        const actor = Actor.createActor<HospitalService>(idlFactory, {
+        const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
           agent,
           canisterId,
         });
@@ -107,6 +107,8 @@ export default function DoctorRecord() {
       fetchDoctors();
     }
   }, [hospitalActor, fetchDoctors]);
+
+  
 
   const handleAddDoctor = async (formData: FormData) => {
     if (!hospitalActor) {
@@ -148,8 +150,7 @@ export default function DoctorRecord() {
       console.error("Error adding doctor:", error);
       toast.error("Failed to add doctor. Please try again.");
     }
-  }; 
-
+  };
 
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => {

@@ -14,8 +14,11 @@ import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { Textarea } from "../../components/ui/textarea"
 import { Checkbox } from "../../components/ui/checkbox"
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
-import { Actor, HttpAgent } from '@dfinity/agent';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 import App from 'next/app'
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 const statuses = ['Pending', 'Done']
 const doctors = [
@@ -60,29 +63,82 @@ export default function Appointment() {
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [isLoading, setIsLoading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const generateUniqueId = () => {
     return 'APT' + Math.floor(1000 + Math.random() * 9000).toString()
   }
 
-  
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
-  const fetchAppointments = async () => {
+  const initializeActor = useCallback(async () => {
     try {
-      const result = await healers_healthcare_backend.listAppointments();
-      setAppointments(result as Appointment[]);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
+      const canisterId = localStorage.getItem('hospitalCanisterId')
+      if (!canisterId) {
+        throw new Error('Hospital canister ID not found')
+      }
+      console.log('Initializing actor with canister ID:', canisterId)
+      const agent = new HttpAgent({ host: 'http://localhost:3000' }) // Update this URL if your local network is different
+      await agent.fetchRootKey()
+      const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
+        agent,
+        canisterId,
+      })
+      console.log('Actor initialized successfully')
+      setHospitalActor(actor)
+    } catch (err) {
+      console.error('Failed to initialize hospital actor:', err)
+      setError('Failed to connect to the hospital service. Please try logging in again.')
     }
-  };
+  }, [])
   
-  const handleAddAppointment = async (formData: FormData) => {
+  const fetchAppointments = useCallback(async () => {
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized')
+      setError('Unable to fetch appointments. Please try logging in again.')
+      return
+    }
     try {
-      const existingConditionsString = formData.get('existingConditions') as string;
-    const existingConditionsArray = existingConditionsString.split(', ');
+      setIsLoading(true)
+      const result = await hospitalActor.listAppointments()
+      console.log('Fetched appointments:', result)
+      
+      const convertedAppointments: Appointment[] = result.map(apt => ({
+        ...apt,
+        contact: BigInt(apt.contact.toString()),
+        nOfVisits: BigInt(apt.nOfVisits.toString()),
+        emergencyContactPhone: BigInt(apt.emergencyContactPhone.toString()),
+        existingConditions: Array.isArray(apt.existingConditions) && apt.existingConditions.length > 0
+          ? [apt.existingConditions[0]]
+          : ['']
+      }))
+      
+      setAppointments(convertedAppointments)
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+      setError('Failed to fetch appointments. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [hospitalActor])
+
+  useEffect(() => {
+    initializeActor()
+  }, [initializeActor])
+
+  useEffect(() => {
+    if (hospitalActor) {
+      fetchAppointments()
+    }
+  }, [hospitalActor, fetchAppointments])
+
+  const handleAddAppointment = async (formData: FormData) => {
+    if (!hospitalActor) {
+      console.error('Hospital actor is not initialized')
+      return
+    }
+    try {
+      const existingConditionsString = formData.get('existingConditions') as string
+      const existingConditionsArray = existingConditionsString.split(', ')
 
       const newAppointment: Appointment = {
         patientName: formData.get('patientName') as string,
@@ -101,9 +157,9 @@ export default function Appointment() {
         insuranceProvider: formData.get('insuranceProvider') as string,
         emergencyContactName: formData.get('emergencyContact') as string,
         emergencyContactPhone: BigInt(formData.get('emergencyPhone') as string),
-      };
+      }
 
-      await healers_healthcare_backend.addAppointment(
+      await hospitalActor.addAppointment(
         newAppointment.patientName,
         newAppointment.patientAge,
         newAppointment.gender,
@@ -120,16 +176,15 @@ export default function Appointment() {
         newAppointment.insuranceProvider,
         newAppointment.emergencyContactName,
         newAppointment.emergencyContactPhone
-      );
+      )
 
-      console.log("Appointment added successfully");
-      setIsOpen(false);
-      fetchAppointments(); // Refresh the appointments list
+      console.log("Appointment added successfully")
+      setIsOpen(false)
+      fetchAppointments()
     } catch (error) {
-      console.error('Error adding appointment:', error);
+      console.error('Error adding appointment:', error)
     }
-  };
-
+  }
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value === 'all' ? '' : value }))
     setCurrentPage(1)
@@ -542,4 +597,8 @@ export default function Appointment() {
       </div>
     </div>
   )
+}
+
+function setError(arg0: string) {
+  throw new Error('Function not implemented.')
 }

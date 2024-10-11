@@ -11,6 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Label } from "../../components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog"
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"
+import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 
 type InventoryItem = {
   itemName: string
@@ -28,14 +32,42 @@ export default function Component() {
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false)
   const [newSectionName, setNewSectionName] = useState('')
   const [newInventoryItems, setNewInventoryItems] = useState<InventoryItem[]>([{ itemName: '', itemCount: BigInt(0) }])
+  const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
 
   useEffect(() => {
-    fetchInventory()
+    const initializeActor = async () => {
+      try {
+        const canisterId = localStorage.getItem('hospitalCanisterId')
+        if (!canisterId) {
+          throw new Error('Hospital canister ID not found')
+        }
+        console.log('Initializing actor with canister ID:', canisterId)
+        const agent = new HttpAgent({ host: 'http://localhost:3000' }) // Update this URL if your local network is different
+        await agent.fetchRootKey()
+        const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
+          agent,
+          canisterId,
+        })
+        console.log('Actor initialized successfully')
+        setHospitalActor(actor)
+      } catch (err) {
+        console.error('Failed to initialize hospital actor:', err)
+      }
+    }
+
+    initializeActor()
   }, [])
 
+  useEffect(() => {
+    if (hospitalActor) {
+      fetchInventory()
+    }
+  }, [hospitalActor])
+
   const fetchInventory = async () => {
+    if (!hospitalActor) return
     try {
-      const result = await healers_healthcare_backend.listInventories()
+      const result = await hospitalActor.listInventories()
       setInventory(result.map(section => ({
         ...section,
         items: section.items.map(item => ({
@@ -47,7 +79,6 @@ export default function Component() {
       console.error("Failed to fetch inventory:", error)
     }
   }
-
   const handleAddInventoryItem = () => {
     if (newInventoryItems.length < 5) {
       setNewInventoryItems([...newInventoryItems, { itemName: '', itemCount: BigInt(0) }])
@@ -68,8 +99,9 @@ export default function Component() {
   }
 
   const handleAddInventorySubmit = async () => {
+    if (!hospitalActor) return
     try {
-      await healers_healthcare_backend.AddInventory(newSectionName, newInventoryItems)
+      await hospitalActor.AddInventory(newSectionName, newInventoryItems)
       await fetchInventory()
       setIsAddInventoryOpen(false)
       setNewSectionName('')
@@ -80,8 +112,9 @@ export default function Component() {
   }
 
   const handleCountChange = async (sectionName: string, itemName: string, change: number) => {
+    if (!hospitalActor) return
     try {
-      await healers_healthcare_backend.updateInventoryItemCount(sectionName, itemName, BigInt(change))
+      await hospitalActor.updateInventoryItemCount(sectionName, itemName, BigInt(change))
       await fetchInventory()
     } catch (error) {
       console.error("Failed to update inventory count:", error)

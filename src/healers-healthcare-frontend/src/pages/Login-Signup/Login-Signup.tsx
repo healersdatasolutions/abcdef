@@ -24,6 +24,7 @@ import { ethers } from 'ethers'
 
 import Spinner from "../../Spinner"
 import { twMerge } from "tailwind-merge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select'
 
 declare global {
   interface Window {
@@ -56,7 +57,8 @@ export default function LoginButton() {
   const [isLoading, setIsLoading] = useState(false)
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [parentActor, setParentActor] = useState<ActorSubclass<_SERVICE> | null>(null);
-  
+  const [hospitalNames, setHospitalNames] = useState<string[]>([])
+  const [selectedHospital, setSelectedHospital] = useState('')
   // MetaMask states
   const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -93,6 +95,10 @@ export default function LoginButton() {
           canisterId: 'be2us-64aaa-aaaaa-qaabq-cai'
         });
         setParentActor(actor)
+
+        // Fetch hospital names
+        const hospitals = await actor.listHospitals()
+        setHospitalNames(hospitals.map(([name, _]) => name))
       } catch (error) {
         console.error('Failed to initialize parentActor:', error)
         setError('Failed to connect to the Internet Computer. Please try again.')
@@ -116,32 +122,48 @@ export default function LoginButton() {
 
     try {
       if (isLogin) {
-        const canisterIdOpt = await parentActor.loginUser(email, password)
-        console.log('Login response:', canisterIdOpt)
+        let canisterIdOpt
+        if (userType === 'admin') {
+          canisterIdOpt = await parentActor.loginAdmin(email, password)
+          console.log('Admin Login response:', canisterIdOpt)
+        } else {
+          canisterIdOpt = await parentActor.loginUser(email, password)
+          console.log('User Login response:', canisterIdOpt)
+        }
         
         if (canisterIdOpt && canisterIdOpt.length > 0) {
           const principal = canisterIdOpt[0] as unknown as Principal
           const canisterId = principal.toString()
           console.log('Canister ID:', canisterId)
           localStorage.setItem('hospitalCanisterId', canisterId)
+          localStorage.setItem('userType', userType)
           navigate('/dashboard')
         } else {
           throw new Error('Invalid login credentials')
         }
-      } else {
-
-        const result:string = await parentActor.registerUser(name, email, password)
-        console.log('Registration result:', result)
+      } else if (userType === 'hospital') {
+        const result:string = await parentActor.registerHospital(name, email, password)
+        console.log('Hospital Registration result:', result)
         
-        if (result === "User registered successfully") {
-          const principal = result as unknown as Principal
-          const canisterId = principal.toString()
+        if (result.includes("Hospital registered and canister created with ID:")) {
+          const canisterId = result.split("ID: ")[1]
           alert(`Hospital registered successfully. Canister ID: ${canisterId}`)
           setIsLogin(true)
-        } else if (result === "Registration failed") {
-          throw new Error(`Failed to register hospital: ${result}`)
         } else {
-          throw new Error('Invalid registration response')
+          throw new Error(`Failed to register hospital: ${result}`)
+        }
+      } else if (userType === 'admin') {
+        if (!selectedHospital) {
+          throw new Error('Please select a hospital')
+        }
+        const result:string = await parentActor.registerAdmin(name, email, password, selectedHospital)
+        console.log('Admin Registration result:', result)
+        
+        if (result === "Admin registered successfully") {
+          alert('Admin registered successfully')
+          setIsLogin(true)
+        } else {
+          throw new Error(`Failed to register admin: ${result}`)
         }
       }
     } catch (error) {
@@ -151,6 +173,7 @@ export default function LoginButton() {
       setIsLoading(false)
     }
   }
+
   const handleUserTypeChange = (type: string) => {
     setIsLoading(true)
     setUserType(type)
@@ -218,9 +241,7 @@ export default function LoginButton() {
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative">
       {walletId && (
         <div className="absolute top-4 right-4  text-white p-2 rounded flex items-center gap-2">
-          {/* make a small gradient filled cirlcle to give an account image looks*/}
           <div className="w-8 h-8 bg-gradient-to-br from-blue-300 to-green-400 rounded-full"></div>
-
           <p>Connected Wallet:</p> <p>{walletId.slice(0, 6)}...{walletId.slice(-4)}</p>
         </div>
       )}
@@ -285,53 +306,55 @@ export default function LoginButton() {
               </div>
             </CardHeader>
             <CardContent>
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex justify-center items-center h-48"
-            >
-              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </motion.div>
-          ) : (
-            <motion.form
-              key={userType}
-              variants={formVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex justify-center items-center h-48"
+                  >
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    key={userType}
+                    variants={formVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
+                  >
                     <AnimatePresence mode="wait">
-                      {!isLogin && (
-                        <motion.div
-                          key="name"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="space-y-2">
-                            <Label htmlFor="name" className="text-gray-200">Name</Label>
-                            <div className="relative">
-                              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-                              <Input
-                                id="name"
-                                type="text"
-                                placeholder="John Doe"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
-                              />
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
+                    {!isLogin && (userType === 'hospital' || userType === 'admin') && (
+  <motion.div
+    key="name"
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: 'auto' }}
+    exit={{ opacity: 0, height: 0 }}
+    transition={{ duration: 0.2 }}
+  >
+    <div className="space-y-2">
+      <Label htmlFor="name" className="text-gray-200">
+        {userType === 'hospital' ? 'Hospital Name' : 'Admin Name'}
+      </Label>
+      <div className="relative">
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+        <Input
+          id="name"
+          type="text"
+          placeholder={userType === 'hospital' ? 'Hospital Name' : 'Admin Name'}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+        />
+      </div>
+    </div>
+  </motion.div>
+)}
                     </AnimatePresence>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-gray-200">Email</Label>
@@ -354,6 +377,7 @@ export default function LoginButton() {
                         <Input
                           id="password"
                           type="password"
+                          
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -361,15 +385,32 @@ export default function LoginButton() {
                         />
                       </div>
                     </div>
+                    {!isLogin && userType === 'admin' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="hospital" className="text-gray-200">Select Hospital</Label>
+                        <Select onValueChange={setSelectedHospital} value={selectedHospital}>
+                          <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
+                            <SelectValue placeholder="Select a hospital" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {hospitalNames.map((hospital) => (
+                              <SelectItem key={hospital} value={hospital}>
+                                {hospital}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200">
-                {isLogin ? 'Login' : 'Sign Up'}
-              </Button>
-              
-              {error && (
-                <div className="text-red-500 text-sm mt-2">
-                  {error}
-                </div>
-              )}
+                      {isLogin ? 'Login' : 'Sign Up'}
+                    </Button>
+                    
+                    {error && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {error}
+                      </div>
+                    )}
                   </motion.form>
                 )}
               </AnimatePresence>
@@ -377,13 +418,13 @@ export default function LoginButton() {
                 <span className="text-gray-400">or</span>
               </div>
               
-                <Button
+              <Button
                 onClick={() => setShowWalletPopup(true)}
                 className="w-full mt-4 bg-transparent-600 border text-white hover:bg-black hover:border-white"
                 disabled={!!connectedWallet}
-                >
+              >
                 {connectedWallet ? "Connected" : "Choose your wallet"}
-                </Button>
+              </Button>
             </CardContent>
             <CardFooter>
               <p className="text-center text-sm text-gray-400 w-full">
@@ -448,10 +489,6 @@ export default function LoginButton() {
                   }
                 </span>
               </Button>
-
-
-              
-              
             </CardContent>
           </Card>
         </div>
