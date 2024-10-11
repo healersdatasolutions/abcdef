@@ -8,8 +8,11 @@ import Int "mo:base/Int";
 import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
+import Principal "mo:base/Principal";
 
-actor class Hospital(user : Text) = this {
+actor class Hospital(name: Text) = this {
+
+  private var admins: [(Text, Text)] = []; // Store (username, password) pairs
   
   type MedicalHistory = {
     pharmacy: Text;
@@ -87,6 +90,24 @@ actor class Hospital(user : Text) = this {
   var doctors: [Doctor] = [];
   var inventories: [Inventory] = [];
 
+ public shared({caller}) func setAdmin(username: Text, password: Text) : async Text {
+        admins := Array.append(admins, [(username, password)]);
+        return "Admin added successfully";
+    };
+
+    public shared({caller}) func adminLogin(username: Text, password: Text) : async Bool {
+        for ((storedUsername, storedPassword) in admins.vals()) {
+            if (storedUsername == username and storedPassword == password) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    public query func getName() : async Text {
+        return name;
+    }; 
+    
   public shared func addPatient(
   name: Text,
   age: Nat64,
