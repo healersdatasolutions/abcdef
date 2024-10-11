@@ -16,6 +16,8 @@
     "src/healers-healthcare-frontend"
   ],
   "dependencies": {
+    "@dfinity/agent": "^2.1.2",
+    "@dfinity/auth-client": "^2.1.2",
     "@metamask/detect-provider": "^2.0.0",
     "@psychedelic/dab-js": "^0.3.0",
     "@psychedelic/plug-connect": "^0.1.4",

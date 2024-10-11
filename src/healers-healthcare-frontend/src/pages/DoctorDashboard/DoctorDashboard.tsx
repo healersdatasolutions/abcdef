@@ -65,8 +65,8 @@ export default function DoctorRecord() {
           throw new Error('Hospital canister ID not found');
         }
         console.log('Initializing actor with canister ID:', canisterId);
-        const agent = new HttpAgent({ host: 'http://localhost:3000' }); // Update this URL if your local network is different
-        await agent.fetchRootKey();
+        const agent = new HttpAgent({ host: 'https://ic0.app' }); // Update this URL if your local network is different
+        //await agent.fetchRootKey();
         const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
           agent,
           canisterId,
