@@ -18,6 +18,7 @@ actor Parent {
         canisterId: ?Principal;
     };
     type Admin = {
+        name: Text;
         username: Text;
         password: Text;
         hospitalName: Text;
@@ -80,7 +81,7 @@ private let ic : IC.Service = actor "aaaaa-aa";
     };
 
     // New function for admin registration
-    public shared({caller}) func registerAdmin(username: Text, password: Text, hospitalName: Text) : async Text {
+    public shared({caller}) func registerAdmin(name: Text,username: Text, password: Text, hospitalName: Text) : async Text {
         if (Array.size(canisters) == 0) {
             return "No hospitals available for registration";
         };
@@ -91,6 +92,7 @@ private let ic : IC.Service = actor "aaaaa-aa";
             case (null) { return "Hospital not found"; };
             case (?(_, canisterId)) {
                 let admin: Admin = {
+                    name = name;
                     username = username;
                     password = password;
                     hospitalName = hospitalName;
