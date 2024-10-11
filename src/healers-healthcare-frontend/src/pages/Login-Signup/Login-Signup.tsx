@@ -83,16 +83,15 @@ export default function LoginButton() {
         setAuthClient(client)
   
         const agent = new HttpAgent({ 
-          host: 'http://localhost:3000',
+          host: 'https://ic0.app',
           fetch: (url, options) => {
             return fetch(url, { ...options, credentials: 'include' })
           }
         })
-        await agent.fetchRootKey()
-        
+        //await agent.fetchRootKey()
         const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
           agent,
-          canisterId: 'be2us-64aaa-aaaaa-qaabq-cai'
+          canisterId: '7gngh-jqaaa-aaaab-qacvq-cai'
         });
         setParentActor(actor)
 
@@ -423,7 +422,7 @@ export default function LoginButton() {
                 className="w-full mt-4 bg-transparent-600 border text-white hover:bg-black hover:border-white"
                 disabled={!!connectedWallet}
               >
-                {connectedWallet ? "Connected" : "Choose your wallet"}
+                {connectedWallet ? "Connected" : "Connect with Internet Identity"}
               </Button>
             </CardContent>
             <CardFooter>
@@ -453,21 +452,7 @@ export default function LoginButton() {
               </button>
             </CardHeader>
             <CardContent className="space-y-4 flex flex-col items-center">
-              {!isMetaMaskInstalled ? (
-                <div className="flex items-center space-x-2 text-yellow-600">
-                  <AlertCircle size={20} />
-                  <p>MetaMask is not installed. Please install it to continue.</p>
-                </div>
-              ) : (
-                <Button 
-                  onClick={connectToMetaMask} 
-                  disabled={isConnecting}
-                  className="w-full flex items-center justify-center space-x-2 hover:scale-95 transition duration-300"
-                >
-                  <img src="meta.png" alt="MetaMask" className="w-6 h-6" />
-                  <span>{isConnecting ? "Connecting..." : "Connect with MetaMask"}</span>
-                </Button>
-              )}
+              
               <Button
                 onClick={handleInternetIdentityClick}
                 disabled={isLoggingIn}
@@ -495,4 +480,8 @@ export default function LoginButton() {
       )}
     </div>
   )
+}
+
+function getHost(): string | undefined {
+  throw new Error('Function not implemented.')
 }
