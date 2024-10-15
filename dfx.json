@@ -1,3 +1,4 @@
+
 {
   "canisters": {
     "healers-healthcare-backend": {
@@ -27,6 +28,14 @@
       "packtool":"mops sources"
     }
   },
+  "ic": {
+      "providers": ["https://ic0.app"],
+      "type": "persistent",
+      "wallet": "sib3p-eiaaa-aaaap-qhp4a-cai"   
+    },
+
   "output_env_file": ".env",
+  "dfx": "0.23.0",
   "version": 1
 }
+

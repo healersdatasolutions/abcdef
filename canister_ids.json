@@ -1,0 +1,11 @@
+{
+  "healers-healthcare-backend": {
+    "ic": "grnch-ciaaa-aaaap-qkfqq-cai"
+  },
+  "healers-healthcare-frontend": {
+    "ic": "gyoj3-uaaaa-aaaap-qkfra-cai"
+  },
+  "parent_canister": {
+    "ic": "uh4ji-xiaaa-aaaap-qkk7q-cai"
+  }
+}
