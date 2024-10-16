@@ -58,7 +58,7 @@ If you are making frontend changes, you can start a development server with
 npm start
 ```
 
-Which will start a server at `http://localhost:3000`, proxying API requests to the replica at port 4943.
+Which will start a server at `https://icp0.io`, proxying API requests to the replica at port 4943.
 
 # Deploy the project on Mainnet:
 To deploy your project on the mainnet, you use the dfx deploy command with the --network ic option:

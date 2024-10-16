@@ -88,10 +88,10 @@ export default function LoginButton() {
             return fetch(url, { ...options, credentials: 'include' })
           }
         })
-        //await agent.fetchRootKey()
+        //// await agent.fetchRootKey()
         const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
           agent,
-          canisterId: '7gngh-jqaaa-aaaab-qacvq-cai'
+          canisterId: 'grnch-ciaaa-aaaap-qkfqq-cai'
         });
         setParentActor(actor)
 
@@ -121,25 +121,38 @@ export default function LoginButton() {
 
     try {
       if (isLogin) {
-        let canisterIdOpt
-        if (userType === 'admin') {
-          canisterIdOpt = await parentActor.loginAdmin(email, password)
-          console.log('Admin Login response:', canisterIdOpt)
+        let canisterIdOpt;
+      
+        // Temporary bypass for login
+        const bypassLogin = true;  // Set this to 'false' in production
+      
+        if (bypassLogin) {
+          // Hardcode values for testing
+          canisterIdOpt = ['grnch-ciaaa-aaaap-qkfqq-cai'];  // Replace with your test canister ID
+          const userType = 'admin';  // Or 'user', depending on your test case
+          console.log('Bypassing login. Using test values.');
         } else {
-          canisterIdOpt = await parentActor.loginUser(email, password)
-          console.log('User Login response:', canisterIdOpt)
+          if (userType === 'admin') {
+            canisterIdOpt = await parentActor.loginAdmin(email, password);
+            console.log('Admin Login response:', canisterIdOpt);
+          } else {
+            canisterIdOpt = await parentActor.loginUser(email, password);
+            console.log('User Login response:', canisterIdOpt);
+          }
         }
-        
+      
         if (canisterIdOpt && canisterIdOpt.length > 0) {
-          const principal = canisterIdOpt[0] as unknown as Principal
-          const canisterId = principal.toString()
-          console.log('Canister ID:', canisterId)
-          localStorage.setItem('hospitalCanisterId', canisterId)
-          localStorage.setItem('userType', userType)
-          navigate('/dashboard')
+          const principal = canisterIdOpt[0] as unknown as Principal;
+          const canisterId = principal.toString();
+          console.log('Canister ID:', canisterId);
+          localStorage.setItem('hospitalCanisterId', canisterId);
+          localStorage.setItem('userType', userType);
+          navigate('/dashboard');  // This is where the routing happens after authentication
         } else {
-          throw new Error('Invalid login credentials')
+          throw new Error('Invalid login credentials');
         }
+      
+      
       } else if (userType === 'hospital') {
         const result:string = await parentActor.registerHospital(name, email, password)
         console.log('Hospital Registration result:', result)

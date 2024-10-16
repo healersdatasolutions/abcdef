@@ -39,7 +39,7 @@ function Dashboard() {
           console.log('Initializing actor with canister ID:', hospitalCanisterId);
       
           const agent = new HttpAgent({ host: 'https://ic0.app'});
-          //await agent.fetchRootKey();
+          //// await agent.fetchRootKey();
           
           const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
             agent,

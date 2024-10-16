@@ -52,8 +52,8 @@ export default function MedicalHistory() {
         throw new Error('Hospital canister ID not found')
       }
       console.log('Initializing actor with canister ID:', canisterId)
-      const agent = new HttpAgent({ host: 'http://localhost:3000' })
-      await agent.fetchRootKey()
+      const agent = new HttpAgent({ host: 'https://icp-api.io/' })
+      // await agent.fetchRootKey()
       const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
         agent,
         canisterId,

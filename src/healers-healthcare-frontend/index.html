@@ -5,15 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self'; 
-    img-src 'self' data: https://example.com https://pbs.twimg.com;
-    frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;
-    connect-src 'self' https://*.ic0.app; https://*.ic0.app;
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;
-    style-src 'self' 'unsafe-inline' https://www.youtube.com;
-    object-src 'none';
-    worker-src 'self' blob:;
-  ">
+  default-src 'self'; 
+  img-src 'self' data: https://example.com https://pbs.twimg.com;
+  frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;
+  connect-src 'self' http://localhost:* https://icp-api.io/ https://icp0.io https://*.icp0.io https://ic0.app;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;
+  style-src 'self' 'unsafe-inline' https://www.youtube.com;
+  font-src 'self' https://fonts.gstatic.com; /* Add this line */
+  object-src 'none';
+  worker-src 'self' blob:;
+">
+
+
   <meta http-equiv="Permissions-Policy" content="accelerometer=(), autoplay=(), camera=(), gyroscope=(), magnetometer=()">
   
   <title>Healers Healthcare</title>

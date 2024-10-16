@@ -177,7 +177,7 @@ export default function PatientDetails() {
         }
         console.log('Initializing actor with canister ID:', canisterId)
         const agent = new HttpAgent({ host: 'https://ic0.app' })
-        //await agent.fetchRootKey()
+        //// await agent.fetchRootKey()
         const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
           agent,
           canisterId,

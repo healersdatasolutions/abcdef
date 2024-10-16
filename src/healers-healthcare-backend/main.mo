@@ -8,7 +8,6 @@ import Hospital "./hospital";
 import IC "mo:ic";
 
 
-
  
 actor Parent {
     type User = {
@@ -106,6 +105,13 @@ private let ic : IC.Service = actor "aaaaa-aa";
                 return "Admin registered successfully";
             };
         };
+    };
+    func corsHeaders() : [Text] {
+    return [
+        "Access-Control-Allow-Origin: *",
+        "Access-Control-Allow-Methods: GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers: Content-Type, Authorization"
+    ]
     };
     // New function for admin login
     public shared({caller}) func loginAdmin(username: Text, password: Text) : async ?Principal {

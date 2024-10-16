@@ -10,6 +10,7 @@ import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Principal "mo:base/Principal";
 
+
 actor class Hospital(name: Text) = this {
 
   private var admins: [(Text, Text)] = []; // Store (username, password) pairs

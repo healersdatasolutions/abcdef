@@ -43,7 +43,7 @@ export default function Component() {
         }
         console.log('Initializing actor with canister ID:', canisterId)
         const agent = new HttpAgent({ host: 'https://ic0.app' }) // Update this URL if your local network is different
-        //await agent.fetchRootKey()
+        //// await agent.fetchRootKey()
         const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory,  {
           agent,
           canisterId,
