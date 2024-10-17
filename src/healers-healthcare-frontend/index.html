@@ -11,14 +11,16 @@
   connect-src 'self' http://localhost:* https://icp-api.io/ https://icp0.io https://*.icp0.io https://ic0.app;
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;
   style-src 'self' 'unsafe-inline' https://www.youtube.com;
-  font-src 'self' https://fonts.gstatic.com; /* Add this line */
+  font-src 'self' https://fonts.gstatic.com; 
   object-src 'none';
   worker-src 'self' blob:;
-">
-
+  ">
 
   <meta http-equiv="Permissions-Policy" content="accelerometer=(), autoplay=(), camera=(), gyroscope=(), magnetometer=()">
-  
+  <meta http-equiv="Access-Control-Allow-Origin" content="https://gyoj3-uaaaa-aaaap-qkfra-cai.icp0.io">
+  <meta http-equiv="Access-Control-Allow-Methods" content="GET, POST, OPTIONS">
+  <meta http-equiv="Access-Control-Allow-Headers" content="Content-Type, Authorization">
+
   <title>Healers Healthcare</title>
   <base href="/" />
   <link rel="icon" type="image/svg+xml" href="/HealersHealthcareLogo.png" />

@@ -26,6 +26,7 @@ import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 //import { Result } from '@dfinity/candid/lib/cjs/idl';
 import { Principal } from '@dfinity/principal';
 import { toast } from "sonner" 
+import { Label } from '@/components/ui/label'
 
 /*interface HospitalService {
   listPatients(): unknown
@@ -618,7 +619,7 @@ export default function PatientHealthRecord() {
                     <HeadlessDialog.Panel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-black p-6 text-left align-middle shadow-xl transition-all">
                       <div className='w-full flex justify-end'>
 
-                    <Button type="button" onClick={() => setIsOpen(false)} className="bg-black border hover:bg-transparent hover:border-red-500">
+                    <Button type="button" onClick={() => setIsOpen(false)} className="bg-black border text-white hover:bg-transparent hover:border-red-500">
                             X
                           </Button>
                       </div>
@@ -628,220 +629,232 @@ export default function PatientHealthRecord() {
                       >
                         Add New Patient
                       </HeadlessDialog.Title>
-                      <form onSubmit={handleAddPatient} className="space-y-6 mx-5 sm:mx-10 lg:mx-20 text-white">
-                        <div className=" grid grid-cols-1 md:grid-cols-1 gap-6">
+                      <form onSubmit={handleAddPatient} className="max-w-6xl mx-auto space-y-6 text-white">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 bg-[#000] border-slate-600 rounded-lg p-5'>
+          <h3 className="text-2xl font-semibold mb-3 text-[#fff]">General Details</h3>
+          <div className="space-y-4 m-0 sm:m-10">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <div className="flex items-center space-x-2">
+                <User className="text-[#fff]" />
+                <Input id="name" name="name" placeholder="Enter patient's full name" value={newPatient.name} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="age">Age</Label>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="text-[#fff]" />
+                  <Input id="age" name="age" type="number" placeholder="e.g., 35" value={newPatient.age.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <div className="flex items-center space-x-2">
+                  <UserCog className="text-[#fff]" />
+                  <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } } as any)}>
+                    <SelectTrigger id="gender" className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border-gray-700">
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="text-[#fff]" />
+                  <Input id="location" name="location" placeholder="e.g., New York, NY" value={newPatient.location} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="blood">Blood Group</Label>
+                <div className="flex items-center space-x-2">
+                  <Droplet className="text-[#fff]" />
+                  <Select name="blood" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } } as any)}>
+                    <SelectTrigger id="blood" className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border-gray-700">
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
+                        <SelectItem key={group} value={group}>{group}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="height">Height</Label>
+              <div className="flex items-center space-x-2">
+                <Ruler className="text-[#fff]" />
+                <Input id="height" name="height" type="number" placeholder="e.g., 175 (in cm)" value={newPatient.height.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weight">Weight</Label>
+              <div className="flex items-center space-x-2">
+                <Weight className="text-[#fff]" />
+                <Input id="weight" name="weight" type="number" placeholder="e.g., 70 (in kg)" value={newPatient.weight.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-                        <div className='relative border bg-[#171717a2] border-slate-600  rounded-lg p-5'>
-                        <GridPattern
-        width={20}
-        height={20}
-        x={-1}
-        y={-1}
-        className={cn(
-          "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)] ",
-        )}
-      />
+        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 rounded-lg p-5'>
+          <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">Medical History Section</h1>
+          {newPatient.medicalHistories.map((history, index) => (
+            <div key={index} className="mb-6">
+              <h3 className="text-2xl font-semibold mb-3 text-[#fff]">Medical History {index + 1}</h3>
+              <div className="space-y-4 m-0 sm:m-10">
+                <div className="space-y-2">
+                  <Label htmlFor={`pharmacy${index}`}>Pharmacy</Label>
+                  <div className="flex items-center space-x-2">
+                    <Pill className="text-[#fff]" />
+                    <Input id={`pharmacy${index}`} name={`pharmacy${index}`} placeholder="e.g., City Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor={`physician${index}`}>Physician</Label>
+                    <div className="flex items-center space-x-2">
+                      <Stethoscope className="text-[#fff]" />
+                      <Input id={`physician${index}`} name={`physician${index}`} placeholder="e.g., Dr. Johnson" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`event${index}`}>Event</Label>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="text-[#fff]" />
+                      <Input id={`event${index}`} name={`event${index}`} placeholder="e.g., Annual Check-up" value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`prescription${index}`}>Prescription</Label>
+                    <div className="flex items-center space-x-2">
+                      <FileSymlink className="text-[#fff]" />
+                      <Input id={`prescription${index}`} name={`prescription${index}`} placeholder="e.g., Amoxicillin 500mg" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`remedies${index}`}>Remedies</Label>
+                    <div className="flex items-center space-x-2">
+                      <Pill className="text-[#fff]" />
+                      <Input id={`remedies${index}`} name={`remedies${index}`} placeholder="e.g., Rest and fluids" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                </div>
+                {index > 0 && (
+                  <Button type="button" onClick={() => removeMedicalHistory(index)} className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove Medical History
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+          {newPatient.medicalHistories.length < 5 && (
+            <Button type="button" onClick={addMedicalHistory} className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Medical History
+            </Button>
+          )}
+        </div>
 
-                            <h3 className="text-2xl font-semibold mb-3 text-[#fff]">General Details</h3>
-                            <div className="space-y-4 m-0 sm:m-10">
-                              <div className="flex items-center space-x-2">
-                                <User className="text-[#fff]" />
-                                <Input name="name" placeholder="Name" value={newPatient.name} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                              <div className="flex items-center space-x-2">
-                                <Calendar className="text-[#fff]" />
-                                <Input name="age" type="number" placeholder="Age" value={newPatient.age.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                              </div>
-
-
-                              <div className="flex items-center space-x-2">
-                                <UserCog className="text-[#fff]" />
-                                <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } } as any)}>
-                                  <SelectTrigger className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
-                                    <SelectValue placeholder="Select Gender" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-black border-gray-700">
-                                    <SelectItem value="Male">Male</SelectItem>
-                                    <SelectItem value="Female">Female</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-
-                              <div className="flex items-center space-x-2">
-                                <MapPin className="text-[#fff]" />
-                                <Input name="location" placeholder="Location" value={newPatient.location} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Droplet className="text-[#fff]" />
-                                <Select name="bloodGroup" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } } as any)}>
-                                  <SelectTrigger className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
-                                    <SelectValue placeholder="Blood Group" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-black border-gray-700">
-                                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
-                                      <SelectItem key={group} value={group}>{group}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Ruler className="text-[#fff]" />
-                                <Input name="height" type="number" placeholder="Height (in cms.)" value={newPatient.height.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Weight className="text-[#fff]" />
-                                <Input name="weight" type="number" placeholder="Weight (in kg.)" value={newPatient.weight.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className=' relative border border-slate-600 bg-[#160219a2] rounded-lg p-5'>
-                          <GridPattern
-        width={20}
-        height={20}
-        x={-1}
-        y={-1}
-        className={cn(
-          "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)] ",
-        )}
-      />
-                            <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">
-                              Medical History Section
-                        </h1>
-                        
-                        {newPatient.medicalHistories.map((history, index) => (
-                              <div key={index} className="mb-6">
-                                <h3 className="text-2xl font-semibold mb-3 text-[#fff]">Medical History {index + 1}</h3>
-                                
-                                <div className="space-y-4 m-0 sm:m-10">
-                                  <div className="flex items-center space-x-2">
-                                    <Pill className="text-[#fff]" />
-                                    <Input name={`pharmacy${index}`} placeholder="Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-
-
-                                  <div className="flex items-center space-x-2">
-                                    <Stethoscope className="text-[#fff]" />
-                                    <Input name={`physician${index}`} placeholder="Physician" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Calendar className="text-[#fff]" />
-                                    <Input name={`event${index}`} placeholder="Event"  value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <FileSymlink className="text-[#fff]" />
-                                    <Input name={`prescription${index}`} placeholder="Prescription" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Pill className="text-[#fff]" />
-                                    <Input name={`remedies${index}`} placeholder="Remedies" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  </div>
-                                </div>
-                                {index > 0 && (
-                                  <Button type="button" onClick={() => removeMedicalHistory(index)} className="mt-4 bg-black text-white border  hover:border-red-500 hover:bg-transparent">
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Remove Medical History
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                            {newPatient.medicalHistories.length < 5 && (
-                              <Button type="button" onClick={addMedicalHistory} className="mt-4 bg-black text-white border  hover:border-green-500 hover:bg-transparent">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Medical History
-                              </Button>
-                            )}
-                            
-                           
-                          </div>
-                          <div className='relative border border-slate-600 bg-[#0a0218a2] rounded-lg p-5'>
-                          <GridPattern
-        width={20}
-        height={20}
-        x={-1}
-        y={-1}
-        className={cn(
-          "[mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)] ",
-        )}
-      />
-                          <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">
-                              Test Report Section
-                        </h1>
-                        {newPatient.testReports.map((report, index) => (
-                              <div key={index} className="mt-6">
-                                <h3 className="text-lg font-semibold mb-3 text-[#fff]">Test Report {index + 1}</h3>
-                                <div className="space-y-4 m-0 sm:m-10">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                  <div className="flex items-center space-x-2">
-                                    <UserCog className="text-[#fff]" />
-                                    <Input name={`doctor${index}`} placeholder="Doctor" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <FileSymlink className="text-[#fff]" />
-                                    <Input name={`referredTo${index}`} placeholder="Referred to" value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <FileTextIcon className="text-[#fff]" />
-                                    <Input name={`type${index}`} placeholder="Type" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <FileText className="text-[#fff]" />
-                                    <Input name={`comments${index}`} placeholder="Comments" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Upload className="text-[#fff]" />
-                                    <Input name={`files${index}`} type="file"  onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (event) => {
-                            if (event.target?.result) {
-                              const arrayBuffer = event.target.result as ArrayBuffer;
-                              const uint8Array = new Uint8Array(arrayBuffer); handleTestReportChange(index, 'file', Array.from(uint8Array)); }
+        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 rounded-lg p-5'>
+          <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">Test Report Section</h1>
+          {newPatient.testReports.map((report, index) => (
+            <div key={index} className="mt-6">
+              <h3 className="text-lg font-semibold mb-3 text-[#fff]">Test Report {index + 1}</h3>
+              <div className="space-y-4 m-0 sm:m-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor={`doctor${index}`}>Doctor</Label>
+                    <div className="flex items-center space-x-2">
+                      <UserCog className="text-[#fff]" />
+                      <Input id={`doctor${index}`} name={`doctor${index}`} placeholder="e.g., Dr. Smith" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`referredTo${index}`}>Referred To</Label>
+                    <div className="flex items-center space-x-2">
+                      <FileSymlink className="text-[#fff]" />
+                      <Input id={`referredTo${index}`} name={`referredTo${index}`} placeholder="e.g., Cardiology Dept." value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`testType${index}`}>Test Type</Label>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="text-[#fff]" />
+                      <Input id={`testType${index}`} name={`testType${index}`} placeholder="e.g., Blood Test" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`comments${index}`}>Comments</Label>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="text-[#fff]" />
+                      <Input id={`comments${index}`} name={`comments${index}`} placeholder="e.g., Normal results" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`file${index}`}>File Upload</Label>
+                    <div className="flex items-center space-x-2">
+                      <Upload className="text-[#fff]" />
+                      <Input 
+                        id={`file${index}`} 
+                        name={`file${index}`} 
+                        type="file" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              if (event.target?.result) {
+                                const arrayBuffer = event.target.result as ArrayBuffer;
+                                const uint8Array = new Uint8Array(arrayBuffer);
+                                handleTestReportChange(index, 'file', Array.from(uint8Array));
+                              }
                             };
                             reader.readAsArrayBuffer(file);
                           }
-                        }} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                                  </div>
-                                </div>
-                                </div>
-                                {index > 0 && (
-                                  <Button type="button" onClick={() => removeTestReport(index)} className="mt-4 bg-black text-white border  hover:border-red-500 hover:bg-transparent">
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Remove Test Report
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                            {newPatient.testReports.length < 5 && (
-                              <Button type="button" onClick={addTestReport} className="mt-4 bg-black text-white border  hover:border-green-500 hover:bg-transparent">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Test Report
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="mt-6 flex justify-end space-x-4">
-                          <Button type="button" onClick={() => setIsOpen(false)} className="bg-gray-600 hover:bg-gray-700">
-                            Cancel
-                          </Button>
-                          <Button type="submit" className="bg-black text-white border border-[#7047eb]  hover: hover:bg-[#7047eb]">
-                            Add Patient
-                          </Button>
-                        </div>
-                      </form>
+                        }} 
+                        className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" 
+                      />
+                    </div>
+                  </div>
+                </div>
+                {index > 0 && (
+                  <Button type="button" onClick={() => removeTestReport(index)} className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove Test Report
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+          {newPatient.testReports.length < 5 && (
+            <Button type="button" onClick={addTestReport} className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Test Report
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end space-x-4">
+        <Button type="button" onClick={() => setIsOpen(false)} className="bg-gray-600 hover:bg-gray-700">
+          Cancel
+        </Button>
+        <Button type="submit" className="bg-black text-white border border-[#7047eb] hover:bg-[#7047eb]">
+          Add Patient
+        </Button>
+      </div>
+    </form>
                     </HeadlessDialog.Panel>
                   </Transition.Child>
                 </div>

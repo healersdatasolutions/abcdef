@@ -6,9 +6,8 @@ import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Hospital "./hospital"; 
 import IC "mo:ic";
+import Debug "mo:base/Debug";
 
-
- 
 actor Parent {
     type User = {
         name: Text;
@@ -27,10 +26,7 @@ actor Parent {
     var admins: [(Text, Admin)] = []; // Store users with username and data
     var canisters: [(Text, Principal)] = [];
    
-
-private let ic : IC.Service = actor "aaaaa-aa";
-
-
+     let ic : IC.Service = actor "aaaaa-aa";
 
     public shared({caller}) func registerHospital(name: Text, username: Text, password: Text) : async Text {
         // Create a new canister (hospital)
@@ -72,15 +68,13 @@ private let ic : IC.Service = actor "aaaaa-aa";
         return userList;
     };
 
-   
-
     // New function to list hospital names
-   public query func listHospitals() : async [(Text, Principal)] {
+    public query func listHospitals() : async [(Text, Principal)] {
         return canisters;
     };
 
     // New function for admin registration
-    public shared({caller}) func registerAdmin(name: Text,username: Text, password: Text, hospitalName: Text) : async Text {
+    public shared({caller}) func registerAdmin(name: Text, username: Text, password: Text, hospitalName: Text) : async Text {
         if (Array.size(canisters) == 0) {
             return "No hospitals available for registration";
         };
@@ -106,13 +100,17 @@ private let ic : IC.Service = actor "aaaaa-aa";
             };
         };
     };
+
+    // Static CORS headers function
     func corsHeaders() : [Text] {
-    return [
-        "Access-Control-Allow-Origin: *",
-        "Access-Control-Allow-Methods: GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers: Content-Type, Authorization"
-    ]
+        return [
+            "Access-Control-Allow-Origin: https://gyoj3-uaaaa-aaaap-qkfra-cai.icp0.io",
+            "Access-Control-Allow-Methods: GET, PUT, POST, DELETE",
+            "Access-Control-Allow-Headers: Origin, Content-Type, Authorization, Accept",
+            "Access-Control-Allow-Credentials: true"
+        ];
     };
+
     // New function for admin login
     public shared({caller}) func loginAdmin(username: Text, password: Text) : async ?Principal {
         for ((storedUsername, admin) in admins.vals()) {

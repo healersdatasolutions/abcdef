@@ -2,7 +2,7 @@
     {
         "match": "**/*",
         "headers": {
-            "Content-Security-Policy": "default-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; img-src 'self' https://i.ytimg.com data:; connect-src 'self' http://localhost:* https://icp-api.io/ https://icp0.io https://*.icp0.io https://ic0.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; /* Updated line */ font-src 'self' https://fonts.gstatic.com; object-src 'none'; worker-src 'self' blob:",
+            "Content-Security-Policy": "default-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; img-src 'self' https://i.ytimg.com data:; connect-src 'self' https://icp-api.io/ https://icp0.io https://*.icp0.io https://ic0.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; /* Updated line */ font-src 'self' https://fonts.gstatic.com; object-src 'none'; worker-src 'self' blob:",
             "Permissions-Policy": "accelerometer=(), autoplay=(), camera=(), gyroscope=(), magnetometer=(), geolocation=(), microphone=(), payment=(), usb=(), clipboard-read=(), clipboard-write=(), fullscreen=(), sync-xhr=()",
             "X-Frame-Options": "DENY",
             "Referrer-Policy": "same-origin",

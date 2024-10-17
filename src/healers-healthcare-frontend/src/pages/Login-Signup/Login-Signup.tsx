@@ -85,13 +85,13 @@ export default function LoginButton() {
         const agent = new HttpAgent({ 
           host: 'https://ic0.app',
           fetch: (url, options) => {
-            return fetch(url, { ...options, credentials: 'include' })
+            return fetch(url, { ...options, credentials: 'same-origin' })
           }
         })
         //// await agent.fetchRootKey()
         const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
           agent,
-          canisterId: 'grnch-ciaaa-aaaap-qkfqq-cai'
+          canisterId: 'uh4ji-xiaaa-aaaap-qkk7q-cai'
         });
         setParentActor(actor)
 
@@ -124,7 +124,7 @@ export default function LoginButton() {
         let canisterIdOpt;
       
         // Temporary bypass for login
-        const bypassLogin = true;  // Set this to 'false' in production
+        const bypassLogin = false;  // Set this to 'false' in production
       
         if (bypassLogin) {
           // Hardcode values for testing

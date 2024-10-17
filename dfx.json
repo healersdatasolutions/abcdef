@@ -2,13 +2,7 @@
   "canisters": {
     "healers-healthcare-backend": {
       "main": "src/healers-healthcare-backend/hospital.mo",
-      "type": "motoko",
-      "CORS": {
-        "Access-Control-Allow-Origin": [
-          "https://gyoj3-uaaaa-aaaap-qkfra-cai.icp0.io"
-        ],
-        "allow_credentials": true
-      }
+      "type": "motoko"
     },
     "parent_canister": {
       "main": "src/healers-healthcare-backend/main.mo",
@@ -38,6 +32,13 @@
     "wallet": "sib3p-eiaaa-aaaap-qhp4a-cai"
   },
   "output_env_file": ".env",
+  "cors": {
+    "allowed_origins": [
+      "https://gyoj3-uaaaa-aaaap-qkfra-cai.icp0.io",
+      "http://localhost:3000"
+    ],
+    "allow_credentials": true
+  },
   "dfx": "0.23.0",
   "version": 1
 }
