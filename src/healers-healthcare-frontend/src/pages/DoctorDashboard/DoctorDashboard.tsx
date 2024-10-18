@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, MapPin, Phone, Clock, Briefcase, Search, CalendarIcon, Menu, CalendarCheck } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -13,12 +13,11 @@ import { Label } from "../../components/ui/label"
 import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
 import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { Skeleton } from "../../components/ui/skeleton"
-import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
-import { Actor, HttpAgent } from '@dfinity/agent'; 
+import { Actor, HttpAgent } from '@dfinity/agent'
 import { toast } from "sonner"
-// import { gradient } from '../assets'
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
+import { Toaster } from "../../components/ui/sonner"
 
 const specialties = [
   'NEUROSURGEON', 'UROLOGIST', 'ENT', 'GYNECOLOGIST', 'ORTHOPEDIC',
@@ -27,21 +26,19 @@ const specialties = [
 
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-
 type Doctor = {
-  name : string;
-  experience : string;
-  speciality : string;
-  mobile : bigint;
-  days : string[];
-  dutyStart : string;
-  dutyEnd : string;
-  qualification : string;
-  op : bigint;
-
+  name: string;
+  experience: string;
+  speciality: string;
+  mobile: bigint;
+  days: string[];
+  dutyStart: string;
+  dutyEnd: string;
+  qualification: string;
+  op: bigint;
 };
 
-export default function DoctorRecord() {
+export default function DoctorDashboard() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +51,6 @@ export default function DoctorRecord() {
 
   const generateUniqueId = () => {
     return Math.floor(10000000 + Math.random() * 90000000).toString()
-
   }
 
   useEffect(() => {
@@ -65,8 +61,7 @@ export default function DoctorRecord() {
           throw new Error('Hospital canister ID not found');
         }
         console.log('Initializing actor with canister ID:', canisterId);
-        const agent = new HttpAgent({ host: 'https://ic0.app' }); // Update this URL if your local network is different
-        //// await agent.fetchRootKey();
+        const agent = new HttpAgent({ host: 'https://ic0.app' });
         const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
           agent,
           canisterId,
@@ -107,8 +102,6 @@ export default function DoctorRecord() {
       fetchDoctors();
     }
   }, [hospitalActor, fetchDoctors]);
-
-  
 
   const handleAddDoctor = async (formData: FormData) => {
     if (!hospitalActor) {
@@ -163,7 +156,6 @@ export default function DoctorRecord() {
       return { ...prev, [key]: value === 'all' ? '' : value }
     })
     setCurrentPage(1)
-    
   }, [])
 
   const filteredDoctors = useMemo(() => {
@@ -197,7 +189,6 @@ export default function DoctorRecord() {
     }
   }, [paginatedDoctors, currentPage])
 
-
   const simulateLoading = useCallback(() => {
     setIsLoading(true)
     setTimeout(() => setIsLoading(false), 1500)
@@ -205,7 +196,6 @@ export default function DoctorRecord() {
 
   const SidebarContent = () => (
     <>
-      {/* <h2 className="text-xl md:text-2xl font-bold text-[#7047eb] mb-8">Healers Healthcare</h2> */}
       <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
       <nav className="space-y-2">
         {[
@@ -217,7 +207,7 @@ export default function DoctorRecord() {
           <React.Fragment key={item.name}>
             <Link 
               to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#7047eb] transition-colors duration-200"
+              className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
               onClick={() => setIsSidebarOpen(false)}
             >
               <item.icon className="h-5 w-5 md:mr-3" />
@@ -229,52 +219,32 @@ export default function DoctorRecord() {
       </nav>
     </>
   )
-  /*
-  const EnhancedDoctorForm: React.FC<{ onSubmit: (formData: FormData) => void; onCancel: () => void }> = ({ onSubmit, onCancel }) => {
-    const [selectedDays, setSelectedDays] = useState<string[]>([]);
   
-    const handleConditionChange = (condition: string) => {
-      setSelectedDays(prev =>
-        prev.includes(condition)
-          ? prev.filter(c => c !== condition)
-          : [...prev, condition]
-      );
-    };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append('days', selectedDays.join(', '));
-    onSubmit(formData);
-  };
-  
-*/  
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
-      {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-n-8 p-4 md:p-6">
+        <SheetContent side="left" className="w-[240px] bg-[#030b0b] p-4 md:p-6">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-n-8 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
-      {/* Main content */}
       <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <Toaster />
         <h1 className="text-4xl md:text-5xl text-center lg:text-left font-bold mb-4 text-white">Doctor Dashboard</h1>
         <p className="text-gray-400 text-center lg:text-left mb-8">Manage and view detailed information about doctors, their specialties, and schedules.</p>
         
         <section className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <Select onValueChange={(value) => handleFilter('specialty', value)}>
-            <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#7047eb] rounded-lg">
+            <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Specialty" />
             </SelectTrigger>
             <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -300,24 +270,24 @@ export default function DoctorRecord() {
           </div>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
-            <Search className="hidden sm:block text-[#7047eb]" />
+            <Search className="hidden sm:block text-[#259b95]" />
             <Input
               placeholder="Search by name or ID"
-              className="w-full md:w-auto bg-transparent border hover:border-[#7047eb] text-white border-gray-700"
+              className="w-full md:w-auto bg-transparent border hover:border-[#259b95] text-white border-gray-700"
               onChange={(e) => handleFilter('search', e.target.value)}
             />
           </div>
 
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full md:w-auto bg-black border hover:bg-transparent hover:border-[#7047eb] text-white rounded-lg">
+              <Button className="w-full md:w-auto bg-[#259b95] border hover:bg-transparent hover:border-[#259b95] text-white rounded-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Doctor
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-black text-white border-gray-700 max-w-[90%] h-[70%] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#7047eb] mb-4">Add New Doctor</DialogTitle>
+                <DialogTitle className="text-2xl font-bold text-[#259b95] mb-4">Add New Doctor</DialogTitle>
               </DialogHeader>
               <form onSubmit={(e) => {
                 e.preventDefault();
@@ -326,36 +296,26 @@ export default function DoctorRecord() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-
-
-                       <User className="text-[#fff]" />
-                      <Label htmlFor="name">Name</Label>
-                    </div>
-                      <Input id="name" name="name" placeholder="Dr. John Doe" className="bg-black border-gray-700 focus:border-[#7047eb]" />
-                    
-
+                      <div className="flex items-center space-x-2">
+                        <User className="text-[#259b95]" />
+                        <Label htmlFor="name">Name</Label>
+                      </div>
+                      <Input id="name" name="name" placeholder="Dr. John Doe" className="bg-black border-gray-700 focus:border-[#259b95]" />
                     </div>
                     <div className="space-y-2">
-                      
                       <div className="flex items-center space-x-2">
-
-
-                      <Briefcase className="text-[#fff]" />
-                      <Label htmlFor="experience">Experience (years)</Label>
-</div>
-
-                      <Input id="experience" name="experience" type="number" placeholder="5" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                        <Briefcase className="text-[#259b95]" />
+                        <Label htmlFor="experience">Experience (years)</Label>
+                      </div>
+                      <Input id="experience" name="experience" type="number" placeholder="5" className="bg-black border-gray-700 focus:border-[#259b95]" />
                     </div>
                     <div className="space-y-2">
-                      
                       <div className="flex items-center space-x-2">
-
-
-                      <UserCog className="text-[#fff]" />
-<Label htmlFor="specialty">Specialty</Label></div>
+                        <UserCog className="text-[#259b95]" />
+                        <Label  htmlFor="specialty">Specialty</Label>
+                      </div>
                       <Select name="specialty">
-                        <SelectTrigger className="bg-black border-gray-700 focus:border-[#7047eb]">
+                        <SelectTrigger className="bg-black border-gray-700 focus:border-[#259b95]">
                           <SelectValue placeholder="Select Specialty" />
                         </SelectTrigger>
                         <SelectContent className="bg-black border-gray-700">
@@ -367,22 +327,18 @@ export default function DoctorRecord() {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-
-
-                      <Phone className="text-[#fff]" />
-<Label htmlFor="mobile">Mobile No.</Label>
-</div>
-                      <Input id="mobile" name="mobile" placeholder="+1 234 567 8900" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                        <Phone className="text-[#259b95]" />
+                        <Label htmlFor="mobile">Mobile No.</Label>
+                      </div>
+                      <Input id="mobile" name="mobile" placeholder="+1 234 567 8900" className="bg-black border-gray-700 focus:border-[#259b95]" />
                     </div>
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      
                       <div className="flex items-center space-x-2">
-                        <CalendarCheck className="text-[#fff]" />
-
-
-<Label>Days Available</Label></div>
+                        <CalendarCheck className="text-[#259b95]" />
+                        <Label>Days Available</Label>
+                      </div>
                       <div className="grid grid-cols-3 gap-2">
                         {days.map(day => (
                           <div key={day} className="flex items-center space-x-2">
@@ -394,69 +350,57 @@ export default function DoctorRecord() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                       
                         <div className="flex items-center space-x-2">
-
-
-                        <Clock className="text-[#fff]" />
-                        <Label htmlFor="dutyStart">Duty Start Time</Label></div>
-                        <Input id="dutyStart" name="dutyStart" type="time" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                          <Clock className="text-[#259b95]" />
+                          <Label htmlFor="dutyStart">Duty Start Time</Label>
+                        </div>
+                        <Input id="dutyStart" name="dutyStart" type="time" className="bg-black border-gray-700 focus:border-[#259b95]" />
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-
-
-                        <Clock className="text-[#fff]" />
-                        <Label htmlFor="dutyEnd">Duty End Time</Label>
-</div>
-                        <Input id="dutyEnd" name="dutyEnd" type="time" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                          <Clock className="text-[#259b95]" />
+                          <Label htmlFor="dutyEnd">Duty End Time</Label>
+                        </div>
+                        <Input id="dutyEnd" name="dutyEnd" type="time" className="bg-black border-gray-700 focus:border-[#259b95]" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-
-
-                      <Briefcase className="text-[#fff]" />
-<Label htmlFor="qualification">Qualification</Label>
-</div>
-                      <Input id="qualification" name="qualification" placeholder="MBBS, MD" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                        <Briefcase className="text-[#259b95]" />
+                        <Label htmlFor="qualification">Qualification</Label>
+                      </div>
+                      <Input id="qualification" name="qualification" placeholder="MBBS, MD" className="bg-black border-gray-700 focus:border-[#259b95]" />
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-
-
-                      <CalendarIcon className="text-[#fff]" />
-<Label htmlFor="opdFees">OPD Fees</Label>
-</div>
-                      <Input id="opdFees" name="opdFees" type="number" placeholder="100" className="bg-black border-gray-700 focus:border-[#7047eb]" />
+                        <CalendarIcon className="text-[#259b95]" />
+                        <Label htmlFor="opdFees">OPD Fees</Label>
+                      </div>
+                      <Input id="opdFees" name="opdFees" type="number" placeholder="100" className="bg-black border-gray-700 focus:border-[#259b95]" />
                     </div>
                   </div>
                 </div>
-                <Button type="submit" className="w-[30vh] bg-black border hover:bg-transparent hover:border-[#7047eb] text-white">
+                <div className='w-full flex justify-center'>
+
+                <Button type="submit" className="px-8 bg-[#259b95] hover:bg-[#1a6b67] text-white">
                   Add Doctor
                 </Button>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
         </section>
 
         <div className='relative'>
-          {/* <MouseParallax ref={parallaxRef} className="relative z-10">
-            <div className="hidden sm:block inset-0 left-90 w-[56.625rem] opacity-10 mix-blend-color-dodge pointer-events-none">
-              <div className="absolute top-1/2 left-1/2 w-[58.85rem] h-[58.85rem] -translate-x-3/4 -translate-y-1/2">
-                <img className="w-full" src='/gradient.png' width={942} height={942} alt="" />
-              </div>
-            </div>
-          </MouseParallax> */}
           <div className="bg-n-8/[0.5] rounded-lg p-4 overflow-x-auto shadow-lg">
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">
-                  <TableHead className="text-[#7047eb] border-r">ID</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Name</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Specialty</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Days Available</TableHead>
-                  <TableHead className="text-[#7047eb] ">Duty Time</TableHead>
+                  <TableHead className="text-[#259b95] border-r">ID</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Name</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Specialty</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Days Available</TableHead>
+                  <TableHead className="text-[#259b95]">Duty Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -471,10 +415,10 @@ export default function DoctorRecord() {
                     </TableRow>
                   ))
                 ) : (
-                  paginatedDoctors.map((doctor, index ) => (
+                  paginatedDoctors.map((doctor, index) => (
                     <TableRow 
                       key={index} 
-                      className="border-b border-transparent hover:bg-[#7047eb20] transition-colors duration-200 rounded-lg"
+                      className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
                       <TableCell>{generateUniqueId()}</TableCell>
                       <TableCell>{doctor.name}</TableCell>
@@ -493,7 +437,7 @@ export default function DoctorRecord() {
           <div className="flex items-center space-x-2">
             <span>Show</span>
             <Select onValueChange={handleItemsPerPageChange} defaultValue="10">
-              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#7047eb] rounded-full">
+              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -513,7 +457,7 @@ export default function DoctorRecord() {
                 simulateLoading()
               }}
               disabled={currentPage === 1 || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
@@ -525,7 +469,7 @@ export default function DoctorRecord() {
                 simulateLoading()
               }}
               disabled={currentPage === totalPages || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-2" />
