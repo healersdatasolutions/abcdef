@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, Clock, Search, CalendarIcon, Menu, Phone, Mail } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -13,12 +13,12 @@ import { Skeleton } from "../../components/ui/skeleton"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
 import { Textarea } from "../../components/ui/textarea"
 import { Checkbox } from "../../components/ui/checkbox"
-import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend"; 
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { Actor, HttpAgent } from '@dfinity/agent'
 import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
-import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-import App from 'next/app'
+import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
+import { Toaster } from "../../components/ui/sonner"
+import { toast } from "sonner"
 
 const statuses = ['Pending', 'Done']
 const doctors = [
@@ -26,26 +26,26 @@ const doctors = [
   'Dr. John Doe',
   'Dr. Emily Johnson',
   'Dr. Michael Brown',
-   'Dr. Sarah Lee'
+  'Dr. Sarah Lee'
 ]
+
 type Appointment = {
- 
-    patientName : string;
-    patientAge : string;
-    gender : string;
-    contact : bigint;
-    email : string;
-    doctor : string;
-    date : string;
-    appTime : string;
-    consultation : string;
-    existingConditions: [string];
-    currentMedications : string;
-    allergies : string;
-    nOfVisits : bigint;
-    insuranceProvider : string;
-    emergencyContactName : string;
-    emergencyContactPhone : bigint; 
+  patientName: string;
+  patientAge: string;
+  gender: string;
+  contact: bigint;
+  email: string;
+  doctor: string;
+  date: string;
+  appTime: string;
+  consultation: string;
+  existingConditions: [string];
+  currentMedications: string;
+  allergies: string;
+  nOfVisits: bigint;
+  insuranceProvider: string;
+  emergencyContactName: string;
+  emergencyContactPhone: bigint; 
 }
 
 type Filters = {
@@ -53,7 +53,6 @@ type Filters = {
   search: string;
   date: string;
 };
-
 
 export default function Appointment() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -78,7 +77,6 @@ export default function Appointment() {
       }
       console.log('Initializing actor with canister ID:', canisterId)
       const agent = new HttpAgent({ host: 'https://ic0.app' }) 
-      //// await agent.fetchRootKey()
       const actor = Actor.createActor<HospitalService>(idlFactory as unknown as InterfaceFactory, {
         agent,
         canisterId,
@@ -179,12 +177,15 @@ export default function Appointment() {
       )
 
       console.log("Appointment added successfully")
+      toast.success("Appointment added successfully")
       setIsOpen(false)
       fetchAppointments()
     } catch (error) {
       console.error('Error adding appointment:', error)
+      toast.error('Failed to add appointment. Please try again.')
     }
   }
+
   const handleFilter = useCallback((key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value === 'all' ? '' : value }))
     setCurrentPage(1)
@@ -242,7 +243,7 @@ export default function Appointment() {
           <React.Fragment key={item.name}>
             <Link 
               to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#7047eb] transition-colors duration-200"
+              className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
               onClick={() => setIsSidebarOpen(false)}
             >
               <item.icon className="h-5 w-5 md:mr-3" />
@@ -255,12 +256,6 @@ export default function Appointment() {
     </>
   )
 
- interface AppointmentFormProps {
-  onSubmit: (formData: FormData) => void;  
-  onCancel: () => void;
-}
-
-  
   const EnhancedAppointmentForm: React.FC<{ onSubmit: (formData: FormData) => void; onCancel: () => void }> = ({ onSubmit, onCancel }) => {
     const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   
@@ -279,22 +274,21 @@ export default function Appointment() {
       onSubmit(formData);
     };
 
-  
     return (
       <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#7047eb]">Basic Information</h3>
+            <h3 className="text-lg font-semibold text-[#259b95]">Basic Information</h3>
             <div className="flex items-center space-x-2">
-              <User className="text-[#7047eb]" />
-              <Input name="patientName" placeholder="Patient Name" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <User className="text-[#259b95]" />
+              <Input name="patientName" placeholder="Patient Name" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
             <div className="flex items-center space-x-2">
-              <Input name="patientAge" type="number" placeholder="Patient Age" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <Input name="patientAge" type="number" placeholder="Patient Age" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
             <Select name="patientGender">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover:border-[#259b95] transition duration-200">
                 <SelectValue placeholder="Patient Gender" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -305,20 +299,20 @@ export default function Appointment() {
               </SelectContent>
             </Select>
             <div className="flex items-center space-x-2">
-              <Phone className="text-[#7047eb]" />
-              <Input name="contactNumber" type="tel" placeholder="Contact Number" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <Phone className="text-[#259b95]" />
+              <Input name="contactNumber" type="tel" placeholder="Contact Number" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
             <div className="flex items-center space-x-2">
-              <Mail className="text-[#7047eb]" />
-              <Input name="emailAddress" type="email" placeholder="Email Address" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <Mail className="text-[#259b95]" />
+              <Input name="emailAddress" type="email" placeholder="Email Address" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
           </div>
   
           {/* Appointment Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#7047eb]">Appointment Details</h3>
+            <h3 className="text-lg font-semibold text-[#259b95]">Appointment Details</h3>
             <Select name="doctorName">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover:border-[#259b95] transition duration-200">
                 <SelectValue placeholder="Select Doctor" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -327,12 +321,12 @@ export default function Appointment() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex items-center space-x-2">
-              <Calendar className="text-[#7047eb]" />
-              <Input name="appointmentDate" type="date" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+            <div className="flex items-center  space-x-2">
+              <Calendar className="text-[#259b95]" />
+              <Input name="appointmentDate" type="date" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
             <Select name="appointmentTime">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover:border-[#259b95] transition duration-200">
                 <SelectValue placeholder="Appointment Time" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -342,7 +336,7 @@ export default function Appointment() {
               </SelectContent>
             </Select>
             <Select name="consultationType">
-              <SelectTrigger className="w-full bg-black border hover:border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover:border-[#259b95] transition duration-200">
                 <SelectValue placeholder="Type of Consultation" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -354,7 +348,7 @@ export default function Appointment() {
   
           {/* Medical Information */}
           <div className="space-y-4 md:col-span-2">
-            <h3 className="text-lg font-semibold text-[#7047eb]">Medical Information</h3>
+            <h3 className="text-lg font-semibold text-[#259b95]">Medical Information</h3>
             <div className="space-y-2">
               <Label>Existing Conditions</Label>
               <div className="grid grid-cols-2 gap-2">
@@ -376,7 +370,7 @@ export default function Appointment() {
                 id="currentMedications" 
                 name="currentMedications" 
                 placeholder="List your current medications" 
-                className="bg-black border hover:border-[#7047eb] transition duration-200"
+                className="bg-black border hover:border-[#259b95] transition duration-200"
               />
             </div>
             <div className="space-y-2">
@@ -385,20 +379,20 @@ export default function Appointment() {
                 id="allergies" 
                 name="allergies" 
                 placeholder="List any allergies" 
-                className="bg-black border hover:border-[#7047eb] transition duration-200"
+                className="bg-black border hover:border-[#259b95] transition duration-200"
               />
             </div>
             <div className="flex items-center space-x-2">
-              <FileText className="text-[#7047eb]" />
-              <Input name="previousVisits" type="number" placeholder="Number of Previous Doctor Visits" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <FileText className="text-[#259b95]" />
+              <Input name="previousVisits" type="number" placeholder="Number of Previous Doctor Visits" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
           </div>
   
           {/*Insurance and Emergency */}
           <div className="space-y-4 md:col-span-2">
-            <h3 className="text-lg font-semibold text-[#7047eb]">Insurance and Emergency</h3>
+            <h3 className="text-lg font-semibold text-[#259b95]">Insurance and Emergency</h3>
             <Select name="insuranceProvider">
-              <SelectTrigger className="w-full bg-black border hover: border-[#7047eb] transition duration-200">
+              <SelectTrigger className="w-full bg-black border hover:border-[#259b95] transition duration-200">
                 <SelectValue placeholder="Insurance Provider" />
               </SelectTrigger>
               <SelectContent className="bg-black border-gray-700">
@@ -409,21 +403,21 @@ export default function Appointment() {
               </SelectContent>
             </Select>
             <div className="flex items-center space-x-2">
-              <User className="text-[#7047eb]" />
-              <Input name="emergencyContact" placeholder="Emergency Contact Name" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <User className="text-[#259b95]" />
+              <Input name="emergencyContact" placeholder="Emergency Contact Name" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
             <div className="flex items-center space-x-2">
-              <Phone className="text-[#7047eb]" />
-              <Input name="emergencyPhone" type="tel" placeholder="Emergency Contact Phone" className="flex-grow bg-black border hover:border-[#7047eb] transition duration-200" />
+              <Phone className="text-[#259b95]" />
+              <Input name="emergencyPhone" type="tel" placeholder="Emergency Contact Phone" className="flex-grow bg-black border hover:border-[#259b95] transition duration-200" />
             </div>
           </div>
         </div>
   
         <div className="flex justify-end space-x-4">
-          <Button type="button" onClick={onCancel} variant="outline" className="border-[#7047eb] text-[#7047eb] hover:bg-[#7047eb] hover:text-white">
+          <Button type="button" onClick={onCancel} variant="outline" className="border-[#259b95] text-[#259b95] hover:bg-[#259b95] hover:text-white">
             Cancel
           </Button>
-          <Button type="submit" className="bg-[#7047eb] hover:bg-[#5f3cc4] text-white">
+          <Button type="submit" className="bg-[#259b95] hover:bg-[#1a6b67] text-white">
             Add Appointment
           </Button>
         </div>
@@ -433,31 +427,29 @@ export default function Appointment() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
-      {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-n-8 p-4 md:p-6">
+        <SheetContent side="left" className="w-[240px] bg-[#030b0b] p-4 md:p-6">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-n-8 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
-      {/* Main content */}
       <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <Toaster />
         <h1 className="text-4xl md:text-5xl text-center lg:text-left font-bold mb-4 text-white">Appointments</h1>
         <p className="text-gray-400 text-center lg:text-left mb-8">Manage and view all scheduled appointments for patients and doctors.</p>
         
         <section className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <Select onValueChange={(value) => handleFilter('status', value)}>
-            <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#7047eb] rounded-lg">
+            <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -472,30 +464,30 @@ export default function Appointment() {
             <Label>Date:</Label>
             <Input
               type="date"
-              onChange={(e) => handleFilter('time', e.target.value)}
-              className="bg-transparent border hover:border-[#7047eb] text-white"
+              onChange={(e) => handleFilter('date', e.target.value)}
+              className="bg-transparent border hover:border-[#259b95] text-white"
             />
           </div>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
-            <Search className="hidden sm:block text-[#7047eb]" />
+            <Search className="hidden sm:block text-[#259b95]" />
             <Input
               placeholder="Search by patient, doctor or ID"
-              className="w-full md:w-auto bg-transparent border hover:border-[#7047eb] text-white"
+              className="w-full md:w-auto bg-transparent border hover:border-[#259b95] text-white"
               onChange={(e) => handleFilter('search', e.target.value)}
             />
           </div>
 
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full md:w-auto bg-[#7047eb] border hover:bg-transparent hover:border-[#7047eb] text-white rounded-lg">
+              <Button className="w-full md:w-auto bg-[#259b95] border hover:bg-transparent hover:border-[#259b95] text-white rounded-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 New Appointment
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-black text-white border-gray-700 max-w-6xl max-h-[90vh]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#7047eb] mb-4">Add New Appointment</DialogTitle>
+                <DialogTitle className="text-2xl font-bold text-[#259b95] mb-4">Add New Appointment</DialogTitle>
               </DialogHeader>
               <EnhancedAppointmentForm 
                 onSubmit={handleAddAppointment}
@@ -510,11 +502,11 @@ export default function Appointment() {
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">
-                  <TableHead className="text-[#7047eb] border-r">Appointment ID</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Patient</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Doctor</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Time</TableHead>
-                  <TableHead className="text-[#7047eb]">Status</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Appointment ID</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Patient</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Doctor</TableHead>
+                  <TableHead className="text-[#259b95] border-r">Time</TableHead>
+                  <TableHead className="text-[#259b95]">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -532,7 +524,7 @@ export default function Appointment() {
                   paginatedAppointments.map((appointment, index) => (
                     <TableRow 
                       key={index} 
-                      className="border-b border-transparent hover:bg-[#7047eb20] transition-colors duration-200 rounded-lg"
+                      className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
                       <TableCell>{generateUniqueId()}</TableCell>
                       <TableCell>{appointment.patientName}</TableCell>
@@ -555,7 +547,7 @@ export default function Appointment() {
           <div className="flex items-center space-x-2">
             <span>Show</span>
             <Select onValueChange={handleItemsPerPageChange} defaultValue="10">
-              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#7047eb] rounded-full">
+              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -575,7 +567,7 @@ export default function Appointment() {
                 simulateLoading()
               }}
               disabled={currentPage === 1 || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
@@ -587,7 +579,7 @@ export default function Appointment() {
                 simulateLoading()
               }}
               disabled={currentPage === totalPages || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-2" />
@@ -597,8 +589,4 @@ export default function Appointment() {
       </div>
     </div>
   )
-}
-
-function setError(arg0: string) {
-  throw new Error('Function not implemented.')
 }

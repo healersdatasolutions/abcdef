@@ -1,9 +1,31 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, MapPin, Droplet, Ruler, Weight, Pill, Stethoscope, FileSymlink, FileText as FileTextIcon, Upload, Trash2, Search, CalendarIcon, Menu } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, FileText as FileTextIcon, Trash2, Search, CalendarIcon, Menu } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
+import { 
+  FaUser, 
+  FaBirthdayCake, 
+  FaVenusMars, 
+  FaMapMarkerAlt, 
+  FaTint, 
+  FaRulerVertical, 
+  FaWeight, 
+  FaHospital, 
+  FaUserMd, 
+  FaCalendarCheck, 
+  FaPrescription, 
+  FaFirstAid, 
+  FaFileAlt, 
+  FaStethoscope, 
+  FaFlask, 
+  FaComments, 
+  FaUpload, 
+  FaTrashAlt, 
+  FaPlus 
+} from 'react-icons/fa'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
@@ -14,7 +36,8 @@ import { Link } from 'react-router-dom';
 import { DateRange } from 'react-day-picker';
 import { Skeleton } from "../../components/ui/skeleton"
 import { Sheet, SheetContent, SheetTrigger } from "../../components/ui/sheet"
-import { Transition, Dialog as HeadlessDialog } from '@headlessui/react'
+import { Transition, Dialog as HeadlessDialog, Dialog, DialogPanel, DialogTitle, TransitionChild } from '@headlessui/react'
+import { Toaster } from "../../components/ui/sonner"
 import GridPattern from "../../components/magicui/grid-pattern";
 import { healers_healthcare_backend } from "../../../../declarations/healers-healthcare-backend";
 import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
@@ -27,6 +50,8 @@ import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 import { Principal } from '@dfinity/principal';
 import { toast } from "sonner" 
 import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 /*interface HospitalService {
   listPatients(): unknown
@@ -192,10 +217,11 @@ export default function PatientHealthRecord() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAddingPatient, setIsAddingPatient] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
-    if (e.target instanceof HTMLInputElement && e.target.type === 'file') {
+    if ('files' in e.target && e.target.type === 'file') {
       // Handle file input
       const file = e.target.files ? e.target.files[0] : null;
 
@@ -218,7 +244,8 @@ export default function PatientHealthRecord() {
       setError('Unable to add patient. Please try logging in again.');
       return;
     }
-  
+    setIsOpen(false);
+    toast.success('Patient details added successfully');
     setIsLoading(true);
     setError(null);
   
@@ -236,12 +263,16 @@ export default function PatientHealthRecord() {
         newPatient.medicalHistories,
         newPatient.testReports
       );
-  
+      
       console.log('Patient added successfully, result:', result);
+      
+      
+      
       fetchPatients();
       // Reset form and show success message
     } catch (error) {
       console.error('Error adding patient:', error);
+      
       if (error instanceof Error) {
         setError(`Failed to add patient: ${error.message}`);
       } else {
@@ -450,7 +481,9 @@ export default function PatientHealthRecord() {
     setIsLoading(true)
     setInterval(() => setIsLoading(false), 1500)
   }, [])
-
+  const handleClose = () => {
+    setIsOpen(false);
+  };
   const SidebarContent = () => (
     <>
       {/* <h2 className="text-xl md:text-2xl font-bold text-[#fff] mb-8">Healers Healthcare</h2> */}
@@ -465,13 +498,13 @@ export default function PatientHealthRecord() {
           <React.Fragment key={item.name}>
             <Link 
               to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#7047eb] transition-colors duration-200"
+              className="flex items-center border border-transparent p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
               onClick={() => setIsSidebarOpen(false)}
             >
               <item.icon className="h-5 w-5 md:mr-3" />
               <span className='md:block'>{item.name}</span>
             </Link>
-            {index < 3 && <div className="h-px bg-gray-700 my-2 mx-4" />}
+            {index < 3 && <div className="h-px bg-[#0c302e] my-2 " />}
           </React.Fragment>
         ))}
       </nav>
@@ -518,18 +551,19 @@ export default function PatientHealthRecord() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-n-8 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
       {/* Main content */}
       <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
-        <h1 className="text-4xl text-center lg:text-left md:text-5xl font-bold mb-4 text-white">Patient Health Records</h1>
-        <p className="text-gray-400 text-center lg:text-left mb-8">Manage and view detailed patient information, medical histories, and test reports.</p>
+      <Toaster />
+        <h1 className="text-4xl text-center lg:text-left lg:px-10 md:text-5xl font-bold mb-4 text-white">Patient Health Records</h1>
+        <p className="text-gray-400 lg:text-left lg:px-10 text-center mb-8 lg:mb-14">Manage and view detailed patient information, medical histories, and test reports.</p>
         
-        <section className="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <section className="flex max-w-6xl mx-auto flex-wrap justify-between items-center mb-6 gap-4 lg:px-5">
           <Select onValueChange={(value) => handleFilter('gender', value)}>
-            <SelectTrigger className="w-full md:w-[150px] bg-n-8 text-white border hover:border-[#7047eb] rounded-lg">
+            <SelectTrigger className="w-full md:w-[150px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Gender" />
             </SelectTrigger>
             <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -541,10 +575,10 @@ export default function PatientHealthRecord() {
           </Select>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
-            <Search className="hidden sm:block text-[#7047eb]" />
+            <Search className="hidden sm:block text-[#259b95]" />
             <Input
               placeholder="Search by name or ID"
-              className="w-full md:w-auto bg-transparent border hover:border-[#7047eb] text-white border-gray-700"
+              className="w-full md:w-auto bg-transparent border hover:border-[#259b95] text-white border-gray-700 "
               onChange={(e) => handleFilter('search', e.target.value)}
             />
           </div>
@@ -587,288 +621,282 @@ export default function PatientHealthRecord() {
           </Popover>
 
           {/* Updated Form Popup */}
-          <Transition appear show={isOpen} as={React.Fragment}>
-            <HeadlessDialog
-              as="div"
-              className="relative z-50"
-              onClose={() => setIsOpen(false)}
-            >
-              <Transition.Child
-                as={React.Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <div className="fixed inset-0 bg-black bg-opacity-25" />
-              </Transition.Child>
+        
+          <Dialog open={isOpen} as="div"
+              className="relative z-50" onClose={() => {}}>
+            
+              
 
               <div className="fixed inset-0 overflow-y-auto">
                 <div className="flex min-h-full items-center justify-center p-4 text-center">
-                  <Transition.Child
-                    as={React.Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                  >
-                    <HeadlessDialog.Panel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-black p-6 text-left align-middle shadow-xl transition-all">
+                  
+                    <DialogPanel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-black p-6 text-left align-middle shadow-xl transition-all">
                       <div className='w-full flex justify-end'>
 
-                    <Button type="button" onClick={() => setIsOpen(false)} className="bg-black border text-white hover:bg-transparent hover:border-red-500">
+                    <Button type="button" onClick={handleClose} className="bg-black border text-white hover:bg-transparent hover:border-red-500">
                             X
                           </Button>
                       </div>
-                      <HeadlessDialog.Title 
+                      {/* <DialogTitle 
                         as="h3" 
                         className="text-4xl font-bold text-[#fff] mb-4 text-center"
                       >
                         Add New Patient
-                      </HeadlessDialog.Title>
-                      <form onSubmit={handleAddPatient} className="max-w-6xl mx-auto space-y-6 text-white">
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 bg-[#000] border-slate-600 rounded-lg p-5'>
-          <h3 className="text-2xl font-semibold mb-3 text-[#fff]">General Details</h3>
-          <div className="space-y-4 m-0 sm:m-10">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <div className="flex items-center space-x-2">
-                <User className="text-[#fff]" />
-                <Input id="name" name="name" placeholder="Enter patient's full name" value={newPatient.name} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="text-[#fff]" />
-                  <Input id="age" name="age" type="number" placeholder="e.g., 35" value={newPatient.age.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="gender">Gender</Label>
-                <div className="flex items-center space-x-2">
-                  <UserCog className="text-[#fff]" />
-                  <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } } as any)}>
-                    <SelectTrigger id="gender" className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-gray-700">
-                      <SelectItem value="Male">Male</SelectItem>
-                      <SelectItem value="Female">Female</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="text-[#fff]" />
-                  <Input id="location" name="location" placeholder="e.g., New York, NY" value={newPatient.location} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="blood">Blood Group</Label>
-                <div className="flex items-center space-x-2">
-                  <Droplet className="text-[#fff]" />
-                  <Select name="blood" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } } as any)}>
-                    <SelectTrigger id="blood" className="w-full bg-black border-gray-700 focus:border-[#7047eb]">
-                      <SelectValue placeholder="Select blood group" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-gray-700">
-                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
-                        <SelectItem key={group} value={group}>{group}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="height">Height</Label>
-              <div className="flex items-center space-x-2">
-                <Ruler className="text-[#fff]" />
-                <Input id="height" name="height" type="number" placeholder="e.g., 175 (in cm)" value={newPatient.height.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight">Weight</Label>
-              <div className="flex items-center space-x-2">
-                <Weight className="text-[#fff]" />
-                <Input id="weight" name="weight" type="number" placeholder="e.g., 70 (in kg)" value={newPatient.weight.toString()} onChange={handleInputChange} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 rounded-lg p-5'>
-          <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">Medical History Section</h1>
-          {newPatient.medicalHistories.map((history, index) => (
-            <div key={index} className="mb-6">
-              <h3 className="text-2xl font-semibold mb-3 text-[#fff]">Medical History {index + 1}</h3>
-              <div className="space-y-4 m-0 sm:m-10">
-                <div className="space-y-2">
-                  <Label htmlFor={`pharmacy${index}`}>Pharmacy</Label>
-                  <div className="flex items-center space-x-2">
-                    <Pill className="text-[#fff]" />
-                    <Input id={`pharmacy${index}`} name={`pharmacy${index}`} placeholder="e.g., City Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      </DialogTitle> */}
+                      <form onSubmit={handleAddPatient} className="w-full max-w-7xl mx-auto space-y-6 text-white">
+      <Card className="bg-gradient-to-b from-[#111] to-black border-zinc-900">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-center text-teal-500">Patient Registration</CardTitle>
+          <CardDescription className="text-center text-gray-400">Enter patient details below</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-3/4 mx-auto grid-cols-3 bg-black">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="medical">Medical History</TabsTrigger>
+              <TabsTrigger value="test">Test Reports</TabsTrigger>
+            </TabsList>
+            <TabsContent value="general">
+              <ScrollArea className="h-[60vh] pr-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor={`physician${index}`}>Physician</Label>
-                    <div className="flex items-center space-x-2">
-                      <Stethoscope className="text-[#fff]" />
-                      <Input id={`physician${index}`} name={`physician${index}`} placeholder="e.g., Dr. Johnson" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    <Label htmlFor="name">Name</Label>
+                    <div className="relative">
+                      <FaUser className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input id="name" name="name" placeholder="Enter patient's full name" value={newPatient.name} onChange={handleInputChange} className="pl-10" />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`event${index}`}>Event</Label>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="text-[#fff]" />
-                      <Input id={`event${index}`} name={`event${index}`} placeholder="e.g., Annual Check-up" value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Age</Label>
+                      <div className="relative">
+                        <FaBirthdayCake className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input id="age" name="age" type="number" placeholder="e.g., 35" value={newPatient.age.toString()} onChange={handleInputChange} className="pl-10" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`prescription${index}`}>Prescription</Label>
-                    <div className="flex items-center space-x-2">
-                      <FileSymlink className="text-[#fff]" />
-                      <Input id={`prescription${index}`} name={`prescription${index}`} placeholder="e.g., Amoxicillin 500mg" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    <div className="space-y-2">
+                      <Label htmlFor="gender">Gender</Label>
+                      <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } })}>
+                        <SelectTrigger id="gender">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`remedies${index}`}>Remedies</Label>
-                    <div className="flex items-center space-x-2">
-                      <Pill className="text-[#fff]" />
-                      <Input id={`remedies${index}`} name={`remedies${index}`} placeholder="e.g., Rest and fluids" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location</Label>
+                      <div className="relative">
+                        <FaMapMarkerAlt className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input id="location" name="location" placeholder="e.g., New York, NY" value={newPatient.location} onChange={handleInputChange} className="pl-10" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="blood">Blood Group</Label>
+                      <Select name="blood" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } })}>
+                        <SelectTrigger id="blood">
+                          <SelectValue placeholder="Select blood group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => (
+                            <SelectItem key={group} value={group}>{group}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="height">Height (cm)</Label>
+                      <div className="relative">
+                        <FaRulerVertical className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input id="height" name="height" type="number" placeholder="e.g., 175" value={newPatient.height.toString()} onChange={handleInputChange} className="pl-10" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weight">Weight (kg)</Label>
+                      <div className="relative">
+                        <FaWeight className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input id="weight" name="weight" type="number" placeholder="e.g., 70" value={newPatient.weight.toString()} onChange={handleInputChange} className="pl-10" />
+                      </div>
                     </div>
                   </div>
                 </div>
-                {index > 0 && (
-                  <Button type="button" onClick={() => removeMedicalHistory(index)} className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Remove Medical History
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="medical">
+              <ScrollArea className="h-[60vh] pr-4">
+                {newPatient.medicalHistories.map((history, index) => (
+                  <Card key={index} className="mb-4 bg-gradient-to-br from-black via-black to-[#0a2a28]">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Medical History {index + 1}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`pharmacy${index}`}>Pharmacy</Label>
+                        <div className="relative">
+                          <FaHospital className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input id={`pharmacy${index}`} name={`pharmacy${index}`} placeholder="City Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`physician${index}`}>Physician</Label>
+                          <div className="relative">
+                            <FaUserMd className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`physician${index}`} name={`physician${index}`} placeholder="Dr. Johnson" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`event${index}`}>Event</Label>
+                          <div className="relative">
+                            <FaCalendarCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`event${index}`} name={`event${index}`} placeholder="Annual Check-up" value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`prescription${index}`}>Prescription</Label>
+                          <div className="relative">
+                            <FaPrescription className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`prescription${index}`} name={`prescription${index}`} placeholder="Amoxicillin 500mg" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`remedies${index}`}>Remedies</Label>
+                          <div className="relative">
+                            <FaFirstAid className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`remedies${index}`} name={`remedies${index}`} placeholder="Rest and fluids" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      {index > 0 && (
+                        <Button variant="destructive" onClick={() => removeMedicalHistory(index)} className="ml-auto">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+                {newPatient.medicalHistories.length < 5 && (
+                  <Button type='button' onClick={addMedicalHistory} className="w-full mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Medical History
                   </Button>
                 )}
-              </div>
-            </div>
-          ))}
-          {newPatient.medicalHistories.length < 5 && (
-            <Button type="button" onClick={addMedicalHistory} className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Medical History
-            </Button>
-          )}
-        </div>
-
-        <div className='relative border border-[#171717] hover:border-[#155956] transition-all duration-300 rounded-lg p-5'>
-          <h1 className="text-4xl font-bold text-[#fff] mb-4 text-center">Test Report Section</h1>
-          {newPatient.testReports.map((report, index) => (
-            <div key={index} className="mt-6">
-              <h3 className="text-lg font-semibold mb-3 text-[#fff]">Test Report {index + 1}</h3>
-              <div className="space-y-4 m-0 sm:m-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor={`doctor${index}`}>Doctor</Label>
-                    <div className="flex items-center space-x-2">
-                      <UserCog className="text-[#fff]" />
-                      <Input id={`doctor${index}`} name={`doctor${index}`} placeholder="e.g., Dr. Smith" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`referredTo${index}`}>Referred To</Label>
-                    <div className="flex items-center space-x-2">
-                      <FileSymlink className="text-[#fff]" />
-                      <Input id={`referredTo${index}`} name={`referredTo${index}`} placeholder="e.g., Cardiology Dept." value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`testType${index}`}>Test Type</Label>
-                    <div className="flex items-center space-x-2">
-                      <FileText className="text-[#fff]" />
-                      <Input id={`testType${index}`} name={`testType${index}`} placeholder="e.g., Blood Test" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`comments${index}`}>Comments</Label>
-                    <div className="flex items-center space-x-2">
-                      <FileText className="text-[#fff]" />
-                      <Input id={`comments${index}`} name={`comments${index}`} placeholder="e.g., Normal results" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`file${index}`}>File Upload</Label>
-                    <div className="flex items-center space-x-2">
-                      <Upload className="text-[#fff]" />
-                      <Input 
-                        id={`file${index}`} 
-                        name={`file${index}`} 
-                        type="file" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              if (event.target?.result) {
-                                const arrayBuffer = event.target.result as ArrayBuffer;
-                                const uint8Array = new Uint8Array(arrayBuffer);
-                                handleTestReportChange(index, 'file', Array.from(uint8Array));
-                              }
-                            };
-                            reader.readAsArrayBuffer(file);
-                          }
-                        }} 
-                        className="flex-grow bg-black border-gray-700 focus:border-[#7047eb]" 
-                      />
-                    </div>
-                  </div>
-                </div>
-                {index > 0 && (
-                  <Button type="button" onClick={() => removeTestReport(index)} className="mt-4 bg-black text-white border hover:border-red-500 hover:bg-transparent">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Remove Test Report
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="test">
+              <ScrollArea className="h-[60vh] pr-4">
+                {newPatient.testReports.map((report, index) => (
+                  <Card key={index} className="mb-4 bg-gradient-to-br from-black via-black to-[#0a2a28]">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Test Report {index + 1}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`doctor${index}`}>Doctor</Label>
+                        <div className="relative">
+                          <FaUserMd className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input id={`doctor${index}`} name={`doctor${index}`} placeholder="Dr. Smith" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`referredTo${index}`}>Referred To</Label>
+                          <div className="relative">
+                            <FaHospital className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`referredTo${index}`} name={`referredTo${index}`} placeholder="Cardiology Dept." value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`testType${index}`}>Test Type</Label>
+                          <div className="relative">
+                            <FaFlask className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`testType${index}`} name={`testType${index}`} placeholder="Blood Test" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`comments${index}`}>Comments</Label>
+                          <div className="relative">
+                            <FaComments className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input id={`comments${index}`} name={`comments${index}`} placeholder="Normal results" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`file${index}`}>File Upload</Label>
+                          <div className="relative">
+                            <FaUpload className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input 
+                              id={`file${index}`} 
+                              name={`file${index}`} 
+                              type="file" 
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    if (event.target?.result) {
+                                      const arrayBuffer = event.target.result as ArrayBuffer;
+                                      const uint8Array = new Uint8Array(arrayBuffer);
+                                      handleTestReportChange(index, 'file', Array.from(uint8Array));
+                                    }
+                                  };
+                                  reader.readAsArrayBuffer(file);
+                                }
+                              }} 
+                              className="pl-10" 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      {index > 0 && (
+                        <Button variant="destructive" onClick={() => removeTestReport(index)} className="ml-auto">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+                {newPatient.testReports.length < 5 && (
+                  <Button type='button' onClick={addTestReport} className="w-full mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Test Report
                   </Button>
                 )}
-              </div>
-            </div>
-          ))}
-          {newPatient.testReports.length < 5 && (
-            <Button type="button" onClick={addTestReport} className="mt-4 bg-black text-white border hover:border-green-500 hover:bg-transparent">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Test Report
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-6 flex justify-end space-x-4">
-        <Button type="button" onClick={() => setIsOpen(false)} className="bg-gray-600 hover:bg-gray-700">
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-black text-white border border-[#7047eb] hover:bg-[#7047eb]">
-          Add Patient
-        </Button>
-      </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        <CardFooter className="flex justify-end space-x-4">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            Add Patient
+          </Button>
+        </CardFooter>
+      </Card>
     </form>
-                    </HeadlessDialog.Panel>
-                  </Transition.Child>
+                    </DialogPanel>
+                 
                 </div>
               </div>
-            </HeadlessDialog>
-          </Transition>
-
-          <Button className="w-full md:w-auto bg-[#7047eb] border hover:bg-transparent hover:border-[#7047eb] text-white rounded-lg" onClick={() => setIsOpen(true)}>
+            </Dialog>
+          
+          <Button className="w-full md:w-auto bg-[#145451] border hover:bg-transparent hover:border-[#259b95] text-white rounded-lg" onClick={() => setIsOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Patient
           </Button>
         </section>
 
-        <div className='relative'>
+        <div className='relative max-w-6xl mx-auto'>
           {/* <MouseParallax ref={parallaxRef} className="relative z-10">
             <div className="hidden sm:block inset-0 left-90 w-[56.625rem] opacity-10 mix-blend-color-dodge pointer-events-none">
               <div className="absolute top-1/2 left-1/2 w-[58.85rem] h-[58.85rem] -translate-x-3/4 -translate-y-1/2">
@@ -880,45 +908,45 @@ export default function PatientHealthRecord() {
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">
-                  <TableHead className="text-[#7047eb] border-r">ID</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Name</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Age</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Gender</TableHead>
-                  <TableHead className="text-[#7047eb] border-r">Date</TableHead>
-                  <TableHead className="text-[#7047eb]">Actions</TableHead>
-                  <TableHead className="text-[#7047eb]">Delete</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">ID</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">Name</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">Age</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">Gender</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">Date</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg border-r">Actions</TableHead>
+                  <TableHead className="text-[#259b95] text-center text-lg">Delete</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   Array(itemsPerPage).fill(0).map((_, index) => (
                     <TableRow key={index}>
-                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className='mx-auto'><Skeleton className="h-4 w-8" /></TableCell>
                     </TableRow>
                   ))
                 ) : (
                   paginatedPatients.map((patient) => (
                     <TableRow 
                       key={patient.id} 
-                      className="border-b border-transparent hover:bg-[#7047eb20] transition-colors duration-200 rounded-lg"
+                      className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell>{patient.id}</TableCell>
-                      <TableCell>{patient.name}</TableCell>
-                      <TableCell>{String(patient.age)}</TableCell>
-                      <TableCell>{patient.gender}</TableCell>
-                      <TableCell>{formatDate(patient.pdate)}</TableCell>
-                      <TableCell>
-                        <Link to={`/patient/${patient.id}`} className="text-[#7047eb] hover:underline">
+                      <TableCell className='text-[1.12rem] text-center'>{patient.id}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{patient.name}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{String(patient.age)} yrs</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{patient.gender}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{formatDate(patient.pdate)}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center' >
+                        <Link to={`/patient/${patient.id}`} className="text-[#259b95] text-[1.12rem] text-center hover:underline">
                           View Details
                         </Link>
                       </TableCell>
-                      <TableCell className='border-transparent'>
+                      <TableCell className='border-transparent text-center'>
               <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => {
                   if (window.confirm('Are you sure you want to delete this patient?')) {
                     deletePatient(patient.id);
@@ -935,14 +963,14 @@ export default function PatientHealthRecord() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
+        <div className="flex flex-col max-w-6xl mx-auto md:flex-row lg:px-5 justify-between items-center mt-4 gap-4">
           <div className="flex items-center space-x-2">
             <span>Show</span>
             <Select onValueChange={handleItemsPerPageChange} defaultValue="10">
-              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#7047eb] rounded-full">
+              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-n-8 text-white border-gray-700">
+              <SelectContent className="bg-black text-white border-gray-700 hover:border-[#259b95] transition-all duration-200">
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
                 <SelectItem value="50">50</SelectItem>
@@ -959,7 +987,7 @@ export default function PatientHealthRecord() {
                 simulateLoading()
               }}
               disabled={currentPage === 1 || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
@@ -971,7 +999,7 @@ export default function PatientHealthRecord() {
                 simulateLoading()
               }}
               disabled={currentPage === totalPages || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#7047eb] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-2" />

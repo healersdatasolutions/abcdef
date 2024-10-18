@@ -31,6 +31,28 @@ import { _SERVICE as HospitalService } from '../../../declarations/healers-healt
 import { healers_healthcare_backend } from "../../../.././src/declarations/healers-healthcare-backend";
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
+import { 
+  FaUser, 
+  FaBirthdayCake, 
+  FaVenusMars, 
+  FaMapMarkerAlt, 
+  FaTint, 
+  FaRulerVertical, 
+  FaWeight, 
+  FaHospital, 
+  FaUserMd, 
+  FaCalendarCheck, 
+  FaPrescription, 
+  FaFirstAid, 
+  FaFileAlt, 
+  FaStethoscope, 
+  FaFlask, 
+  FaComments, 
+  FaUpload, 
+  FaTrashAlt, 
+  FaPlus, 
+  FaUserInjured
+} from 'react-icons/fa'
 
 
 
@@ -439,7 +461,7 @@ export default function PatientDetails() {
 
   const SidebarContent = () => (
     <>
-      {/* <h2 className="text-xl md:text-2xl font-bold text-[#7047eb] mb-8">Healers Healthcare</h2> */}
+      {/* <h2 className="text-xl md:text-2xl font-bold text-[#155956] mb-8">Healers Healthcare</h2> */}
       <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
       <nav className="space-y-2">
         {[
@@ -451,7 +473,7 @@ export default function PatientDetails() {
           <React.Fragment key={item.name}>
             <Link 
               to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#7047eb] transition-colors duration-200"
+              className="flex items-center p-3 rounded-lg hover:bg-[#155956] transition-colors duration-200"
               onClick={() => setIsSidebarOpen(false)}
             >
               <item.icon className="h-5 w-5 md:mr-3" />
@@ -509,62 +531,73 @@ const firstAppointment = appointmentsData[0] || {};
         
         <div className="mb-6 flex items-center text-sm text-gray-500">
           
-          <a href="/health-records" className="hover:text-[#7047eb]">Health Records</a>
+          <a href="/health-records" className="hover:text-[#155956]">Health Records</a>
           <span className="mx-2">/</span>
-          <span className="text-[#7047eb]">Patient Details</span>
+          <span className="text-[#155956]">Patient Details</span>
         </div>
 
             <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {editedData.id}</p>
-        <div className='relative bg-[#131313a2]  mb-12 flex-col items-center justify-center overflow-hidden rounded-lg border border-black md:shadow-xl'>
+        <div className='relative bg-[#131313a2]  mb-12 flex-col items-center justify-center overflow-hidden rounded-lg  md:shadow-xl'>
 
-          <Card className="bg-[#131313a2]">
+          <Card className="bg-gradient-to-br from-black  to-[#202020]">
           <div className="flex  flex-col mx-auto sm:mx-0 items-center my-0 lg:my-8 p-10 md:p-15 ">
             <div className='container flex flex-wrap px-0 md:justify-between'>
 
             
             </div>
-            <div className='grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-5 lg:gap-0 py-5'>
+            <div className='grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-5 lg:gap-10 py-5'>
 
-            <img src={`/defaultProfilePhoto.jpg`} alt="Patient" className="sm:col-span-4 w-[30vh] sm:w-[40vh] h-[30vh] sm:h-[40vh] rounded-lg hover:scale-95 transition duration-100 mx-auto lg:mx-0 sm:my-auto" />
+            <img src={`/defaultProfilePhoto.jpg`} alt="Patient" className="sm:col-span-4 size-full rounded-lg hover:scale-95 transition duration-100 mx-auto lg:mx-0 sm:my-auto" />
 
             <div className='flex flex-col justify-between w-full sm:col-span-8'>
-            <h1 className="text-5xl font-bold mb-8 text-white">Name: {editedData.name}</h1>
+              <div className='flex gap-3'>
+
+              <FaUserInjured className="text-5xl text-[#155956]" /> 
+            <h1 className="text-5xl font-bold mb-8 text-white">Name: <span className='text-white/85'>{editedData.name}</span></h1>
               
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="flex items-top gap-2 items-center">
-                  <User className="h-8 w-8 text-[#7047eb]" />
+                  {/* <User className="h-8 w-8 text-[#155956]" /> */}
+                  <FaVenusMars className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData.gender}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  <Cake className="h-8 w-8 text-[#7047eb]" />
+                  {/* <Cake className="h-8 w-8 text-[#155956]" /> */}
+                  <FaBirthdayCake className="h-7 w-7 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData.age.toString()}</p></span>
                 </div>
                 
                 <div className="flex items-top gap-2 items-center">
-                  <MapPin className="h-8 w-8 text-[#7047eb]" />
+                  {/* <MapPin className="h-8 w-8 text-[#155956]" /> */}
+                  <FaMapMarkerAlt className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData.location}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  <Droplet className="h-8 w-8 text-[#7047eb]" />
+                  {/* <Droplet className="h-8 w-8 text-[#155956]" /> */}
+                  <FaTint className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData.blood}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  <Ruler className="h-8 w-8 text-[#7047eb]" />
+                  {/* <Ruler className="h-8 w-8 text-[#155956]" /> */}
+                  <FaRulerVertical className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData.height.toString()}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  <Weight className="h-8 w-8 text-[#7047eb]" />
+                  {/* <Weight className="h-8 w-8 text-[#155956]" /> */}
+                  <FaWeight className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData.weight.toString()} kg</p></span>
                 </div>
                 {/*
                 <div className="flex items-top gap-2 items-center">
-                  <BackpackIcon className="h-8 w-8 text-[#7047eb]" />
+                  <BackpackIcon className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{firstAppointment?.occupation || 'N/A'}</p></span>
                 </div>
                 */}
                 
                 <div className="flex items-top gap-2 items-center">
-                  <User className="h-8 w-8 text-[#7047eb]" />
+                  {/* <User className="h-8 w-8 text-[#155956]" /> */}
+                  <FaUser className="h-8 w-8 text-[#155956]" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4><p className='text-white/55'>{firstAppointment?.contact ? String(firstAppointment.contact) : 'N/A'}</p></span>
                 </div>
                 
@@ -584,7 +617,7 @@ const firstAppointment = appointmentsData[0] || {};
             </div>
           </div>
           </Card>
-          <BorderBeam size={250} duration={12} delay={9} />
+          <BorderBeam size={550} duration={10} delay={9} />
 
         </div>
 
@@ -603,7 +636,7 @@ const firstAppointment = appointmentsData[0] || {};
           <h2 className="text-4xl font-bold">Patient Records</h2>
           <Drawer>
   <DrawerTrigger asChild>
-    <Button className="border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] text-white">Edit Patient Details</Button>
+    <Button className="border bg-[#155956] hover:bg-[#000] hover:border-[#155956] text-white">Edit Patient Details</Button>
   </DrawerTrigger>
   <DrawerContent className="bg-black text-white">
     <DrawerHeader>
@@ -622,7 +655,7 @@ const firstAppointment = appointmentsData[0] || {};
   value={typeof value === 'bigint' ? value.toString() : value}
   onChange={handleInputChange}
   type={key === 'age' || key === 'height' || key === 'weight' ? 'number' : 'text'}
-  className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+  className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
 />
           </div>
         )
@@ -643,7 +676,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`pharmacy${index}`}
                 value={history.pharmacy}
                 onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -653,7 +686,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`physician${index}`}
                 value={history.physician}
                 onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -663,7 +696,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`event${index}`}
                 value={history.event}
                 onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -673,7 +706,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`prescription${index}`}
                 value={history.prescription}
                 onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -683,7 +716,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`remedies${index}`}
                 value={history.remedies}
                 onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
           </div>
@@ -723,7 +756,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`doctor${index}`}
                 value={report.doctor}
                 onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -733,7 +766,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`referredTo${index}`}
                 value={report.referredTo}
                 onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -743,7 +776,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`testType${index}`}
                 value={report.testType}
                 onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -753,7 +786,7 @@ const firstAppointment = appointmentsData[0] || {};
                 name={`comments${index}`}
                 value={report.comments}
                 onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
             <div className="space-y-2">
@@ -776,7 +809,7 @@ const firstAppointment = appointmentsData[0] || {};
                     reader.readAsArrayBuffer(file);
                   }
                 }}
-                className="bg-black border hover:bg-transparent hover:border-[#7047eb] transition duration-200 text-white"
+                className="bg-black border hover:bg-transparent hover:border-[#155956] transition duration-200 text-white"
               />
             </div>
           </div>
@@ -804,7 +837,7 @@ const firstAppointment = appointmentsData[0] || {};
 
     <div className="p-4">
       <div className='w-full flex justify-center items-center'>
-        <Button onClick={handleSave} className="w-[30vh] border bg-[#7047eb] hover:bg-[#000] hover:border-[#7047eb] hover:text-white ">Save Changes</Button>
+        <Button onClick={handleSave} className="w-[30vh] border text-white bg-[#155956] hover:bg-[#000] hover:border-[#155956] hover:text-white ">Save Changes</Button>
       </div>
     </div>
     </ScrollArea>
@@ -818,10 +851,9 @@ const firstAppointment = appointmentsData[0] || {};
          {/* Medical History card */}
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-8 sm:my-32">
           <Link to={`/patient/${id}/medical-history`}>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full h-[45vh] bg-[#131313a2] border border-[#7047eb] rounded-lg flex items-center justify-center cursor-pointer p-20"
+            <div
+              
+              className="w-full h-[45vh] bg-gradient-to-br hover:scale-105 transition-all duration-150 from-black via-black to-[#2d2d2d]  rounded-lg flex items-center justify-center cursor-pointer p-20"
             >
                 <Lottie
                 animationData={defaultOptions.animationData}
@@ -829,18 +861,17 @@ const firstAppointment = appointmentsData[0] || {};
         width={150}
       />
               <div className="text-center">
-                {/* <FileText className="text-[#7047eb] w-16 h-16 mb-4 mx-auto" /> */}
+                {/* <FileText className="text-[#155956] w-16 h-16 mb-4 mx-auto" /> */}
                 <span className="text-2xl font-semibold">Medical History</span>
               </div>
-            </motion.div>
+            </div>
           </Link>
 
           {/* Test Report Card */}
           <Link to={`/patient/${id}/test-report`}>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full h-[45vh] bg-[#131313a2] border border-[#7047eb] rounded-lg flex items-center justify-center cursor-pointer p-20"
+            <div
+              
+              className="w-full h-[45vh] bg-gradient-to-bl from-black via-black to-[#2d2d2d] hover:scale-105 transition-all duration-150 rounded-lg flex items-center justify-center cursor-pointer p-20"
             >
                 <Lottie
                 animationData={defaultOptions2.animationData}
@@ -848,10 +879,10 @@ const firstAppointment = appointmentsData[0] || {};
         width={50}
       />
               <div className="text-center">
-                {/* <FileText className="text-[#7047eb] w-16 h-16 mb-4 mx-auto" /> */}
+                {/* <FileText className="text-[#155956] w-16 h-16 mb-4 mx-auto" /> */}
                 <span className="text-2xl font-semibold">Test Reports</span>
               </div>
-            </motion.div>
+            </div>
           </Link>
         </div>
 
@@ -872,8 +903,8 @@ const firstAppointment = appointmentsData[0] || {};
                   ? 'text-right ml-2 text-wrap'
                   : 'text-left mr-2 text-wrap'}`}>
                   <span className={`inline-block p-2 rounded-lg ${message.startsWith('You:')
-                    ? 'bg-[#7047eb] text-white'
-                    : 'bg-gray-700 text-white'}`}>
+                    ? 'bg-[#155956] text-white'
+                    : 'bg-[#646464] text-white'}`}>
                     {message}
                   </span>
                 </div>
@@ -885,11 +916,11 @@ const firstAppointment = appointmentsData[0] || {};
                 placeholder="Ask anything about this patient..."
                 value={aiQuery}
                 onChange={(e) => setAiQuery(e.target.value)}
-                className="w-full pr-12 bg-[#131313a2] border-[#7047eb] text-white placeholder-gray-400"
+                className="w-full pr-12 bg-[#131313a2] border-[#fff] text-white placeholder-gray-400"
               />
               <Button
                 type="submit"
-                className="absolute right-0.25 top-1/2 transform -translate-y-1/2 bg-[#7047eb] hover:bg-[#5f3cc4]"
+                className="absolute right-0.25 top-1/2 transform -translate-y-1/2 bg-[#fff] hover:bg-[#d5d5d5]"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -945,11 +976,11 @@ const firstAppointment = appointmentsData[0] || {};
                   <BarChart data={healthData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
-                    <YAxis yAxisId="left" orientation="left" stroke="#7047eb" />
+                    <YAxis yAxisId="left" orientation="left" stroke="#155956" />
                     <YAxis yAxisId="right" orientation="right" stroke="#ffffff" />
                     <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="weight" fill="#7047eb" />
+                    <Bar yAxisId="left" dataKey="weight" fill="#155956" />
                     <Bar yAxisId="right" dataKey="bloodPressure" fill="#ffffff" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -969,7 +1000,7 @@ const firstAppointment = appointmentsData[0] || {};
                     <YAxis />
                     <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
                     <Legend />
-                    <Line type="monotone" dataKey="progress" stroke="#7047eb" strokeWidth={2} />
+                    <Line type="monotone" dataKey="progress" stroke="#155956" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
