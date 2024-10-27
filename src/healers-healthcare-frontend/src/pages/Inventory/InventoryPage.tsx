@@ -198,7 +198,7 @@ export default function InventoryManagement() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen h-full bg-[url('/gradient9.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
