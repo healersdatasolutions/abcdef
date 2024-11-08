@@ -17,11 +17,12 @@ import TestReport from "./components/TestReport";
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
 import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
+
+import SignupButton from "./pages/Dev-Tools/DevAuth";
 import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
 import MetaMaskAuth from "./pages/Login-Signup/Metamask"
 
 import LandingPage from "./pages/LandingPage/LandingPage";
-
 
 
 function App() {
@@ -37,6 +38,11 @@ function App() {
     {
       path: "/login",
       element: <LoginSignup />,
+
+    },
+    {
+      path: "/dev-tools",
+      element: <SignupButton/>,
 
     },
     {
@@ -56,6 +62,7 @@ function App() {
       path: "/health-records",
       element: <Ehr />,
     },
+
     {
       path: "/doctor-dashboard",
       element: <DoctorDashboard />,
