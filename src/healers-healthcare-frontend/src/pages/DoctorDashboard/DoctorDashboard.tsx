@@ -222,7 +222,7 @@ export default function DoctorDashboard() {
   
   return (
     // start content
-    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/gradient14.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -395,7 +395,7 @@ export default function DoctorDashboard() {
         </section>
 
         <div className='relative'>
-          <div className="bg-n-8/[0.5] rounded-lg p-4 overflow-x-auto shadow-lg">
+          <div className="bg-transparent backdrop-blur-lg rounded-lg p-4 overflow-x-auto shadow-lg">
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">

@@ -537,7 +537,7 @@ export default function PatientHealthRecord() {
   } */
 
   return (
-    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/gradient14.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] bgbg-opacity-80 object-cover max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -936,7 +936,7 @@ export default function PatientHealthRecord() {
                       key={patient.id} 
                       className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell className='text-[1.12rem] text-center'>{patient.id}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{(parseInt(patient.id) + 1).toString()}</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{patient.name}</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{String(patient.age)} yrs</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{patient.gender}</TableCell>

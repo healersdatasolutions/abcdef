@@ -205,12 +205,13 @@ export default function InventoryManagement() {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-[#030b0b] p-4 md:p-6">
+        <SheetContent side="left" className="w-[240px] bg-n-8 p-4 md:p-6">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -224,7 +225,7 @@ export default function InventoryManagement() {
             <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="bg-n-8 text-white border-gray-700">
+            <SelectContent className="bg-transparent  text-white border-gray-700">
               <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="PPE">PPE</SelectItem>
               <SelectItem value="Medication">Medication</SelectItem>
@@ -304,7 +305,7 @@ export default function InventoryManagement() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredInventory.map((section, sectionIndex) => (
-            <Card key={sectionIndex} className="bg-[#131313a2] border-[#259b95] rounded-lg shadow-lg relative">
+            <Card key={sectionIndex} className="bg-transparent backdrop-blur-lg border-[#259b95] rounded-lg shadow-lg relative">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-2xl font-bold text-[#259b95]">{section.sectionName}</CardTitle>
                 <Button
@@ -319,7 +320,7 @@ export default function InventoryManagement() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-center justify-between p-4 bg-[#081414] rounded-lg">
+                    <div key={itemIndex} className="flex items-center justify-between p-4 bg-transparent border border-white/35 rounded-lg">
                       <div className="flex items-center">
                         <Package className="h-6 w-6 mr-2 text-[#259b95]" />
                         <span className='text-xs'>{item.itemName}</span>

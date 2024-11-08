@@ -509,7 +509,7 @@ export default function PatientDetails() {
 const firstAppointment = appointmentsData[0] || {};
   return (
     
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[url('/grainyBg.png')] text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
@@ -521,11 +521,11 @@ const firstAppointment = appointmentsData[0] || {};
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 bg-black p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
-      <div className="relative flex-1 min-h-screen bg-black text-white p-8 sm:p-10">
+      <div className="relative flex-1 min-h-screen  text-white p-8 sm:p-10">
         
         <Toaster />
         
@@ -537,9 +537,9 @@ const firstAppointment = appointmentsData[0] || {};
         </div>
 
             <p className="text-gray-400 text-center sm:text-right text-xl mb-4">Patient ID: {editedData.id}</p>
-        <div className='relative bg-[#131313a2]  mb-12 flex-col items-center justify-center overflow-hidden rounded-lg  md:shadow-xl'>
+        <div className='relative   mb-12 flex-col items-center justify-center overflow-hidden rounded-lg  md:shadow-xl'>
 
-          <Card className="bg-gradient-to-br from-black  to-[#202020]">
+          <Card className="bg-transparent backdrop-blur-lg shadow-2xl">
           <div className="flex  flex-col mx-auto sm:mx-0 items-center my-0 lg:my-8 p-10 md:p-15 ">
             <div className='container flex flex-wrap px-0 md:justify-between'>
 
@@ -853,7 +853,7 @@ const firstAppointment = appointmentsData[0] || {};
           <Link to={`/patient/${id}/medical-history`}>
             <div
               
-              className="w-full h-[45vh] bg-gradient-to-br hover:scale-105 transition-all duration-150 from-black via-black to-[#2d2d2d]  rounded-lg flex items-center justify-center cursor-pointer p-20"
+              className="w-full h-[45vh]  hover:scale-105 transition-all duration-150  backdrop-blur-lg bg-[#2d2d2d35]  rounded-lg flex items-center justify-center cursor-pointer p-20"
             >
                 <Lottie
                 animationData={defaultOptions.animationData}
@@ -871,7 +871,7 @@ const firstAppointment = appointmentsData[0] || {};
           <Link to={`/patient/${id}/test-report`}>
             <div
               
-              className="w-full h-[45vh] bg-gradient-to-bl from-black via-black to-[#2d2d2d] hover:scale-105 transition-all duration-150 rounded-lg flex items-center justify-center cursor-pointer p-20"
+              className="w-full h-[45vh] backdrop-blur-lg bg-[#2d2d2d35] hover:scale-105 transition-all duration-150 rounded-lg flex items-center justify-center cursor-pointer p-20"
             >
                 <Lottie
                 animationData={defaultOptions2.animationData}
@@ -965,7 +965,7 @@ const firstAppointment = appointmentsData[0] || {};
         <section className="mb-12">
           <h2 className="text-4xl font-bold mb-8">Patient Analysis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="bg-[#131313a2]  text-white">
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45  text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Health Trends
@@ -986,7 +986,7 @@ const firstAppointment = appointmentsData[0] || {};
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            <Card className="bg-[#131313a2] text-white">
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Recovery Progress
