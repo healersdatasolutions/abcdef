@@ -426,19 +426,20 @@ export default function Appointment() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[url('/grainyBg.png')] text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-[#030b0b] p-4 md:p-6">
+        <SheetContent side="left" className="w-[240px] bg-n-8 p-4 md:p-6">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -449,10 +450,10 @@ export default function Appointment() {
         
         <section className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <Select onValueChange={(value) => handleFilter('status', value)}>
-            <SelectTrigger className="w-full md:w-[200px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
+            <SelectTrigger className="w-full md:w-[200px] bg-transparent text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-n-8 text-white border-gray-700">
+            <SelectContent className="bg-transparent text-white border-gray-700">
               <SelectItem value="all">All Statuses</SelectItem>
               {statuses.map(status => (
                 <SelectItem key={status} value={status}>{status}</SelectItem>
@@ -498,7 +499,7 @@ export default function Appointment() {
         </section>
 
         <div className='relative'>
-          <div className="bg-n-8/[0.5] rounded-lg p-4 overflow-x-auto shadow-lg">
+          <div className="bg-transparent backdrop-blur-lg rounded-lg p-4 overflow-x-auto shadow-lg">
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">
@@ -547,10 +548,10 @@ export default function Appointment() {
           <div className="flex items-center space-x-2">
             <span>Show</span>
             <Select onValueChange={handleItemsPerPageChange} defaultValue="10">
-              <SelectTrigger className="w-[100px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
+              <SelectTrigger className="w-[100px] bg-transparent text-white border hover:border-[#259b95] rounded-lg">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-n-8 text-white border-gray-700">
+              <SelectContent className="bg-transparent text-white border-gray-700">
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
                 <SelectItem value="50">50</SelectItem>

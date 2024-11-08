@@ -221,19 +221,22 @@ export default function DoctorDashboard() {
   )
   
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    // start content
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
+      {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-[#030b0b] p-4 md:p-6">
+        <SheetContent side="left" className="w-[240px] bg-n-8 p-4 md:p-6">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -392,7 +395,7 @@ export default function DoctorDashboard() {
         </section>
 
         <div className='relative'>
-          <div className="bg-n-8/[0.5] rounded-lg p-4 overflow-x-auto shadow-lg">
+          <div className="bg-transparent backdrop-blur-lg rounded-lg p-4 overflow-x-auto shadow-lg">
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">

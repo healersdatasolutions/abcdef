@@ -537,7 +537,7 @@ export default function PatientHealthRecord() {
   } */
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] bgbg-opacity-80 object-cover max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -551,19 +551,19 @@ export default function PatientHealthRecord() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
       {/* Main content */}
-      <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+      <div className="flex-1 p-4 md:p-8 overflow-x-hidden  ">
       <Toaster />
         <h1 className="text-4xl text-center lg:text-left lg:px-10 md:text-5xl font-bold mb-4 text-white">Patient Health Records</h1>
         <p className="text-gray-400 lg:text-left lg:px-10 text-center mb-8 lg:mb-14">Manage and view detailed patient information, medical histories, and test reports.</p>
         
-        <section className="flex max-w-6xl mx-auto flex-wrap justify-between items-center mb-6 gap-4 lg:px-5">
+        <section className="flex max-w-6xl mx-auto flex-wrap justify-between items-center mb-6 gap-4 ">
           <Select onValueChange={(value) => handleFilter('gender', value)}>
-            <SelectTrigger className="w-full md:w-[150px] bg-n-8 text-white border hover:border-[#259b95] rounded-lg">
+            <SelectTrigger className="w-full md:w-[150px] bg-transparent text-white border hover:border-[#259b95] rounded-lg">
               <SelectValue placeholder="Gender" />
             </SelectTrigger>
             <SelectContent className="bg-n-8 text-white border-gray-700">
@@ -589,7 +589,7 @@ export default function PatientHealthRecord() {
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-full md:w-[300px] justify-start text-left font-normal",
+                  "w-full md:w-[300px] bg-transparent border hover:border-[#259b95] hover:bg-transparent justify-start text-left font-normal",
                   !filters.date && "text-muted-foreground"
                 )}
               >
@@ -904,7 +904,7 @@ export default function PatientHealthRecord() {
               </div>
             </div>
           </MouseParallax> */}
-          <div className="bg-n-8/[0.5] rounded-lg p-4 overflow-x-auto shadow-lg">
+          <div className="bg-transparent backdrop-blur border border-white/10 rounded-lg p-4 overflow-x-auto shadow-lg">
             <Table>
               <TableHeader>
                 <TableRow className="border-r border-transparent rounded-lg">
@@ -936,13 +936,13 @@ export default function PatientHealthRecord() {
                       key={patient.id} 
                       className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell className='text-[1.12rem] text-center'>{patient.id}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center'>{(parseInt(patient.id) + 1).toString()}</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{patient.name}</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{String(patient.age)} yrs</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{patient.gender}</TableCell>
                       <TableCell className='text-[1.12rem] text-center'>{formatDate(patient.pdate)}</TableCell>
                       <TableCell className='text-[1.12rem] text-center' >
-                        <Link to={`/patient/${patient.id}`} className="text-[#259b95] text-[1.12rem] text-center hover:underline">
+                        <Link to={`/patient/${patient.id}`} className=" text-[1rem] text-center  px-2 py-2 bg-transparent border text-white/50 border-white/20 hover:bg-white hover:text-[#0A0F29] transition duration-500 rounded-lg hover:-translate-y-2">
                           View Details
                         </Link>
                       </TableCell>
@@ -963,7 +963,7 @@ export default function PatientHealthRecord() {
           </div>
         </div>
 
-        <div className="flex flex-col max-w-6xl mx-auto md:flex-row lg:px-5 justify-between items-center mt-4 gap-4">
+        <div className="flex flex-col max-w-6xl mx-auto md:flex-row  justify-between items-center mt-4 gap-4">
           <div className="flex items-center space-x-2">
             <span>Show</span>
             <Select onValueChange={handleItemsPerPageChange} defaultValue="10">
@@ -987,12 +987,12 @@ export default function PatientHealthRecord() {
                 simulateLoading()
               }}
               disabled={currentPage === 1 || isLoading}
-              className="bg-black border hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
+              className="bg-transparent border  backdrop-blur hover:bg-transparent hover:border-[#259b95] hover:scale-95 transition duration-300 text-white rounded-lg"
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="h-4 w-4 mr-2 text-white" />
               Previous
             </Button>
-            <span className='text-slate-400'>Page {currentPage} of {totalPages}</span>
+            <span className='text-white'>Page {currentPage} of {totalPages}</span>
             <Button 
               onClick={() => {
                 setCurrentPage(prev => Math.min(prev + 1, totalPages))
