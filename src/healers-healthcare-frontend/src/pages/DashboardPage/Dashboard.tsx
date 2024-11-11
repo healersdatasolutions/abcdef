@@ -1,15 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, Search, Menu, Users, Activity, DollarSign, TrendingUp } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, Search, Menu, Users, Activity, DollarSign, TrendingUp, Bell, Settings, LogOut, PieChart, Zap } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell } from 'recharts'
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Link } from 'react-router-dom'
 import { Actor, HttpAgent } from '@dfinity/agent'
 import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
@@ -36,12 +37,25 @@ const appointmentData = [
   { name: 'Sun', count: 10 },
 ]
 
+const departmentData = [
+  { name: 'Cardiology', value: 30 },
+  { name: 'Neurology', value: 25 },
+  { name: 'Pediatrics', value: 20 },
+  { name: 'Orthopedics', value: 15 },
+  { name: 'Oncology', value: 10 },
+]
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
+
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [hospitalActor, setHospitalActor] = useState<HospitalService | null>(null)
   const [patientCount, setPatientCount] = useState(0)
   const [doctorCount, setDoctorCount] = useState(0)
   const [appointmentCount, setAppointmentCount] = useState(0)
+  const [revenueTotal, setRevenueTotal] = useState(0)
+  const [activeTab, setActiveTab] = useState('overview')
+
   interface Patient {
     name: string;
     gender: string;
@@ -85,19 +99,18 @@ export default function Dashboard() {
         const patients = await hospitalActor.listPatients()
         setPatientCount(patients.length)
         setRecentPatients(patients.slice(-5).reverse().map(patient => ({
-
-            ...patient,
-  
-            age: Number(patient.age)
-  
-          })))
-  
+          ...patient,
+          age: Number(patient.age)
+        })))
 
         const doctors = await hospitalActor.listDoctors()
         setDoctorCount(doctors.length)
 
         const appointments = await hospitalActor.listAppointments()
         setAppointmentCount(appointments.length)
+
+        // Dummy revenue calculation (replace with actual logic when available)
+        setRevenueTotal(appointments.length * 100) // Assuming $100 per appointment
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -117,7 +130,7 @@ export default function Dashboard() {
         ].map((item, index) => (
           <Link 
             key={item.name}
-            to={item.name === 'Dashboard' ? '/' : `/${item.name.toLowerCase().replace(' ', '-')}`}
+            to={`/${item.name.toLowerCase().replace(' ', '-')}`}
             className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
             onClick={() => setIsSidebarOpen(false)}
           >
@@ -147,100 +160,246 @@ export default function Dashboard() {
       </div>
 
       <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
-        <h1 className="text-4xl md:text-5xl font-bold mb-8">Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-200" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{patientCount}</div>
-              <p className="text-xs text-blue-200">+20% from last month</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-green-500 to-green-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
-              <UserCog className="h-4 w-4 text-green-200" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{doctorCount}</div>
-              <p className="text-xs text-green-200">+5% from last month</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Appointments</CardTitle>
-              <Calendar className="h-4 w-4 text-purple-200" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{appointmentCount}</div>
-              <p className="text-xs text-purple-200">+15% from last week</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
-            <CardHeader>
-              <CardTitle>Patient Growth</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={patientData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                  <Bar dataKey="count" fill="#259b95" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
-            <CardHeader>
-              <CardTitle>Weekly Appointments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={appointmentData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                  <Line type="monotone" dataKey="count" stroke="#259b95" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
-          <CardHeader>
-            <CardTitle>Recent Patient Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px]">
-              {recentPatients.map((patient, index) => (
-                <div key={index} className="flex items-center space-x-4 mb-4">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold">Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="icon">
+              <Bell className="h-4 w-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
                   <Avatar>
-                    <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${patient.name}`} />
-                    <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                    <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{patient.name}</p>
-                    <p className="text-xs text-gray-400">{patient.gender}, {patient.age.toString()} years old</p>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="patients">Patients</TabsTrigger>
+            <TabsTrigger value="appointments">Appointments</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+                  <Users className="h-4 w-4 text-blue-200" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{patientCount}</div>
+                  <p className="text-xs text-blue-200">+20% from last month</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-green-500 to-green-600">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
+                  <UserCog className="h-4 w-4 text-green-200" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{doctorCount}</div>
+                  <p className="text-xs text-green-200">+5% from last month</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-500 to-purple-600">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Appointments</CardTitle>
+                  <Calendar className="h-4 w-4 text-purple-200" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{appointmentCount}</div>
+                  <p className="text-xs text-purple-200">+15% from last week</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                  <DollarSign className="h-4 w-4 text-yellow-200" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${revenueTotal}</div>
+                  <p className="text-xs text-yellow-200">+10% from last month</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Patient Growth</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={patientData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Bar dataKey="count" fill="#259b95" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Weekly Appointments</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={appointmentData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Line type="monotone" dataKey="count" stroke="#259b95" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+              <CardHeader>
+                <CardTitle>Recent Patient Activities</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  {recentPatients.map((patient, index) => (
+                    <div key={index} className="flex items-center space-x-4 mb-4">
+                      <Avatar>
+                        <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${patient.name}`} />
+                        <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{patient.name}</p>
+                        <p className="text-xs text-gray-400">{patient.gender}, {patient.age.toString()} years old</p>
+                      </div>
+                      <div className="ml-auto">
+                        <Button variant="outline" size="sm">View Details</Button>
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="patients" className="space-y-4">
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+              <CardHeader>
+                <CardTitle>Patient Distribution by Department</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RePieChart>
+                    <Pie
+                      data={departmentData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {departmentData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                    <Legend />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="appointments" className="space-y-4">
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+              <CardHeader>
+                <CardTitle>Upcoming Appointments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  {/* Replace with actual appointment data */}
+                  {[...Array(10)].map((_, index) => (
+                    <div key={index} className="flex items-center justify-between py-4 border-b border-gray-700">
+                      <div className="flex items-center space-x-4">
+                        <Avatar>
+                          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=Patient${index}`} />
+                          <AvatarFallback>P{index}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">Patient {index + 1}</p>
+                          <p className="text-sm text-gray-400">Dr. Smith • Cardiology</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">2:00 PM</p>
+                        <p className="text-sm text-gray-400">Today</p>
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="analytics" className="space-y-4">
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+              <CardHeader>
+                <CardTitle>Hospital Performance Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center p-4 bg-blue-500 rounded-lg">
+                    <Zap className="h-6 w-6 mr-4" />
+                    <div>
+                      <p className="text-sm font-medium">Bed Occupancy Rate</p>
+                      <p className="text-2xl font-bold">85%</p>
+                    </div>
                   </div>
-                  <div className="ml-auto">
-                    <Button variant="outline" size="sm">View Details</Button>
+                  <div className="flex items-center p-4 bg-green-500 rounded-lg">
+                    <Activity className="h-6 w-6 mr-4" />
+                    <div>
+                      <p className="text-sm font-medium">Average Length of Stay</p>
+                      <p className="text-2xl font-bold">4.2 days</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-4 bg-yellow-500 rounded-lg">
+                    <Users className="h-6 w-6 mr-4" />
+                    <div>
+                      <p className="text-sm font-medium">Patient Satisfaction</p>
+                      <p className="text-2xl font-bold">92%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-4 bg-purple-500 rounded-lg">
+                    <PieChart className="h-6 w-6 mr-4" />
+                    <div>
+                      <p className="text-sm font-medium">Operating Margin</p>
+                      <p className="text-2xl font-bold">12.5%</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )

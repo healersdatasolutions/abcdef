@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, MapPin, Phone, Clock, Briefcase, Search, CalendarIcon, Menu, CalendarCheck } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, User, MapPin, Phone, Clock, Briefcase, Search, CalendarIcon, Menu, CalendarCheck, TrendingUp } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Link } from 'react-router-dom'
@@ -196,30 +196,29 @@ export default function DoctorDashboard() {
 
   const SidebarContent = () => (
     <>
-      <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
+      <img src="/HealersHealthcareOfficialLogo.png" alt="Healers Healthcare" className="w-40 mx-auto mb-8" />
       <nav className="space-y-2">
         {[
+          { name: 'Dashboard', icon: TrendingUp },
           { name: 'Health Records', icon: FileText },
           { name: 'Doctor Dashboard', icon: UserCog },
           { name: 'Appointments', icon: Calendar },
           { name: 'Inventory', icon: Package },
         ].map((item, index) => (
-          <React.Fragment key={item.name}>
-            <Link 
-              to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <item.icon className="h-5 w-5 md:mr-3" />
-              <span className='md:block'>{item.name}</span>
-            </Link>
-            {index < 3 && <div className="h-px bg-gray-700 my-2 mx-4" />}
-          </React.Fragment>
+          <Link 
+            key={item.name}
+            to={`/${item.name.toLowerCase().replace(' ', '-')}`}
+            className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <item.icon className="h-5 w-5 mr-3" />
+            <span>{item.name}</span>
+          </Link>
         ))}
       </nav>
     </>
   )
-  
+
   return (
     // start content
     <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
