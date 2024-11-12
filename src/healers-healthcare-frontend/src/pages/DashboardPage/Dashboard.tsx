@@ -1,21 +1,24 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, Search, Menu, Users, Activity, DollarSign, TrendingUp, Bell, Settings, LogOut, PieChart, Zap } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, Search, Menu, Users, Activity, DollarSign, TrendingUp, Bell, Settings, LogOut, PieChart, Zap, Thermometer, Stethoscope, Pill, Clipboard, Heart, Brain, Eye, Bone, ShieldCheck, Clock, Droplet, Scale, Baby } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from 'recharts'
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { Link } from 'react-router-dom'
 import { Actor, HttpAgent } from '@dfinity/agent'
 import { idlFactory } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did.js'
 import { _SERVICE as HospitalService } from '../../../../declarations/healers-healthcare-backend/healers-healthcare-backend.did'
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
+import { StopwatchIcon } from '@radix-ui/react-icons'
 
 // Dummy data for charts
 const patientData = [
@@ -43,6 +46,15 @@ const departmentData = [
   { name: 'Pediatrics', value: 20 },
   { name: 'Orthopedics', value: 15 },
   { name: 'Oncology', value: 10 },
+]
+
+const revenueData = [
+  { name: 'Jan', revenue: 50000 },
+  { name: 'Feb', revenue: 55000 },
+  { name: 'Mar', revenue: 60000 },
+  { name: 'Apr', revenue: 58000 },
+  { name: 'May', revenue: 65000 },
+  { name: 'Jun', revenue: 70000 },
 ]
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
@@ -199,7 +211,7 @@ export default function Dashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-blue-500 to-blue-600">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                   <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -242,13 +254,13 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
                 <CardHeader>
                   <CardTitle>Patient Growth</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={patientData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -264,7 +276,7 @@ export default function Dashboard() {
                   <CardTitle>Weekly Appointments</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={appointmentData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -277,56 +289,155 @@ export default function Dashboard() {
               </Card>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Recent Patient Activities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[200px]">
+                    {recentPatients.map((patient, index) => (
+                      <div key={index} className="flex items-center space-x-4 mb-4">
+                        <Avatar>
+                          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${patient.name}`} />
+                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{patient.name}</p>
+                          <p className="text-xs text-gray-400">{patient.gender}, {patient.age.toString()} years old</p>
+                        </div>
+                        <div className="ml-auto">
+                          <Button variant="outline" size="sm">View</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Revenue Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Area type="monotone" dataKey="revenue" stroke="#259b95" fill="#259b95" fillOpacity={0.3} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
               <CardHeader>
-                <CardTitle>Recent Patient Activities</CardTitle>
+                <CardTitle>Department Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[300px]">
-                  {recentPatients.map((patient, index) => (
-                    <div key={index} className="flex items-center space-x-4 mb-4">
-                      <Avatar>
-                        <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${patient.name}`} />
-                        <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{patient.name}</p>
-                        <p className="text-xs text-gray-400">{patient.gender}, {patient.age.toString()} years old</p>
-                      </div>
-                      <div className="ml-auto">
-                        <Button variant="outline" size="sm">View Details</Button>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {[
+                    { name: 'Cardiology', icon: Heart, patients: 150, doctors: 8 },
+                    { name: 'Neurology', icon: Brain, patients: 120, doctors: 6 },
+                    { name: 'Pediatrics', icon: Baby, patients: 200, doctors: 10 },
+                    { name: 'Orthopedics', icon: Bone, patients: 100, doctors: 5 },
+                    { name: 'Oncology', icon: Zap, patients: 80, doctors: 4 },
+                  ].map((dept, index) => (
+                    <Card key={index} className="bg-[#1f2937] text-white">
+                      <CardHeader className="p-4">
+                        <div className="flex items-center justify-between">
+                          <dept.icon className="h-6 w-6" />
+                          <Badge variant="secondary">{dept.doctors} Doctors</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                        <CardTitle className="text-lg">{dept.name}</CardTitle>
+                        <CardDescription className="text-gray-400">{dept.patients} Patients</CardDescription>
+                      </CardContent>
+                    </Card>
                   ))}
-                </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
           <TabsContent value="patients" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Patient Distribution by Department</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RePieChart>
+                      <Pie
+                        data={departmentData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {departmentData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Legend />
+                    </RePieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Patient Age Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={[
+                      { age: '0-18', count: 50 },
+                      { age: '19-35', count: 120 },
+                      { age: '36-50', count: 80 },
+                      { age: '51-65', count: 60 },
+                      { age: '65+', count: 40 },
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="age" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Bar dataKey="count" fill="#259b95" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
             <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
               <CardHeader>
-                <CardTitle>Patient Distribution by Department</CardTitle>
+                <CardTitle>Patient Health Metrics</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RePieChart>
-                    <Pie
-                      data={departmentData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {departmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                    <Legend />
-                  </RePieChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { name: 'Blood Pressure', icon: Activity, value: '120/80', unit: 'mmHg' },
+                    { name: 'Heart Rate', icon: Heart, value: '72', unit: 'bpm' },
+                    { name: 'Body Temperature', icon: Thermometer, value: '98.6', unit: '°F' },
+                    { name: 'Respiratory Rate', icon: StopwatchIcon, value: '16', unit: 'breaths/min' },
+                    { name: 'Oxygen Saturation', icon: Droplet, value: '98', unit: '%' },
+                    { name: 'BMI', icon: Scale, value: '24.5', unit: 'kg/m²' },
+                  ].map((metric, index) => (
+                    <Card key={index} className="bg-[#1f2937] text-white">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
+                        <metric.icon className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{metric.value}<span className="text-sm ml-1">{metric.unit}</span></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -359,6 +470,64 @@ export default function Dashboard() {
                 </ScrollArea>
               </CardContent>
             </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Appointment Types</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Check-up', value: 400 },
+                          { name: 'Follow-up', value: 300 },
+                          { name: 'Consultation', value: 200 },
+                          { name: 'Procedure', value: 100 },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label
+                      >
+                        {COLORS.map((color, index) => (
+                          <Cell key={`cell-${index}`} fill={color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Appointment Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { status: 'Scheduled', count: 45, color: 'bg-blue-500' },
+                      { status: 'Completed', count: 30, color: 'bg-green-500' },
+                      { status: 'Cancelled', count: 10, color: 'bg-red-500' },
+                      { status: 'No-show', count: 5, color: 'bg-yellow-500' },
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="w-full">
+                          <div className="flex justify-between mb-1">
+                            <span>{item.status}</span>
+                            <span>{item.count}</span>
+                          </div>
+                          <Progress value={(item.count / 90) * 100} className={`h-2 ${item.color}`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           <TabsContent value="analytics" className="space-y-4">
             <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
@@ -395,6 +564,78 @@ export default function Dashboard() {
                       <p className="text-2xl font-bold">12.5%</p>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Staff Efficiency</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={[
+                      { department: 'Nursing', efficiency: 85 },
+                      { department: 'Physicians', efficiency: 90 },
+                      { department: 'Admin', efficiency: 75 },
+                      { department: 'Lab', efficiency: 88 },
+                      { department: 'Radiology', efficiency: 82 },
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="department" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Bar dataKey="efficiency" fill="#259b95" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+                <CardHeader>
+                  <CardTitle>Patient Readmission Rate</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={[
+                      { month: 'Jan', rate: 8.2 },
+                      { month: 'Feb', rate: 7.8 },
+                      { month: 'Mar', rate: 7.5 },
+                      { month: 'Apr', rate: 7.2 },
+                      { month: 'May', rate: 6.9 },
+                      { month: 'Jun', rate: 6.7 },
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
+                      <Line type="monotone" dataKey="rate" stroke="#259b95" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+            <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
+              <CardHeader>
+                <CardTitle>Key Performance Indicators</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { name: 'Emergency Response Time', value: '8 mins', icon: Zap },
+                    { name: 'Surgery Success Rate', value: '98.5%', icon: TrendingUp },
+                    { name: 'Patient Wait Time', value: '22 mins', icon: Clock },
+                    { name: 'Infection Control Rate', value: '99.2%', icon: ShieldCheck },
+                  ].map((kpi, index) => (
+                    <Card key={index} className="bg-[#1f2937] text-white">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">{kpi.name}</CardTitle>
+                        <kpi.icon className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{kpi.value}</div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
