@@ -236,9 +236,9 @@ function SignupButton() {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#3c95d4] to-[#0b0245] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-gradient-to-br from-black via-[#3c95d4] to-[#0b0245] flex flex-col lg:flex-row justify-center items-center">
       {/* Left half - gradient placeholder (hidden on mobile and tablet) */}
-      <img src='loginImg2.png' alt='LoginImg' className="hidden lg:flex m-5 rounded-lg lg:w-1/2 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 hover:scale-95 transition-all duration-100">
+      <img src='HealersHealthcareOfficialLogo.png' alt='LoginImg' className="hidden lg:flex m-5 rounded-lg lg:w-1/2 size-80" >
 
         {/* You can replace this div with an actual image when available */}
       </img>

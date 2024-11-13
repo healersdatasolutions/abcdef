@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, FileText as FileTextIcon, Trash2, Search, CalendarIcon, Menu } from 'lucide-react'
+import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, FileText as FileTextIcon, Trash2, Search, CalendarIcon, Menu, TrendingUp } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { 
@@ -486,30 +486,29 @@ export default function PatientHealthRecord() {
   };
   const SidebarContent = () => (
     <>
-      {/* <h2 className="text-xl md:text-2xl font-bold text-[#fff] mb-8">Healers Healthcare</h2> */}
-      <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
+      <img src="/HealersHealthcareOfficialLogo.png" alt="Healers Healthcare" className="w-40 mx-auto mb-8" />
       <nav className="space-y-2">
         {[
+          { name: 'Dashboard', icon: TrendingUp },
           { name: 'Health Records', icon: FileText },
           { name: 'Doctor Dashboard', icon: UserCog },
           { name: 'Appointments', icon: Calendar },
           { name: 'Inventory', icon: Package },
         ].map((item, index) => (
-          <React.Fragment key={item.name}>
-            <Link 
-              to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center border border-transparent p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <item.icon className="h-5 w-5 md:mr-3" />
-              <span className='md:block'>{item.name}</span>
-            </Link>
-            {index < 3 && <div className="h-px bg-[#0c302e] my-2 " />}
-          </React.Fragment>
+          <Link 
+            key={item.name}
+            to={`/${item.name.toLowerCase().replace(' ', '-')}`}
+            className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <item.icon className="h-5 w-5 mr-3" />
+            <span>{item.name}</span>
+          </Link>
         ))}
       </nav>
     </>
   )
+
 
   const deletePatient = useCallback(async (id: string) => {
     if (!hospitalActor) {
