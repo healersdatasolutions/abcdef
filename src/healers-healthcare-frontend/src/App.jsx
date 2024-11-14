@@ -13,6 +13,7 @@ import InventoryPage from "./pages/Inventory/InventoryPage";
 import Appointments from "./pages/Appointments/Appointments";
 import PatientDetails from "./components/PatientRecord1";
 import MedicalHistory from "./components/MedicalHistory";
+import DoctorDetails from "./components/DoctorInfo";
 import TestReport from "./components/TestReport";
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
 import LoginSignup from "./pages/Login-Signup/Login-Signup";
@@ -89,6 +90,10 @@ function App() {
     {
       path: "/patient/:id/test-report",
       element: <TestReport />
+    },
+    {
+      path: "/doctor/:id",
+      element: <DoctorDetails/>
     },
     {
       path:"/doctor-appointments",
