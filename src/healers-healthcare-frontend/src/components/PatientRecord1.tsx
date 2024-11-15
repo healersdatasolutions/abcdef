@@ -13,7 +13,7 @@ import { Separator } from "./ui/separator"
 import { Toaster } from "./ui/sonner"
 import { toast } from "sonner"
 import { Badge } from "./ui/badge"
-import { User, MapPin, Droplet, Ruler, Weight, FileText, Calendar, Send, Menu, BackpackIcon, Cake } from 'lucide-react'
+import { User, MapPin, Droplet, Ruler, Weight, FileText, Calendar, Send, Menu, BackpackIcon, Cake, TrendingUp, UserCog, Package } from 'lucide-react'
 import Lottie from 'lottie-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { MouseParallax } from "react-just-parallax"
@@ -459,33 +459,31 @@ export default function PatientDetails() {
 
 
 
-  const SidebarContent = () => (
-    <>
-      {/* <h2 className="text-xl md:text-2xl font-bold text-[#155956] mb-8">Healers Healthcare</h2> */}
-      <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
-      <nav className="space-y-2">
-        {[
-          { name: 'Health Records', icon: FileText },
-          { name: 'Doctor Dashboard', icon: User },
-          { name: 'Appointments', icon: Calendar },
-          { name: 'Inventory', icon: Weight },
-        ].map((item, index) => (
-          <React.Fragment key={item.name}>
+    const SidebarContent = () => (
+      <>
+        <img src="/HealersHealthcareOfficialLogo.png" alt="Healers Healthcare" className="w-40 mx-auto mb-8" />
+        <nav className="space-y-2">
+          {[
+            { name: 'Dashboard', icon: TrendingUp },
+            { name: 'Health Records', icon: FileText },
+            { name: 'Doctor Dashboard', icon: UserCog },
+            { name: 'Appointments', icon: Calendar },
+            { name: 'Inventory', icon: Package },
+          ].map((item, index) => (
             <Link 
-              to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#155956] transition-colors duration-200"
+              key={item.name}
+              to={`/${item.name.toLowerCase().replace(' ', '-')}`}
+              className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
               onClick={() => setIsSidebarOpen(false)}
             >
-              <item.icon className="h-5 w-5 md:mr-3" />
-              <span className='md:block'>{item.name}</span>
+              <item.icon className="h-5 w-5 mr-3" />
+              <span>{item.name}</span>
             </Link>
-            {index < 3 && <div className="h-px bg-gray-700 my-2 mx-4" />}
-          </React.Fragment>
-        ))}
-      </nav>
-    </>
-  )
-
+          ))}
+        </nav>
+      </>
+    )
+  
   if (isLoading) {
     return (
 
@@ -552,64 +550,64 @@ const firstAppointment = appointmentsData[0] || {};
             <div className='flex flex-col justify-between w-full sm:col-span-8'>
               <div className='flex gap-3'>
 
-              <FaUserInjured className="text-5xl text-[#155956]" /> 
-            <h1 className="text-5xl font-bold mb-8 text-white">Name: <span className='text-white/85'>{editedData.name}</span></h1>
+     
+            <h1 className="text-5xl font-bold mb-8 text-white">Name: <span className='text-white/70'>{editedData.name}</span></h1>
               
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-1 gap-y-6">
               <div className="flex items-top gap-2 items-center">
-                  {/* <User className="h-8 w-8 text-[#155956]" /> */}
-                  <FaVenusMars className="h-8 w-8 text-[#155956]" />
+                  {/* <User className="h-8 w-8 text-white" /> */}
+                  <FaVenusMars className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Gender:</h4> <p className='text-white/55'>{editedData.gender}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  {/* <Cake className="h-8 w-8 text-[#155956]" /> */}
-                  <FaBirthdayCake className="h-7 w-7 text-[#155956]" />
+                  {/* <Cake className="h-8 w-8 text-white" /> */}
+                  <FaBirthdayCake className="h-7 w-7 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Age:</h4> <p className='text-white/55'>{editedData.age.toString()}</p></span>
                 </div>
                 
                 <div className="flex items-top gap-2 items-center">
-                  {/* <MapPin className="h-8 w-8 text-[#155956]" /> */}
-                  <FaMapMarkerAlt className="h-8 w-8 text-[#155956]" />
+                  {/* <MapPin className="h-8 w-8 text-white" /> */}
+                  <FaMapMarkerAlt className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Location:</h4> <p className='text-white/55'>{editedData.location}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  {/* <Droplet className="h-8 w-8 text-[#155956]" /> */}
-                  <FaTint className="h-8 w-8 text-[#155956]" />
+                  {/* <Droplet className="h-8 w-8 text-white" /> */}
+                  <FaTint className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Blood Group:</h4> <p className='text-white/55'>{editedData.blood}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  {/* <Ruler className="h-8 w-8 text-[#155956]" /> */}
-                  <FaRulerVertical className="h-8 w-8 text-[#155956]" />
+                  {/* <Ruler className="h-8 w-8 text-white" /> */}
+                  <FaRulerVertical className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Height:</h4> <p className='text-white/55'>{editedData.height.toString()}</p></span>
                 </div>
                 <div className="flex items-top gap-2 items-center">
-                  {/* <Weight className="h-8 w-8 text-[#155956]" /> */}
-                  <FaWeight className="h-8 w-8 text-[#155956]" />
+                  {/* <Weight className="h-8 w-8 text-white" /> */}
+                  <FaWeight className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Weight:</h4> <p className='text-white/55'>{editedData.weight.toString()} kg</p></span>
                 </div>
                 {/*
                 <div className="flex items-top gap-2 items-center">
-                  <BackpackIcon className="h-8 w-8 text-[#155956]" />
+                  <BackpackIcon className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Occupation:</h4> <p className='text-white/55'>{firstAppointment?.occupation || 'N/A'}</p></span>
                 </div>
                 */}
                 
                 <div className="flex items-top gap-2 items-center">
-                  {/* <User className="h-8 w-8 text-[#155956]" /> */}
-                  <FaUser className="h-8 w-8 text-[#155956]" />
+                  {/* <User className="h-8 w-8 text-white" /> */}
+                  <FaUser className="h-8 w-8 text-white" />
                   <span className='flex items-center gap-2'><h4 className='text-white'>Contact:</h4><p className='text-white/55'>{firstAppointment?.contact ? String(firstAppointment.contact) : 'N/A'}</p></span>
                 </div>
                 
               </div> 
               <div className="flex flex-wrap gap-2 ">
-            <Badge variant="outline" className="bg-[#fff] text-black">Heart Rate: Normal</Badge>
+            <Badge variant="outline" className="bg-emerald-800 text-white">Heart Rate: Normal</Badge>
             <Badge variant="outline" className="bg-[#fff] text-black">Blood Pressure: Controlled</Badge>
-            <Badge variant="outline" className="bg-[#fff] text-black">Cholesterol: In Range</Badge>
+            <Badge variant="outline" className="bg-emerald-800 text-white">Cholesterol: In Range</Badge>
             <Badge variant="outline" className="bg-[#fff] text-black">BMI: Healthy</Badge>
             {/* add more */}
             <Badge variant="outline" className="bg-[#fff] text-black">Blood Sugar: Normal</Badge>
-            <Badge variant="outline" className="bg-[#fff] text-black">Oxygen Level: Normal</Badge>
+            <Badge variant="outline" className="bg-emerald-800 text-white">Oxygen Level: Normal</Badge>
             <Badge variant="outline" className="bg-[#fff] text-black">Vaccination: Completed</Badge>
             
           </div>
