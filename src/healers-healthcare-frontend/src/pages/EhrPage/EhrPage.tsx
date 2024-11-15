@@ -941,13 +941,13 @@ export default function PatientHealthRecord() {
                       key={patient.id} 
                       className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell className='text-[1.12rem] text-center'>{(parseInt(patient.id) + 1).toString()}</TableCell>
-                      <TableCell className='text-[1.12rem] text-center'>{patient.name}</TableCell>
-                      <TableCell className='text-[1.12rem] text-center'>{String(patient.age)} yrs</TableCell>
-                      <TableCell className='text-[1.12rem] text-center'>{patient.gender}</TableCell>
-                      <TableCell className='text-[1.12rem] text-center'>{formatDate(patient.pdate)}</TableCell>
-                      <TableCell className='text-[1.12rem] text-center' >
-                        <Link to={`/patient/${patient.id}`} className=" text-[1rem] text-center  px-2 py-2 bg-transparent border text-white/50 border-white/20 hover:bg-white hover:text-[#0A0F29] transition duration-500 rounded-lg hover:-translate-y-2">
+                      <TableCell className='text-[1.12rem] text-center text-nowrap'>{(parseInt(patient.id) + 1).toString()}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center text-nowrap'>{patient.name}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center text-nowrap'>{String(patient.age)} yrs</TableCell>
+                      <TableCell className='text-[1.12rem] text-center text-nowrap'>{patient.gender}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center text-nowrap'>{formatDate(patient.pdate)}</TableCell>
+                      <TableCell className='text-[1.12rem] text-center text-nowrap' >
+                        <Link to={`/patient/${patient.id}`} className="text-nowrap text-[0.8rem] sm:text-[1rem] text-center  px-2 py-2 bg-transparent border text-white/50 border-white/20 hover:bg-white hover:text-[#0A0F29] transition duration-500 rounded-lg hover:-translate-y-2">
                           View Details
                         </Link>
                       </TableCell>

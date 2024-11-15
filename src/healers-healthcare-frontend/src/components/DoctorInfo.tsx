@@ -131,7 +131,7 @@ export default function DoctorDetails() {
                 <div className='lg:col-span-8'>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white text-center lg:text-left">{doctorData.name}</h1>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 text-sm sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[
                       { label: 'Specialty', value: doctorData.specialty },
                       { label: 'Experience', value: `${doctorData.experience} years` },
@@ -145,7 +145,7 @@ export default function DoctorDetails() {
                     ].map((item, index) => (
                       <div key={index} className="border border-[#259b95] p-4 rounded-lg">
                         <h4 className='text-[#ffff] font-semibold mb-2'>{item.label}</h4>
-                        <p className='text-white text-lg'>{item.value}</p>
+                        <p className='text-white text-sm md:text-lg'>{item.value}</p>
                       </div>
                     ))}
                   </div>
