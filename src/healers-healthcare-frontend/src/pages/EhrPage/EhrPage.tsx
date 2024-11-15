@@ -627,9 +627,9 @@ export default function PatientHealthRecord() {
               
 
               <div className="fixed inset-0 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <div className="flex min-h-full items-center justify-center  text-center">
                   
-                    <DialogPanel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-black p-6 text-left align-middle shadow-xl transition-all">
+                    <DialogPanel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-[url('/gradient9.png')] p-6 text-left align-middle shadow-xl transition-all">
                       <div className='w-full flex justify-end'>
 
                     <Button type="button" onClick={handleClose} className="bg-black border text-white hover:bg-transparent hover:border-red-500">
@@ -643,26 +643,26 @@ export default function PatientHealthRecord() {
                         Add New Patient
                       </DialogTitle> */}
                       <form onSubmit={handleAddPatient} className="w-full max-w-7xl mx-auto space-y-6 text-white">
-      <Card className="bg-gradient-to-b from-[#111] to-black border-zinc-900">
+      <Card className="bg-transparent border  backdrop-blur-lg shadow-2xl">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center text-teal-500">Patient Registration</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center text-white">Patient Registration</CardTitle>
           <CardDescription className="text-center text-gray-400">Enter patient details below</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-3/4 mx-auto grid-cols-3 bg-black">
+            <TabsList className="grid w-[99%] md:w-3/4 mx-auto grid-cols-3  bg-black/20">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="medical">Medical History</TabsTrigger>
               <TabsTrigger value="test">Test Reports</TabsTrigger>
             </TabsList>
             <TabsContent value="general">
-              <ScrollArea className="h-[60vh] pr-4">
+              <ScrollArea className="h-[60vh] pr-4 mt-3">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
                     <div className="relative">
                       <FaUser className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input id="name" name="name" placeholder="Enter patient's full name" value={newPatient.name} onChange={handleInputChange} className="pl-10" />
+                      <Input id="name" name="name" placeholder="Enter patient's full name" value={newPatient.name} onChange={handleInputChange} className="pl-10 bg-black/20" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -670,13 +670,13 @@ export default function PatientHealthRecord() {
                       <Label htmlFor="age">Age</Label>
                       <div className="relative">
                         <FaBirthdayCake className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="age" name="age" type="number" placeholder="e.g., 35" value={newPatient.age.toString()} onChange={handleInputChange} className="pl-10" />
+                        <Input id="age" name="age" type="number" placeholder="e.g., 35" value={newPatient.age.toString()} onChange={handleInputChange} className="pl-10 bg-black/20" />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="gender">Gender</Label>
+                      <Label htmlFor="gender ">Gender</Label>
                       <Select name="gender" value={newPatient.gender} onValueChange={(value) => handleInputChange({ target: { name: 'gender', value } })}>
-                        <SelectTrigger id="gender">
+                        <SelectTrigger id="gender" className='bg-black/20'>
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>
                         <SelectContent>
@@ -690,13 +690,13 @@ export default function PatientHealthRecord() {
                       <Label htmlFor="location">Location</Label>
                       <div className="relative">
                         <FaMapMarkerAlt className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="location" name="location" placeholder="e.g., New York, NY" value={newPatient.location} onChange={handleInputChange} className="pl-10" />
+                        <Input id="location" name="location" placeholder="e.g., New York, NY" value={newPatient.location} onChange={handleInputChange} className="pl-10 bg-black/20" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="blood">Blood Group</Label>
                       <Select name="blood" value={newPatient.blood} onValueChange={(value) => handleInputChange({ target: { name: 'blood', value } })}>
-                        <SelectTrigger id="blood">
+                        <SelectTrigger id="blood" className='bg-black/20'>
                           <SelectValue placeholder="Select blood group" />
                         </SelectTrigger>
                         <SelectContent>
@@ -710,14 +710,14 @@ export default function PatientHealthRecord() {
                       <Label htmlFor="height">Height (cm)</Label>
                       <div className="relative">
                         <FaRulerVertical className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="height" name="height" type="number" placeholder="e.g., 175" value={newPatient.height.toString()} onChange={handleInputChange} className="pl-10" />
+                        <Input id="height" name="height" type="number" placeholder="e.g., 175" value={newPatient.height.toString()} onChange={handleInputChange} className="pl-10 bg-black/20" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="weight">Weight (kg)</Label>
                       <div className="relative">
                         <FaWeight className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input id="weight" name="weight" type="number" placeholder="e.g., 70" value={newPatient.weight.toString()} onChange={handleInputChange} className="pl-10" />
+                        <Input id="weight" name="weight" type="number" placeholder="e.g., 70" value={newPatient.weight.toString()} onChange={handleInputChange} className="pl-10 bg-black/20" />
                       </div>
                     </div>
                   </div>
@@ -727,7 +727,7 @@ export default function PatientHealthRecord() {
             <TabsContent value="medical">
               <ScrollArea className="h-[60vh] pr-4">
                 {newPatient.medicalHistories.map((history, index) => (
-                  <Card key={index} className="mb-4 bg-gradient-to-br from-black via-black to-[#0a2a28]">
+                  <Card key={index} className="mb-4 bg-[#2d2d2d35] backdrop-blur-3xl shadow-2xl border border-white/50">
                     <CardHeader>
                       <CardTitle className="text-xl">Medical History {index + 1}</CardTitle>
                     </CardHeader>
@@ -736,7 +736,7 @@ export default function PatientHealthRecord() {
                         <Label htmlFor={`pharmacy${index}`}>Pharmacy</Label>
                         <div className="relative">
                           <FaHospital className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <Input id={`pharmacy${index}`} name={`pharmacy${index}`} placeholder="City Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="pl-10" />
+                          <Input id={`pharmacy${index}`} name={`pharmacy${index}`} placeholder="City Pharmacy" value={history.pharmacy} onChange={(e) => handleMedicalHistoryChange(index, 'pharmacy', e.target.value)} className="pl-10 bg-black/20" />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -744,28 +744,28 @@ export default function PatientHealthRecord() {
                           <Label htmlFor={`physician${index}`}>Physician</Label>
                           <div className="relative">
                             <FaUserMd className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`physician${index}`} name={`physician${index}`} placeholder="Dr. Johnson" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="pl-10" />
+                            <Input id={`physician${index}`} name={`physician${index}`} placeholder="Dr. Johnson" value={history.physician} onChange={(e) => handleMedicalHistoryChange(index, 'physician', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor={`event${index}`}>Event</Label>
                           <div className="relative">
                             <FaCalendarCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`event${index}`} name={`event${index}`} placeholder="Annual Check-up" value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="pl-10" />
+                            <Input id={`event${index}`} name={`event${index}`} placeholder="Annual Check-up" value={history.event} onChange={(e) => handleMedicalHistoryChange(index, 'event', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor={`prescription${index}`}>Prescription</Label>
                           <div className="relative">
                             <FaPrescription className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`prescription${index}`} name={`prescription${index}`} placeholder="Amoxicillin 500mg" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="pl-10" />
+                            <Input id={`prescription${index}`} name={`prescription${index}`} placeholder="Amoxicillin 500mg" value={history.prescription} onChange={(e) => handleMedicalHistoryChange(index, 'prescription', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor={`remedies${index}`}>Remedies</Label>
                           <div className="relative">
                             <FaFirstAid className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`remedies${index}`} name={`remedies${index}`} placeholder="Rest and fluids" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="pl-10" />
+                            <Input id={`remedies${index}`} name={`remedies${index}`} placeholder="Rest and fluids" value={history.remedies} onChange={(e) => handleMedicalHistoryChange(index, 'remedies', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                       </div>
@@ -781,17 +781,20 @@ export default function PatientHealthRecord() {
                   </Card>
                 ))}
                 {newPatient.medicalHistories.length < 5 && (
-                  <Button type='button' onClick={addMedicalHistory} className="w-full mt-4">
+                  <div className='w-full flex justify-center items-center'> 
+
+                  <Button type='button' onClick={addMedicalHistory} className=" mt-4 px-10 hover:bg-transparent border border-emerald-800 text-white bg-emerald-800">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Medical History
                   </Button>
+                  </div>
                 )}
               </ScrollArea>
             </TabsContent>
             <TabsContent value="test">
               <ScrollArea className="h-[60vh] pr-4">
                 {newPatient.testReports.map((report, index) => (
-                  <Card key={index} className="mb-4 bg-gradient-to-br from-black via-black to-[#0a2a28]">
+                  <Card key={index} className="mb-4 bg-[#2d2d2d35] backdrop-blur-3xl shadow-2xl border border-white/50">
                     <CardHeader>
                       <CardTitle className="text-xl">Test Report {index + 1}</CardTitle>
                     </CardHeader>
@@ -800,7 +803,7 @@ export default function PatientHealthRecord() {
                         <Label htmlFor={`doctor${index}`}>Doctor</Label>
                         <div className="relative">
                           <FaUserMd className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <Input id={`doctor${index}`} name={`doctor${index}`} placeholder="Dr. Smith" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="pl-10" />
+                          <Input id={`doctor${index}`} name={`doctor${index}`} placeholder="Dr. Smith" value={report.doctor} onChange={(e) => handleTestReportChange(index, 'doctor', e.target.value)} className="pl-10 bg-black/20" />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -808,21 +811,21 @@ export default function PatientHealthRecord() {
                           <Label htmlFor={`referredTo${index}`}>Referred To</Label>
                           <div className="relative">
                             <FaHospital className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`referredTo${index}`} name={`referredTo${index}`} placeholder="Cardiology Dept." value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="pl-10" />
+                            <Input id={`referredTo${index}`} name={`referredTo${index}`} placeholder="Cardiology Dept." value={report.referredTo} onChange={(e) => handleTestReportChange(index, 'referredTo', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor={`testType${index}`}>Test Type</Label>
                           <div className="relative">
                             <FaFlask className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`testType${index}`} name={`testType${index}`} placeholder="Blood Test" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="pl-10" />
+                            <Input id={`testType${index}`} name={`testType${index}`} placeholder="Blood Test" value={report.testType} onChange={(e) => handleTestReportChange(index, 'testType', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor={`comments${index}`}>Comments</Label>
                           <div className="relative">
                             <FaComments className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input id={`comments${index}`} name={`comments${index}`} placeholder="Normal results" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="pl-10" />
+                            <Input id={`comments${index}`} name={`comments${index}`} placeholder="Normal results" value={report.comments} onChange={(e) => handleTestReportChange(index, 'comments', e.target.value)} className="pl-10 bg-black/20" />
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -847,7 +850,7 @@ export default function PatientHealthRecord() {
                                   reader.readAsArrayBuffer(file);
                                 }
                               }} 
-                              className="pl-10" 
+                              className="pl-10 bg-black/20" 
                             />
                           </div>
                         </div>
@@ -864,10 +867,13 @@ export default function PatientHealthRecord() {
                   </Card>
                 ))}
                 {newPatient.testReports.length < 5 && (
-                  <Button type='button' onClick={addTestReport} className="w-full mt-4">
+                  <div className='w-full flex justify-center items-center'>
+
+                  <Button type='button' onClick={addTestReport} className="px-10 mt-4 hover:bg-transparent border border-emerald-800 text-white bg-emerald-800">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Test Report
                   </Button>
+                  </div>
                 )}
               </ScrollArea>
             </TabsContent>

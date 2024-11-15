@@ -403,6 +403,7 @@ export default function DoctorDashboard() {
                   <TableHead className="text-[#259b95] border-r">Specialty</TableHead>
                   <TableHead className="text-[#259b95] border-r">Days Available</TableHead>
                   <TableHead className="text-[#259b95]">Duty Time</TableHead>
+                  <TableHead className="text-[#259b95]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -414,19 +415,26 @@ export default function DoctorDashboard() {
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     </TableRow>
                   ))
                 ) : (
                   paginatedDoctors.map((doctor, index) => (
+                    
                     <TableRow 
                       key={index} 
                       className="border-b border-transparent hover:bg-[#081414] transition-colors duration-200 rounded-lg"
                     >
-                      <TableCell>{generateUniqueId()}</TableCell>
+                      <TableCell>{index+1}</TableCell>
                       <TableCell>{doctor.name}</TableCell>
                       <TableCell>{doctor.speciality}</TableCell>
                       <TableCell>{doctor.days.join(', ')}</TableCell>
                       <TableCell className='border-transparent'>{`${doctor.dutyStart} - ${doctor.dutyEnd}`}</TableCell>
+                      <TableCell className='border-transparent'>
+                        <Link to={`/doctor/${index+1}`} className="text-[#259b95] hover:underline">
+                          Doctor Details
+                        </Link>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

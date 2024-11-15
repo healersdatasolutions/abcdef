@@ -171,36 +171,10 @@ export default function Dashboard() {
         <SidebarContent />
       </div>
 
-      <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold">Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="icon">
-              <Bell className="h-4 w-4" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+      <div className=" flex-1 p-4 md:p-8 overflow-x-hidden">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-center  md:text-left">Dashboard</h1>
+         
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
