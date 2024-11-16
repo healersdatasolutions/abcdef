@@ -221,7 +221,7 @@ export default function DoctorDashboard() {
 
   return (
     // start content
-    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-black max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -235,7 +235,7 @@ export default function DoctorDashboard() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -287,9 +287,9 @@ export default function DoctorDashboard() {
                 Add Doctor
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-black text-white border-gray-700 max-w-[90%] h-[70%] overflow-y-auto">
+            <DialogContent className="lg:px-20 bg-transparent backdrop-blur-md text-white border-gray-700 max-w-full h-screen overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-[#259b95] mb-4">Add New Doctor</DialogTitle>
+                <DialogTitle className="text-4xl text-center font-bold text-white mb-4">Add New Doctor</DialogTitle>
               </DialogHeader>
               <form onSubmit={(e) => {
                 e.preventDefault();
