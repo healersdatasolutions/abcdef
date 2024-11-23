@@ -78,7 +78,7 @@ export default function BentoGrid2() {
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
 
   return (
-    <motion.div ref={ref} id="bentotwo" className="relative w-[60vh] md:w-[100vh] mx-auto p-10" style={{ opacity }}>
+    <motion.div ref={ref} id="bentotwo" className="relative max-w-6xl mx-auto p-10" style={{ opacity }}>
       <div className="grid grid-cols-12 gap-3 auto-rows-fr mb-[0.75rem]">
         <motion.div className="col-span-3" variants={floatingVariants} initial="floating" animate={controls}>
           <img src="/card1.png" alt="" className="w-full h-full object-cover hover:scale-95 transition duration-200" />

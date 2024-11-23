@@ -426,7 +426,7 @@ export default function Appointment() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row min-h-screen max-w-screen-2xl mx-auto   bg-black text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
