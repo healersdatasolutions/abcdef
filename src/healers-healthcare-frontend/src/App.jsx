@@ -15,6 +15,7 @@ import PatientDetails from "./components/PatientRecord1";
 import MedicalHistory from "./components/MedicalHistory";
 import DoctorDetails from "./components/DoctorInfo";
 import TestReport from "./components/TestReport";
+import GeneralUserDashboard from './pages/DashboardPage/GeneralUserDashboard'
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
 import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
@@ -57,6 +58,10 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/user-dashboard",
+      element: <GeneralUserDashboard></GeneralUserDashboard>,
     },
     // other pages....
     {
