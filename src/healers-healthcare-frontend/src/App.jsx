@@ -17,12 +17,12 @@ import DoctorDetails from "./components/DoctorInfo";
 import TestReport from "./components/TestReport";
 import GeneralUserDashboard from './pages/DashboardPage/GeneralUserDashboard'
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
-import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
-
-import SignupButton from "./pages/Dev-Tools/DevAuth";
 import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
+import LoginSignup from "./pages/Login-Signup/Login-Signup"
 import MetaMaskAuth from "./pages/Login-Signup/Metamask"
+import Medications from "./pages/Medications/medications"
+import Emergency from "./pages/Emergency/emergency"
 
 import LandingPage from "./pages/LandingPage/LandingPage";
 
@@ -43,13 +43,17 @@ function App() {
 
     },
     {
-      path: "/dev-tools",
-      element: <SignupButton/>,
-
+      path: "/medications",
+      element: <Medications/>,
     },
+    
     {
       path: "/internetidentity",
       element:<InternetIdentity/>
+    },
+    {
+      path: "/emergency",
+      element: <Emergency/>,
     },
     {
       path: "/metamask",

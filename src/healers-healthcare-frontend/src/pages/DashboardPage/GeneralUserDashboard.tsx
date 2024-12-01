@@ -1,269 +1,559 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { FileText, UserCog, Calendar, Package, Plus, ChevronLeft, ChevronRight, Search, Menu, Users, Activity, DollarSign, TrendingUp, Bell, Settings, LogOut, PieChart, Zap, Thermometer, Stethoscope, Pill, Clipboard, Heart, Brain, Eye, Bone, ShieldCheck, Clock, Droplet, Scale, Baby } from 'lucide-react'
+import * as React from 'react'
+import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, BarChart, Bar } from 'recharts'
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell } from 'recharts'
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Bell, Brain, FileText, LayoutDashboard, Pill, ShieldAlert, Search, User, ChevronRight, Calendar, Heart, TvMinimalPlayIcon, ArrowLeft } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Link } from 'react-router-dom'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { HealthOverview } from './health-overview'
+import { HealthTips } from './health-tips'
+import { HealthCommunity } from './health-community'
+import { Badge } from '@/components/ui/badge'
+import { Meteors } from '@/components/ui/meteors'
 
-export default function GeneralUserDashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [bmi, setBmi] = useState<number | null>(null)
-  const [height, setHeight] = useState('')
-  const [weight, setWeight] = useState('')
-  const [aiQuery, setAiQuery] = useState('')
-  const [aiResponse, setAiResponse] = useState('')
-  const [dietPlan, setDietPlan] = useState('')
+// Hardcoded data for demonstration
+const healthData = [
+  { month: 'Jan', value: 65 },
+  { month: 'Feb', value: 70 },
+  { month: 'Mar', value: 75 },
+  { month: 'Apr', value: 72 },
+  { month: 'May', value: 78 },
+  { month: 'Jun', value: 82 },
+]
 
-  const calculateBMI = () => {
-    const heightInMeters = parseFloat(height) / 100
-    const weightInKg = parseFloat(weight)
-    if (heightInMeters > 0 && weightInKg > 0) {
-      const bmiValue = weightInKg / (heightInMeters * heightInMeters)
-      setBmi(parseFloat(bmiValue.toFixed(2)))
-    }
-  }
+const scheduleData = [
+  { time: '07:45', task: 'Take 2 Capsule of Vitamin D', status: 'DONE' },
+  { time: '09:30', task: 'Blood Pressure Check', status: 'PENDING' },
+  { time: '14:25', task: 'Take 2 Capsule of Vitamin C', status: 'YET' },
+  { time: '16:00', task: 'Evening Walk', status: 'YET' },
+  { time: '20:00', task: 'Take Blood Pressure Medicine', status: 'YET' },
+]
 
-  const handleAiConsultation = () => {
-    // Simulated AI response
-    const responses = [
-      "Based on your symptoms, it's recommended to stay hydrated and rest. If symptoms persist, please consult a doctor.",
-      "Your described condition doesn't seem severe, but monitor it closely. If it worsens, seek medical attention.",
-      "The symptoms you've mentioned could be related to stress. Try relaxation techniques and ensure you're getting enough sleep.",
-      "It's advisable to schedule a check-up with your primary care physician to discuss these symptoms in detail."
-    ]
-    setAiResponse(responses[Math.floor(Math.random() * responses.length)])
-  }
+const alertsData = [
+  { message: 'Paracetamol ends in 2 days!!!', severity: 'high', color: 'bg-red-500' },
+  { message: 'Your Order for Linocitrazen will be delivered tomorrow!!!', severity: 'medium', color: 'bg-green-500' },
+  { message: 'Blood Pressure checkup due in 5 days', severity: 'low', color: 'bg-yellow-500' },
+]
 
-  const generateDietPlan = () => {
-    // Simulated diet plan generation
-    const plans = [
-      "Breakfast: Oatmeal with berries\nLunch: Grilled chicken salad\nDinner: Baked salmon with vegetables",
-      "Breakfast: Greek yogurt with nuts\nLunch: Quinoa bowl with avocado\nDinner: Lean beef stir-fry",
-      "Breakfast: Whole grain toast with peanut butter\nLunch: Lentil soup\nDinner: Grilled tofu with brown rice",
-      "Breakfast: Smoothie bowl\nLunch: Turkey and vegetable wrap\nDinner: Baked chicken with sweet potato"
-    ]
-    setDietPlan(plans[Math.floor(Math.random() * plans.length)])
-  }
+const medicalTips = [
+  "An apple a day keeps doctor away!!",
+  "Stay hydrated! Drink at least 8 glasses of water daily",
+  "Regular exercise boosts immunity and mental health",
+  "Good sleep is crucial for overall health",
+]
 
+const aiResponses = [
+  "Based on your symptoms, it's recommended to rest and stay hydrated.",
+  "Your condition seems mild. Monitor for 24 hours.",
+  "Consider consulting your physician if symptoms persist.",
+]
+
+const suggestedQuestions = [
+  "What are the symptoms of COVID-19?",
+  "How can I improve my sleep quality?",
+  "What's a balanced diet for weight loss?",
+  "How often should I exercise?",
+]
+
+export default function Dashboard() {
+  const [height, setHeight] = React.useState(175)
+  const [weight, setWeight] = React.useState(60)
+  const [currentTip, setCurrentTip] = React.useState(medicalTips[0])
+  const [scheduleDataState, setScheduleData] = React.useState(scheduleData)
+  const [query, setQuery] = React.useState('')
+  const [chatMessages, setChatMessages] = React.useState([
+    { role: 'assistant', content: 'Hello! How can I help you today?' }
+  ])
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [showDetailedHealth, setShowDetailedHealth] = React.useState(false)
+
+  // Calculate BMI
+  const bmi = weight / ((height / 100) * (height / 100))
   const bmiData = [
-    { name: 'Your BMI', value: bmi || 0 },
-    { name: 'Ideal BMI', value: 22 },
+    { name: 'BMI', value: bmi },
+    { name: 'Ideal', value: 25 - bmi }
+  ]
+  const COLORS = ['#00C49F', '#FFBB28']
+
+  // Rotate tips every 24 hours
+  React.useEffect(() => {
+    const index = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) % medicalTips.length
+    setCurrentTip(medicalTips[index])
+  }, [])
+
+  // Handle AI chat
+  const handleSendMessage = (message = query) => {
+    if (!message.trim()) return
+
+    setChatMessages((prev) => [
+      ...prev,
+      { role: 'user', content: message },
+      { role: 'assistant', content: aiResponses[Math.floor(Math.random() * aiResponses.length)] }
+    ])
+    setQuery('')
+  }
+
+  // Simulated real-time updates for schedules
+  React.useEffect(() => {
+      const interval = setInterval(() => {
+        setScheduleData((prev: any) => {
+          const newData = [...prev]
+          const randomIndex = Math.floor(Math.random() * newData.length)
+          const statuses = ['DONE', 'PENDING', 'YET']
+          newData[randomIndex].status = statuses[Math.floor(Math.random() * statuses.length)]
+          return newData
+        })
+      }, 5000) // Update every 5 seconds
+  
+      return () => clearInterval(interval)
+    }, [])
+
+  // More detailed BMI analysis
+  const getBMICategory = (bmi: number) => {
+    if (bmi < 18.5) return 'Underweight'
+    if (bmi < 25) return 'Normal weight'
+    if (bmi < 30) return 'Overweight'
+    return 'Obese'
+  }
+
+  const bmiCategory = getBMICategory(bmi)
+  const bmiAdvice = {
+    'Underweight': 'Consider increasing your calorie intake with nutrient-rich foods.',
+    'Normal weight': 'Maintain your current diet and exercise routine.',
+    'Overweight': 'Focus on portion control and increasing physical activity.',
+    'Obese': 'Consult with a healthcare professional for a personalized weight loss plan.'
+  }
+
+  // User stats data
+  const userStats = [
+    { title: 'Total Consultations', value: 24, icon: Brain },
+    { title: 'Successful Appointments', value: 18, icon: Calendar },
+    { title: 'Health Status', value: 'Healthy', icon: Heart },
+    { title: 'Medication Adherence', value: '92%', icon: Pill },
   ]
 
-  const COLORS = ['#0088FE', '#00C49F']
-
-  const SidebarContent = () => (
-    <>
-      <img src="/HealersHealthcareOfficialLogo.png" alt="Healers Healthcare" className="w-40 mx-auto mb-8" />
-      <nav className="space-y-2">
-        {[
-          { name: 'Dashboard', icon: TrendingUp },
-          { name: 'Health Records', icon: FileText },
-          { name: 'Appointments', icon: Calendar },
-          { name: 'Medications', icon: Pill },
-          { name: 'Settings', icon: Settings },
-        ].map((item) => (
-          <Link 
-            key={item.name}
-            to={`/${item.name.toLowerCase().replace(' ', '-')}`}
-            className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <item.icon className="h-5 w-5 mr-3" />
-            <span>{item.name}</span>
-          </Link>
-        ))}
-      </nav>
-    </>
-  )
-
   return (
-    <div className="flex flex-col md:flex-row min-h-screen max-w-screen-2xl mx-auto bg-black text-white">
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] bg-black p-4 md:p-6">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
-
-      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
-        <SidebarContent />
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar */}
+      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 z-50 bg-card">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold">HEALERS HEALTHCARE</h2>
+        </div>
+        <nav className="flex-1 space-y-2 p-4">
+          {[
+            { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard' },
+            { icon: Pill, label: 'Medications', href: '/medications' },
+            { icon: ShieldAlert, label: 'Emergency', href: '/emergency' },
+            { icon: TvMinimalPlayIcon, label: 'Telly-Medicine', href: '/telly-med' },
+            { icon: FileText, label: 'MedDocs', href: '/med-docs' },
+          ].map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                item.label === 'Dashboard' && "bg-accent text-primary"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </div>
 
-      <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center md:text-left">Your Health Dashboard</h1>
-        <p className="text-gray-400 mb-8 text-center md:text-left">Monitor your health, get insights, and stay informed.</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">BMI Calculator</CardTitle>
-              <Scale className="h-4 w-4 text-blue-200" />
-            </CardHeader>
-            <CardContent>
-              <Input 
-                type="number" 
-                placeholder="Height (cm)" 
-                value={height} 
-                onChange={(e) => setHeight(e.target.value)}
-                className="mb-2"
-              />
-              <Input 
-                type="number" 
-                placeholder="Weight (kg)" 
-                value={weight} 
-                onChange={(e) => setWeight(e.target.value)}
-                className="mb-2"
-              />
-              <Button onClick={calculateBMI} className="w-full">Calculate BMI</Button>
-              {bmi && (
-                <div className="mt-4">
-                  <p className="text-2xl font-bold">Your BMI: {bmi}</p>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <RePieChart>
-                      <Pie
-                        data={bmiData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {bmiData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </RePieChart>
-                  </ResponsiveContainer>
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 p-8">
+        {/* Top bar */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="relative w-64">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+                <span>John Doe</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>User Profile</SheetTitle>
+              </SheetHeader>
+              <div className="py-4">
+                <div className="flex items-center justify-between mb-4">
+                  <span>Complete your profile</span>
+                  <span className="text-sm font-medium">75%</span>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-500 to-green-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">AI Health Consultation</CardTitle>
-              <Stethoscope className="h-4 w-4 text-green-200" />
-            </CardHeader>
-            <CardContent>
-              <Input 
-                type="text" 
-                placeholder="Describe your symptoms..." 
-                value={aiQuery} 
-                onChange={(e) => setAiQuery(e.target.value)}
-                className="mb-2"
-              />
-              <Button onClick={handleAiConsultation} className="w-full mb-2">Get Advice</Button>
-              {aiResponse && (
-                <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                  <p>{aiResponse}</p>
-                </ScrollArea>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">AI Diet Planner</CardTitle>
-              <Clipboard className="h-4 w-4 text-purple-200" />
-            </CardHeader>
-            <CardContent>
-              <Button onClick={generateDietPlan} className="w-full mb-2">Generate Diet Plan</Button>
-              {dietPlan && (
-                <ScrollArea className="h-[150px] w-full rounded-md border p-4">
-                  <p className="whitespace-pre-line">{dietPlan}</p>
-                </ScrollArea>
-              )}
-            </CardContent>
-          </Card>
+                <Progress value={75} className="w-full" />
+              </div>
+              <nav className="space-y-2">
+                {[
+                  { label: 'Complete your profile', href: '#' },
+                  { label: 'Emergency', href: '#' },
+                  { label: 'Support', href: '#' },
+                  { label: 'Settings', href: '#' },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="flex items-center justify-between py-2 text-sm hover:text-primary transition-colors"
+                  >
+                    {item.label}
+                    <ChevronRight className="h-4 w-4" />
+                  </a>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+                
+        
+        {showDetailedHealth ? (
+          <>
+            <div className="flex items-center mb-6">
+              <Button variant="ghost" onClick={() => setShowDetailedHealth(false)} className="mr-4">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="#" onClick={() => setShowDetailedHealth(false)}>Dashboard</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Detailed Health Overview</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+            <HealthOverview height={height} weight={weight} />
+          </>
+        ) : (
+          <>
+            <h1 className='text-4xl font-bold mb-5'>Your Dashboard</h1>
+          {/* start of the base dashboard content - Base Dashboard */}
+        {/* User Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {userStats.map((stat, index) => (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <stat.icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600">
-            <CardHeader>
-              <CardTitle>Activity Tracker</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={[
-                  { day: 'Mon', steps: 6000 },
-                  { day: 'Tue', steps: 7500 },
-                  { day: 'Wed', steps: 5500 },
-                  { day: 'Thu', steps: 8000 },
-                  { day: 'Fri', steps: 6500 },
-                  { day: 'Sat', steps: 9000 },
-                  { day: 'Sun', steps: 7000 },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="steps" fill="#fff" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="general" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="ai">AI Consultations</TabsTrigger>
+                <TabsTrigger value="tips">Health Tips</TabsTrigger>
+                <TabsTrigger value="community">Health Community</TabsTrigger>
+              </TabsList>
 
-          <Card className="bg-gradient-to-br from-red-500 to-red-600">
-            <CardHeader>
-              <CardTitle>Heart Rate Monitor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={[
-                  { time: '12am', rate: 65 },
-                  { time: '4am', rate: 62 },
-                  { time: '8am', rate: 78 },
-                  { time: '12pm', rate: 85 },
-                  { time: '4pm', rate: 82 },
-                  { time: '8pm', rate: 75 },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="rate" stroke="#fff" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+              <TabsContent value="general" className="space-y-6">
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
+              {/* Health Overview Card */}
+              <Card className='col-span-2'>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Health Overview</CardTitle>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">Edit Details</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Update Health Metrics</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="height">Height (cm)</Label>
+                          <Input
+                            id="height"
+                            type="number"
+                            value={height}
+                            onChange={(e) => setHeight(Number(e.target.value))}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="weight">Weight (kg)</Label>
+                          <Input
+                            id="weight"
+                            type="number"
+                            value={weight}
+                            onChange={(e) => setWeight(Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-6">
+                  <div className="h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={healthData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="value" name="Health Score" stroke="#0ea5e9" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={bmiData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {bmiData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+                
+                <CardContent>
+                  <div className='flex items-center justify-between'>
+                  <div>
 
-        <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 mb-8">
-          <CardHeader>
-            <CardTitle>Health Tips</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Stay hydrated by drinking at least 8 glasses of water daily.</li>
-              <li>Aim for 30 minutes of moderate exercise 5 days a week.</li>
-              <li>Include a variety of fruits and vegetables in your diet.</li>
-              <li>Practice mindfulness or meditation to reduce stress.</li>
-              <li>Ensure you get 7-9 hours of quality sleep each night.</li>
-            </ul>
-          </CardContent>
-        </Card>
+                  <h3 className="text-lg font-semibold mb-2">BMI Analysis</h3>
+                  <Badge variant="outline" className="bg-white text-black">Your BMI: {bmi.toFixed(2)}</Badge>
+                  <Badge variant="outline" className="bg-white text-black">Category: {bmiCategory}</Badge>
+                  <Badge variant="outline" className="bg-white text-black">Advice: {bmiAdvice[bmiCategory]}</Badge>
+                 
+                  </div>
+                <Button variant="outline" onClick={() => setShowDetailedHealth(true)} className="mt-8">
+                        View More
+                      </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <div className="text-center text-gray-400 text-sm">
-          <p>Remember, this dashboard provides general health information and should not replace professional medical advice.</p>
-          <p>Always consult with a healthcare professional for personalized medical guidance.</p>
-        </div>
+              {/* Medicharm AI Card */}
+              <Card>
+              <div className=''>
+              <div className='relative overflow-x-hidden'>
+                <CardHeader>
+                  <CardTitle>Medicharm AI</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  
+
+                  <ScrollArea className="h-[200px] z-20 mb-4">
+                    <div className="space-y-4 overflow-hidden">
+                      {chatMessages.map((message, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                            message.role === 'user'
+                              ? "ml-auto bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          )}
+                        >
+                          {message.content}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <div className="flex gap-2 w-full mt-[4.8rem]">
+                    <Input
+                      placeholder="Ask anything..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    />
+                    <Button onClick={() => handleSendMessage()}>Send</Button>
+                  </div>
+              
+                   
+                </CardContent>
+                <Meteors number={20} />
+              </div>
+              </div>
+              </Card>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Tip of the Day Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tip of the Day</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-lg font-medium text-center">{currentTip}</p>
+                </CardContent>
+              </Card>
+
+              {/* Upcoming Schedules Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Upcoming Schedules</CardTitle>
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href="/medications">View Details</a>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-4">
+                      {scheduleData.map((schedule, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{schedule.time}</p>
+                            <p className="text-sm text-muted-foreground">{schedule.task}</p>
+                          </div>
+                          <span className={cn(
+                            "text-sm",
+                            schedule.status === 'DONE' && "text-green-500",
+                            schedule.status === 'PENDING' && "text-yellow-500",
+                            schedule.status === 'YET' && "text-muted-foreground"
+                          )}>
+                            {schedule.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Med Alerts Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    Med Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-4">
+                      {alertsData.map((alert, index) => (
+                        <div key={index} className="flex items-center justify-between gap-2">
+                          <div className={cn(
+                            "w-full rounded-lg px-3 py-2",
+                            alert.color
+                          )}>
+                            <p className="text-sm text-white">{alert.message}</p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="ai">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Consultation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px] mb-4">
+                    <div className="space-y-4">
+                      {chatMessages.map((message, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                            message.role === 'user'
+                              ? "ml-auto bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          )}
+                        >
+                          {message.content}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Ask anything..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    />
+                    <Button onClick={() => handleSendMessage()}>Send</Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Suggested Questions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {suggestedQuestions.map((question, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => handleSendMessage(question)}
+                      >
+                        {question}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tips">
+                <HealthTips />
+              </TabsContent>
+
+              <TabsContent value="community">
+                <HealthCommunity />
+              </TabsContent>
+        </Tabs>
+        </>
+        )}
       </div>
     </div>
   )
