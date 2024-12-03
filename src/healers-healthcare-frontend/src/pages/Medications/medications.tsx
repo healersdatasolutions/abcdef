@@ -183,7 +183,7 @@ export default function Medications() {
             { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard' },
             { icon: Pill, label: 'Medications', href: '/medications' },
             { icon: ShieldAlert, label: 'Emergency', href: '/emergency' },
-            { icon: TvMinimalPlayIcon, label: 'Telly-Medicine', href: '/telly-med' },
+            { icon: TvMinimalPlayIcon, label: 'Telly-Medicine', href: '/telemedicine' },
             { icon: FileText, label: 'MedDocs', href: '/med-docs' },
           ].map((item) => (
             <a

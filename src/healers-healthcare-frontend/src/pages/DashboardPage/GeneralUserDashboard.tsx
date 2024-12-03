@@ -20,6 +20,8 @@ import { HealthTips } from './health-tips'
 import { HealthCommunity } from './health-community'
 import { Badge } from '@/components/ui/badge'
 import { Meteors } from '@/components/ui/meteors'
+import { ProfileCompletionForm } from './profile-completion-form'
+
 
 // Hardcoded data for demonstration
 const healthData = [
@@ -76,6 +78,7 @@ export default function Dashboard() {
   ])
   const [searchQuery, setSearchQuery] = React.useState('')
   const [showDetailedHealth, setShowDetailedHealth] = React.useState(false)
+  const [showProfileForm, setShowProfileForm] = React.useState(false)
 
   // Calculate BMI
   const bmi = weight / ((height / 100) * (height / 100))
@@ -154,7 +157,7 @@ export default function Dashboard() {
             { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard' },
             { icon: Pill, label: 'Medications', href: '/medications' },
             { icon: ShieldAlert, label: 'Emergency', href: '/emergency' },
-            { icon: TvMinimalPlayIcon, label: 'Telly-Medicine', href: '/telly-med' },
+            { icon: TvMinimalPlayIcon, label: 'Telly-Medicine', href: '/telemedicine' },
             { icon: FileText, label: 'MedDocs', href: '/med-docs' },
           ].map((item) => (
             <a
@@ -208,8 +211,15 @@ export default function Dashboard() {
                 <Progress value={75} className="w-full" />
               </div>
               <nav className="space-y-2">
+                <Button
+                  className="w-full justify-start"
+                  variant="ghost"
+                  onClick={() => setShowProfileForm(true)}
+                >
+                  Complete your profile
+                  <ChevronRight className="ml-auto h-4 w-4" />
+                </Button>
                 {[
-                  { label: 'Complete your profile', href: '#' },
                   { label: 'Emergency', href: '#' },
                   { label: 'Support', href: '#' },
                   { label: 'Settings', href: '#' },
@@ -552,6 +562,12 @@ export default function Dashboard() {
                 <HealthCommunity />
               </TabsContent>
         </Tabs>
+        {/* Profile Completion Form Dialog */}
+        <Dialog open={showProfileForm} onOpenChange={setShowProfileForm}>
+          <DialogContent className="sm:max-w-[900px]">
+            <ProfileCompletionForm onClose={() => setShowProfileForm(false)} />
+          </DialogContent>
+        </Dialog>
         </>
         )}
       </div>
