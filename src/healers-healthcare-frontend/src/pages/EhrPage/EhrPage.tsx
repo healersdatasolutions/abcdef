@@ -536,7 +536,7 @@ export default function PatientHealthRecord() {
   } */
 
   return (
-    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-[url('/grainyBg.png')] bgbg-opacity-80 object-cover max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
+    <div className="flex flex-col md:flex-row  relative z-10 min-h-screen bg-black bgbg-opacity-80 object-cover max-w-[1536px] mx-auto  bg-opacity-100 backdrop:blur-sm text-white">
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
@@ -550,7 +550,7 @@ export default function PatientHealthRecord() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -629,7 +629,7 @@ export default function PatientHealthRecord() {
               <div className="fixed inset-0 overflow-y-auto">
                 <div className="flex min-h-full items-center justify-center  text-center">
                   
-                    <DialogPanel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-[url('/gradient9.png')] p-6 text-left align-middle shadow-xl transition-all">
+                    <DialogPanel className="w-full max-w-full transform overflow-hidden rounded-2xl bg-transparent backdrop-blur-xl p-6 text-left align-middle shadow-xl transition-all">
                       <div className='w-full flex justify-end'>
 
                     <Button type="button" onClick={handleClose} className="bg-black border text-white hover:bg-transparent hover:border-red-500">

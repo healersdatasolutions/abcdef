@@ -2,35 +2,59 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Toggle } from "@/components/ui/toggle"
 import { Principal } from '@dfinity/principal'
-import { Mail, Lock, Building2, Users, ShieldCheck, AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { Toggle } from "@/components/ui/toggle"
+import { Mail, Lock, User, X, Building2, Users, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useInternetIdentity } from 'ic-use-internet-identity'
 import { Actor, HttpAgent } from '@dfinity/agent'
 import { AuthClient } from '@dfinity/auth-client'
 import { InterfaceFactory } from '@dfinity/candid/lib/cjs/idl'
 import { idlFactory } from '../../../../declarations/parent_canister/parent_canister.did.js'
-import { _SERVICE } from '../../../../declarations/parent_canister/parent_canister.did'
+import { _SERVICE } from '../../../../declarations/parent_canister/parent_canister.did.js'
 import { ActorSubclass } from '@dfinity/agent'
+import { ethers } from 'ethers'
 
-import Spinner from "../../Spinner"
+import Spinner from "../../Spinner.js"
 import { twMerge } from "tailwind-merge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-export default function LoginComponent() {
+declare global {
+  interface Window {
+    ethereum?: ethers.Eip1193Provider
+    ic?: {
+      plug: {
+        principalId: string
+        accountId: string
+        createActor: (options: { canisterId: string; interfaceFactory: any }) => Promise<any>
+      }
+    }
+  }
+}
+
+type Result = {
+  ok?: string;
+  err?: string;
+};
+
+function LoginSignup() {
+  const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [userType, setUserType] = useState('hospital')
+  const [name, setName] = useState('')
   const [showWalletPopup, setShowWalletPopup] = useState(false)
   const [connectedWallet, setConnectedWallet] = useState('')
   const [walletId, setWalletId] = useState('')
+  const [userType, setUserType] = useState('hospital')
   const [isLoading, setIsLoading] = useState(false)
   const [authClient, setAuthClient] = useState<AuthClient | null>(null)
   const [parentActor, setParentActor] = useState<ActorSubclass<_SERVICE> | null>(null)
+  const [hospitalNames, setHospitalNames] = useState<string[]>([])
+  const [selectedHospital, setSelectedHospital] = useState('')
   const [error, setError] = useState("")
 
   const { isLoggingIn, login, clear, identity } = useInternetIdentity()
@@ -49,11 +73,16 @@ export default function LoginComponent() {
             return fetch(url, { ...options, credentials: 'same-origin' })
           }
         })
+        //// await agent.fetchRootKey()
         const actor = Actor.createActor<_SERVICE>(idlFactory as unknown as InterfaceFactory, {
           agent,
           canisterId: 'uh4ji-xiaaa-aaaap-qkk7q-cai'
         });
         setParentActor(actor)
+
+        // Fetch hospital names
+        const hospitals = await actor.listHospitals()
+        setHospitalNames(hospitals.map(([name, _]) => name))
       } catch (error) {
         console.error('Failed to initialize parentActor:', error)
         setError('Failed to connect to the Internet Computer. Please try again.')
@@ -76,29 +105,67 @@ export default function LoginComponent() {
     }
 
     try {
-      let canisterIdOpt;
+      if (isLogin) {
+        let canisterIdOpt;
       
-      if (userType === 'admin') {
-        canisterIdOpt = await parentActor.loginAdmin(email, password);
-        console.log('Admin Login response:', canisterIdOpt);
-      } else {
-        canisterIdOpt = await parentActor.loginUser(email, password);
-        console.log('User Login response:', canisterIdOpt);
-      }
+        // Temporary bypass for login
+        const bypassLogin = false;  // Set this to 'false' in production
       
-      if (canisterIdOpt && canisterIdOpt.length > 0) {
-        const principal = canisterIdOpt[0] as unknown as Principal;
-        const canisterId = principal.toString();
-        console.log('Canister ID:', canisterId);
-        localStorage.setItem('hospitalCanisterId', canisterId);
-        localStorage.setItem('userType', userType);
-        navigate('/dashboard');
-      } else {
-        throw new Error('Invalid login credentials');
+        if (bypassLogin) {
+          // Hardcode values for testing
+          canisterIdOpt = ['grnch-ciaaa-aaaap-qkfqq-cai'];  // Replace with your test canister ID
+          const userType = 'admin';  // Or 'user', depending on your test case
+          console.log('Bypassing login. Using test values.');
+        } else {
+          if (userType === 'admin') {
+            canisterIdOpt = await parentActor.loginAdmin(email, password);
+            console.log('Admin Login response:', canisterIdOpt);
+          } else {
+            canisterIdOpt = await parentActor.loginUser(email, password);
+            console.log('User Login response:', canisterIdOpt);
+          }
+        }
+      
+        if (canisterIdOpt && canisterIdOpt.length > 0) {
+          const principal = canisterIdOpt[0] as unknown as Principal;
+          const canisterId = principal.toString();
+          console.log('Canister ID:', canisterId);
+          localStorage.setItem('hospitalCanisterId', canisterId);
+          localStorage.setItem('userType', userType);
+          navigate('/dashboard');  // This is where the routing happens after authentication
+        } else {
+          throw new Error('Invalid login credentials');
+        }
+      
+      
+      } else if (userType === 'hospital') {
+        const result:string = await parentActor.registerHospital(name, email, password)
+        console.log('Hospital Registration result:', result)
+        
+        if (result.includes("Hospital registered and canister created with ID:")) {
+          const canisterId = result.split("ID: ")[1]
+          alert(`Hospital registered successfully. Canister ID: ${canisterId}`)
+          setIsLogin(true)
+        } else {
+          throw new Error(`Failed to register hospital: ${result}`)
+        }
+      } else if (userType === 'admin') {
+        if (!selectedHospital) {
+          throw new Error('Please select a hospital')
+        }
+        const result:string = await parentActor.registerAdmin(name, email, password, selectedHospital)
+        console.log('Admin Registration result:', result)
+        
+        if (result === "Admin registered successfully") {
+          alert('Admin registered successfully')
+          setIsLogin(true)
+        } else {
+          throw new Error(`Failed to register admin: ${result}`)
+        }
       }
     } catch (error) {
-      console.error('Login error:', error)
-      setError(`An error occurred during login: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error(isLogin ? 'Login error:' : 'Registration error:', error)
+      setError(`An error occurred during ${isLogin ? 'login' : 'registration'}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsLoading(false)
     }
@@ -110,6 +177,44 @@ export default function LoginComponent() {
     setTimeout(() => setIsLoading(false), 500) // Simulating loading effect
   }
 
+  const formVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+    transition: { duration: 0.4 }
+  }
+
+  // MetaMask functions
+  // const connectToMetaMask = async () => {
+  //   setIsConnecting(true)
+  //   setError("")
+
+  //   try {
+  //     if (window.ethereum) {
+  //       const provider = new ethers.BrowserProvider(window.ethereum)
+  //       const accounts = await provider.send("eth_requestAccounts", [])
+  //       if (accounts.length > 0) {
+  //         const address = accounts[0]
+  //         setEthAddress(address)
+  //         setIsConnected(true)
+  //         setConnectedWallet('MetaMask')
+  //         setWalletId(address)
+  //       } else {
+  //         throw new Error("No accounts found")
+  //       }
+  //     } else {
+  //       throw new Error("MetaMask is not installed")
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to connect to MetaMask. Please try again.")
+  //     console.error(err)
+  //   } finally {
+  //     setIsConnecting(false)
+  //     setShowWalletPopup(false)
+  //   }
+  // }
+
+  // Internet Identity functions
   function handleInternetIdentityClick() {
     if (identity) {
       clear()
@@ -127,9 +232,18 @@ export default function LoginComponent() {
     }
   }, [identity])
 
+  // Plug Wallet functions
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-[#3c95d4] to-[#0b0245] flex flex-col lg:flex-row justify-center items-center">
-      <img src='HealersHealthcareOfficialLogo.png' alt='LoginImg' className="hidden lg:flex m-5 rounded-lg lg:w-1/2 size-80" />
+      {/* Left half - gradient placeholder (hidden on mobile and tablet) */}
+      <img src='HealersHealthcareOfficialLogo.png' alt='LoginImg' className="hidden lg:flex m-5 rounded-lg lg:w-1/2 size-80" >
+
+        {/* You can replace this div with an actual image when available */}
+      </img>
+
+      {/* Right half - login form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4 relative">
         {walletId && (
           <motion.div 
@@ -142,6 +256,18 @@ export default function LoginComponent() {
           </motion.div>
         )}
         <div className="w-full max-w-md">
+          <div className="mb-8 flex justify-center">
+            <Toggle
+              pressed={isLogin}
+              onPressedChange={setIsLogin}
+              className="w-48 h-12 bg-transparent backdrop-blur border border-white/20 rounded-full"
+            >
+              <div className="grid grid-cols-2 w-full h-full">
+                <div className={`flex items-center justify-center ${isLogin ? 'text-white' : 'text-gray-400'}`}>Login</div>
+                <div className={`flex items-center justify-center ${!isLogin ? 'text-white' : 'text-gray-400'}`}>Signup</div>
+              </div>
+            </Toggle>
+          </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -150,10 +276,10 @@ export default function LoginComponent() {
             <Card className="bg-transparent backdrop-blur-md border-white/20 text-white shadow-2xl">
               <CardHeader>
                 <CardTitle className="text-3xl font-bold text-center mb-2">
-                  Welcome Back
+                  {isLogin ? 'Welcome Back' : 'Create Account'}
                 </CardTitle>
                 <CardDescription className="text-center text-gray-200 mb-6">
-                  Enter your credentials to access your account
+                  {isLogin ? 'Enter your credentials to access your account' : 'Sign up to get started'}
                 </CardDescription>
                 <div className="flex justify-center space-x-2 mb-6">
                   <Toggle
@@ -197,12 +323,41 @@ export default function LoginComponent() {
                   ) : (
                     <motion.form
                       key={userType}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      variants={formVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                       onSubmit={handleSubmit}
                       className="space-y-4"
                     >
+                      <AnimatePresence mode="wait">
+                        {!isLogin && (userType === 'hospital' || userType === 'admin') && (
+                          <motion.div
+                            key="name"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="space-y-2">
+                              <Label htmlFor="name" className="text-gray-200">
+                                {userType === 'hospital' ? 'Hospital Name' : 'Admin Name'}
+                              </Label>
+                              <div className="relative">
+                                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                                <Input
+                                  id="name"
+                                  type="text"
+                                  placeholder={userType === 'hospital' ? 'Hospital Name' : 'Admin Name'}
+                                  value={name}
+                                  onChange={(e) => setName(e.target.value)}
+                                  className="pl-10 bg-white/5 border-white/10 text-white placeholder-gray-400 focus:ring-2 focus:ring-white/50"
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-gray-200">Email</Label>
                         <div className="relative">
@@ -231,8 +386,25 @@ export default function LoginComponent() {
                           />
                         </div>
                       </div>
+                      {!isLogin && userType === 'admin' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="hospital" className="text-gray-200">Select Hospital</Label>
+                          <Select onValueChange={setSelectedHospital} value={selectedHospital}>
+                            <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+                              <SelectValue placeholder="Select a hospital" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {hospitalNames.map((hospital) => (
+                                <SelectItem key={hospital} value={hospital}>
+                                  {hospital}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                       <Button type="submit" className="w-full bg-white text-cyan-600 hover:bg-gray-100 transition-colors duration-200">
-                        Login
+                        {isLogin ? 'Login' : 'Sign Up'}
                       </Button>
                       
                       {error && (
@@ -267,6 +439,17 @@ export default function LoginComponent() {
                   )}
                 </Button>
               </CardContent>
+              <CardFooter>
+                <p className="text-center text-sm text-gray-300 w-full">
+                  {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-white font-semibold hover:underline focus:outline-none"
+                  >
+                    {isLogin ? 'Sign up' : 'Log in'}
+                  </button>
+                </p>
+              </CardFooter>
             </Card>
           </motion.div>
         </div>
@@ -316,4 +499,10 @@ export default function LoginComponent() {
       )}
     </div>
   )
+
+}
+export default LoginSignup;
+
+function getHost(): string | undefined {
+  throw new Error('Function not implemented.')
 }

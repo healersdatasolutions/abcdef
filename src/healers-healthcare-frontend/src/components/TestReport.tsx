@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { ScrollArea } from "./ui/scroll-area"
-import { Stethoscope, FileSymlink, FileText, Calendar, Package, UserCog, Menu, X, Search, ChevronDown } from 'lucide-react'
+import { Stethoscope, FileSymlink, FileText, Calendar, Package, UserCog, Menu, X, Search, ChevronDown, TrendingUp } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Input } from "./ui/input"
@@ -131,30 +131,28 @@ export default function TestReport() {
 
   const SidebarContent = () => (
     <>
-      <img src={'/HealersHealthcareOfficialLogo.png'} alt="Healers Healthcare" className="w-40 mx-auto" />
+      <img src="/HealersHealthcareOfficialLogo.png" alt="Healers Healthcare" className="w-40 mx-auto mb-8" />
       <nav className="space-y-2">
         {[
+          { name: 'Dashboard', icon: TrendingUp },
           { name: 'Health Records', icon: FileText },
           { name: 'Doctor Dashboard', icon: UserCog },
           { name: 'Appointments', icon: Calendar },
           { name: 'Inventory', icon: Package },
         ].map((item, index) => (
-          <React.Fragment key={item.name}>
-            <Link 
-              to={`/${item.name.toLowerCase().replace(' ', '-')}`} 
-              className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <item.icon className="h-5 w-5 md:mr-3" />
-              <span className='md:block'>{item.name}</span>
-            </Link>
-            {index < 3 && <div className="h-px bg-gray-700 my-2 mx-4" />}
-          </React.Fragment>
+          <Link 
+            key={item.name}
+            to={`/${item.name.toLowerCase().replace(' ', '-')}`}
+            className="flex items-center p-3 rounded-lg hover:bg-[#259b95] transition-colors duration-200"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <item.icon className="h-5 w-5 mr-3" />
+            <span>{item.name}</span>
+          </Link>
         ))}
       </nav>
     </>
   )
-
   const filteredReports = patientData?.testReports.filter(report => 
     report.doctor.toLowerCase().includes(filters.search.toLowerCase()) ||
     report.testType.toLowerCase().includes(filters.search.toLowerCase())

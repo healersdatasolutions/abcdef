@@ -155,7 +155,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[url('/grainyBg.png')] text-white">
+    <div className="flex flex-col md:flex-row min-h-screen max-w-screen-2xl mx-auto bg-black text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
@@ -167,7 +167,7 @@ export default function Dashboard() {
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-blue-500 to-blue-600">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                   <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -228,7 +228,7 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
                 <CardHeader>
                   <CardTitle>Patient Growth</CardTitle>
@@ -263,7 +263,7 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
                 <CardHeader>
                   <CardTitle>Recent Patient Activities</CardTitle>
@@ -311,7 +311,7 @@ export default function Dashboard() {
                 <CardTitle>Department Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                   {[
                     { name: 'Cardiology', icon: Heart, patients: 150, doctors: 8 },
                     { name: 'Neurology', icon: Brain, patients: 120, doctors: 6 },
@@ -337,7 +337,7 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
           <TabsContent value="patients" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
                 <CardHeader>
                   <CardTitle>Patient Distribution by Department</CardTitle>
@@ -541,7 +541,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="backdrop-blur-lg bg-[#2d2d2d35] border-white/45 text-white">
                 <CardHeader>
                   <CardTitle>Staff Efficiency</CardTitle>

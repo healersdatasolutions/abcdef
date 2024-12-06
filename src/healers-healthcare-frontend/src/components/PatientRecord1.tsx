@@ -507,7 +507,7 @@ export default function PatientDetails() {
 const firstAppointment = appointmentsData[0] || {};
   return (
     
-    <div className="flex flex-col md:flex-row min-h-screen bg-[url('/grainyBg.png')] text-white">
+    <div className="flex flex-col md:flex-row min-h-screen max-w-screen-2xl mx-auto bg-black text-white">
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="md:hidden fixed top-4 left-4 z-50">
@@ -519,7 +519,7 @@ const firstAppointment = appointmentsData[0] || {};
         </SheetContent>
       </Sheet>
 
-      <div className="hidden md:block w-64 mx-2 my-5 rounded-lg bg-transparent backdrop-blur border border-white/20 p-4 md:p-6 space-y-8">
+      <div className="hidden md:block w-64 bg-[#030b0b] p-4 md:p-6 space-y-8">
         <SidebarContent />
       </div>
 

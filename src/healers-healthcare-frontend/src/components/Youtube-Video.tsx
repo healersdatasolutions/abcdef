@@ -94,7 +94,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, index }) => {
 
 export default function VideoComponent() {
   return (
-    <section className="py-12 px-4 max-w-7xl mx-auto">
+    <section className="py-12 px-4 max-w-6xl mx-auto">
       <div className="w-full space-y-8">
         {videos.map((video, index) => (
           <VideoCard key={video.id} video={video} index={index} />

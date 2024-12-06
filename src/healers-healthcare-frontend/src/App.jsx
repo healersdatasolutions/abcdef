@@ -15,13 +15,16 @@ import PatientDetails from "./components/PatientRecord1";
 import MedicalHistory from "./components/MedicalHistory";
 import DoctorDetails from "./components/DoctorInfo";
 import TestReport from "./components/TestReport";
+import GeneralUserDashboard from './pages/DashboardPage/GeneralUserDashboard'
 import DoctorAppointments from "./pages/DoctorPages/AppointmentsPage/DoctorAppointments";
-import LoginSignup from "./pages/Login-Signup/Login-Signup";
 import Dashboard from "./pages/DashboardPage/Dashboard";
-
-import SignupButton from "./pages/Dev-Tools/DevAuth";
 import InternetIdentity from "./pages/Login-Signup/InternetIdentity"
+import LoginSignup from "./pages/Login-Signup/Login-Signup"
 import MetaMaskAuth from "./pages/Login-Signup/Metamask"
+import Medications from "./pages/Medications/medications"
+import Emergency from "./pages/Emergency/emergency"
+import Telemedicine from "./pages/Telemedicine/telly-medicine"
+import MedDocs from "./pages/MedDocs/med-docs"
 
 import LandingPage from "./pages/LandingPage/LandingPage";
 
@@ -42,13 +45,25 @@ function App() {
 
     },
     {
-      path: "/dev-tools",
-      element: <SignupButton/>,
-
+      path: "/medications",
+      element: <Medications/>,
     },
+    {
+      path: "/telemedicine",
+      element: <Telemedicine/>,
+    },
+    {
+      path: "/med-docs",
+      element: <MedDocs/>,
+    },
+    
     {
       path: "/internetidentity",
       element:<InternetIdentity/>
+    },
+    {
+      path: "/emergency",
+      element: <Emergency/>,
     },
     {
       path: "/metamask",
@@ -57,6 +72,10 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/user-dashboard",
+      element: <GeneralUserDashboard></GeneralUserDashboard>,
     },
     // other pages....
     {
