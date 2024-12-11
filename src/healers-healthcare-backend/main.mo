@@ -7,6 +7,7 @@ import Text "mo:base/Text";
 import Hospital "./hospital"; 
 import IC "mo:ic";
 import Debug "mo:base/Debug";
+import Result "mo:base/Result";
 
 actor Parent {
     type User = {
@@ -22,12 +23,56 @@ actor Parent {
         hospitalName: Text;
     };
 
-    var users: [(Text, User)] = []; 
-    var admins: [(Text, Admin)] = []; // Store users with username and data
-    var canisters: [(Text, Principal)] = [];
-   
-     let ic : IC.Service = actor "aaaaa-aa";
+    type GeneralUser = {
+        name: Text;
+        username: Text;
+        password: Text;
+    };
 
+    var users: [(Text, User)] = [];
+    var admins: [(Text, Admin)] = [];
+    var generalUsers: [(Text, GeneralUser)] = [];
+    var canisters: [(Text, Principal)] = [];
+
+    let ic: IC.Service = actor "aaaaa-aa";
+
+    public shared({caller}) func registerGeneralUser(name: Text, username: Text, password: Text) : async Result.Result<Text, Text> {
+    try {
+        let generalUser: GeneralUser = {
+            name = name;
+            username = username;
+            password = password;
+        };
+
+        generalUsers := Array.append(generalUsers, [(username, generalUser)]);
+        #ok("General user registered successfully.")
+    } catch (e) {
+        #err("Error registering user: " # Error.message(e))
+    }
+};
+
+    public shared({caller}) func loginGeneralUser(username: Text, password: Text) : async Bool {
+        for ((storedUsername, generalUser) in generalUsers.vals()) {
+            if (storedUsername == username and generalUser.password == password) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+    public query func listGeneralUsers() : async [(Text, Text)] {
+    return Array.map<(Text, GeneralUser), (Text, Text)>(
+        generalUsers, 
+        func(pair: (Text, GeneralUser)) : (Text, Text) {
+            let (username, generalUser) = pair;
+            return (generalUser.name, username);
+        }
+    );
+};
+
+
+
+// function to register the hospital
     public shared({caller}) func registerHospital(name: Text, username: Text, password: Text) : async Text {
         // Create a new canister (hospital)
         Cycles.add(1_000_000_000_000);

@@ -49,7 +49,7 @@ function LoginSignup() {
   const [showWalletPopup, setShowWalletPopup] = useState(false)
   const [connectedWallet, setConnectedWallet] = useState('')
   const [walletId, setWalletId] = useState('')
-  const [userType, setUserType] = useState('hospital')
+  const [userType, setUserType] = useState('general')
   const [isLoading, setIsLoading] = useState(false)
   const [authClient, setAuthClient] = useState<AuthClient | null>(null)
   const [parentActor, setParentActor] = useState<ActorSubclass<_SERVICE> | null>(null)
@@ -107,10 +107,8 @@ function LoginSignup() {
     try {
       if (isLogin) {
         let canisterIdOpt;
-      
         // Temporary bypass for login
         const bypassLogin = false;  // Set this to 'false' in production
-      
         if (bypassLogin) {
           // Hardcode values for testing
           canisterIdOpt = ['grnch-ciaaa-aaaap-qkfqq-cai'];  // Replace with your test canister ID
@@ -120,24 +118,29 @@ function LoginSignup() {
           if (userType === 'admin') {
             canisterIdOpt = await parentActor.loginAdmin(email, password);
             console.log('Admin Login response:', canisterIdOpt);
-          } else {
-            canisterIdOpt = await parentActor.loginUser(email, password);
-            console.log('User Login response:', canisterIdOpt);
+          } else if (userType === 'general') {
+            canisterIdOpt = await parentActor.loginGeneralUser(email, password);
+            console.log('General User Login response:', canisterIdOpt);
           }
         }
-      
-        if (canisterIdOpt && canisterIdOpt.length > 0) {
+        if (Array.isArray(canisterIdOpt) && canisterIdOpt.length > 0) {
           const principal = canisterIdOpt[0] as unknown as Principal;
           const canisterId = principal.toString();
           console.log('Canister ID:', canisterId);
           localStorage.setItem('hospitalCanisterId', canisterId);
           localStorage.setItem('userType', userType);
-          navigate('/dashboard');  // This is where the routing happens after authentication
+          if (userType === 'admin') {
+            navigate('/dashboard');  
+            // navigate('/admin-dashboard');
+          } else if (userType === 'general') {
+          
+            navigate('/user-dashboard');
+          }         
         } else {
+          // I wanted it to navigate to the /user-dashboard after login, if the login is from the general user
+          // navigate('/user-dashboard');   // temporary bypass for testing
           throw new Error('Invalid login credentials');
         }
-      
-      
       } else if (userType === 'hospital') {
         const result:string = await parentActor.registerHospital(name, email, password)
         console.log('Hospital Registration result:', result)
@@ -162,7 +165,28 @@ function LoginSignup() {
         } else {
           throw new Error(`Failed to register admin: ${result}`)
         }
+      } 
+      
+      
+      else if (userType === 'general') {
+        const result = await parentActor.registerGeneralUser(name, email, password);
+        console.log('General User Registration result:', result);
+      
+        if ('ok' in result) {
+          alert(result.ok);
+          setIsLogin(true); // Switch to login mode after successful signup
+        } else if ('err' in result) {
+          throw new Error(`Failed to register general user: ${result.err}`);
+        } else {
+          throw new Error('Unexpected result from registerGeneralUser');
+        }
       }
+      
+      
+      
+
+
+      
     } catch (error) {
       console.error(isLogin ? 'Login error:' : 'Registration error:', error)
       setError(`An error occurred during ${isLogin ? 'login' : 'registration'}: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -282,14 +306,16 @@ function LoginSignup() {
                   {isLogin ? 'Enter your credentials to access your account' : 'Sign up to get started'}
                 </CardDescription>
                 <div className="flex justify-center space-x-2 mb-6">
-                  <Toggle
-                    pressed={userType === 'hospital'}
-                    onPressedChange={() => handleUserTypeChange('hospital')}
-                    className="bg-white/5 hover:bg-white/10 data-[state=on]:bg-white/20 rounded-full px-4 py-2 transition-all duration-200"
-                  >
-                    <Building2 size={18} className="mr-2" />
-                    Hospital
-                  </Toggle>
+                  {isLogin && (
+                    <Toggle
+                      pressed={userType === 'hospital'}
+                      onPressedChange={() => handleUserTypeChange('hospital')}
+                      className="bg-white/5 hover:bg-white/10 data-[state=on]:bg-white/20 rounded-full px-4 py-2 transition-all duration-200"
+                    >
+                      <Building2 size={18} className="mr-2" />
+                      Hospital
+                    </Toggle>
+                  )}
                   <Toggle
                     pressed={userType === 'general'}
                     onPressedChange={() => handleUserTypeChange('general')}
@@ -298,6 +324,8 @@ function LoginSignup() {
                     <Users size={18} className="mr-2" />
                     General
                   </Toggle>
+
+                  {isLogin && (
                   <Toggle
                     pressed={userType === 'admin'}
                     onPressedChange={() => handleUserTypeChange('admin')}
@@ -306,6 +334,7 @@ function LoginSignup() {
                     <ShieldCheck size={18} className="mr-2" />
                     Admin
                   </Toggle>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -358,6 +387,31 @@ function LoginSignup() {
                           </motion.div>
                         )}
                       </AnimatePresence>
+                      {!isLogin && userType === 'general' && (
+  <motion.div
+    key="name"
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: 'auto' }}
+    exit={{ opacity: 0, height: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <div className="space-y-2">
+      <Label htmlFor="name" className="text-gray-200">Full Name</Label>
+      <div className="relative">
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+        <Input
+          id="name"
+          type="text"
+          placeholder="Your Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="pl-10 bg-white/5 border-white/10 text-white placeholder-gray-400 focus:ring-2 focus:ring-white/50"
+        />
+      </div>
+    </div>
+  </motion.div>
+)}
+
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-gray-200">Email</Label>
                         <div className="relative">
@@ -386,6 +440,8 @@ function LoginSignup() {
                           />
                         </div>
                       </div>
+
+                      
                       {!isLogin && userType === 'admin' && (
                         <div className="space-y-2">
                           <Label htmlFor="hospital" className="text-gray-200">Select Hospital</Label>
@@ -403,6 +459,9 @@ function LoginSignup() {
                           </Select>
                         </div>
                       )}
+
+
+
                       <Button type="submit" className="w-full bg-white text-cyan-600 hover:bg-gray-100 transition-colors duration-200">
                         {isLogin ? 'Login' : 'Sign Up'}
                       </Button>
