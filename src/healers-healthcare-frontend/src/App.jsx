@@ -27,6 +27,8 @@ import Telemedicine from "./pages/Telemedicine/telly-medicine"
 import MedDocs from "./pages/MedDocs/med-docs"
 
 import LandingPage from "./pages/LandingPage/LandingPage";
+import Marketplace from "./pages/Marketplace/marketplace";
+
 
 
 function App() {
@@ -56,7 +58,10 @@ function App() {
       path: "/med-docs",
       element: <MedDocs/>,
     },
-    
+    {
+      path: "/marketplace",
+      element: <Marketplace/>,
+    },
     {
       path: "/internetidentity",
       element:<InternetIdentity/>
